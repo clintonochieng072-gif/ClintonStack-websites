@@ -7,7 +7,7 @@ import Contact from "@/lib/models/Contact";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDb();
   const user = await getUserFromToken(req as any);
@@ -19,7 +19,7 @@ export async function PUT(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const updates = await req.json();
 
     // Find user's site
@@ -60,7 +60,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDb();
   const user = await getUserFromToken(req as any);
@@ -72,7 +72,7 @@ export async function DELETE(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Find user's site
     const site = await Site.findOne({ ownerId: user.id });
