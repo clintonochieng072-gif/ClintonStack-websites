@@ -90,6 +90,37 @@ Located in `niches/*.json`. Example:
 - **testimonials**: Customer reviews
 - **contact**: Email, phone, social links
 
+## Deployment to Vercel
+
+1. **Connect GitHub Repository**: Link your GitHub repo to Vercel.
+
+2. **Environment Variables**: In Vercel dashboard, set the following environment variables (copy from `.env.example`):
+
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+   - `NEXTAUTH_URL`
+   - `NEXTAUTH_SECRET`
+   - `PUSHER_APP_ID`
+   - `PUSHER_KEY`
+   - `PUSHER_SECRET`
+   - `PUSHER_CLUSTER`
+   - `NEXT_PUBLIC_PUSHER_KEY`
+   - `NEXT_PUBLIC_PUSHER_CLUSTER`
+   - `EMAIL_HOST`
+   - `EMAIL_PORT`
+   - `EMAIL_USER`
+   - `EMAIL_PASS`
+   - `FRONTEND_URL`
+   - `NEXT_PUBLIC_BASE_URL`
+   - `NODE_ENV=production`
+
+3. **Build Settings**: Vercel auto-detects Next.js, no additional config needed.
+
+4. **Deploy**: Push to main branch or deploy manually.
+
 ## Notes
 
 - Media uploads stubbed (paste URLs for now).
