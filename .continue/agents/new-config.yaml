@@ -1,0 +1,20 @@
+name: "ClintonStack Continue Config"
+version: "1.0"
+
+models:
+  - name: "grok"
+    provider: "openai"
+    model: "grok-beta" # or grok-2, grok-vision, depending on your key
+
+autocomplete:
+  - model: "grok-beta"
+    provider: "openai"
+
+context:
+  - "lib/**/*"
+  - "models/**/*"
+  - "public/**/*"
+  - "src/**/*"
+
+workflow:
+  defaultModel: "grok-beta"
