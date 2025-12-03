@@ -6,6 +6,10 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
+// Skip database connection during build time
+const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.VERCEL;
+const isDummyUri = MONGODB_URI === 'mongodb://dummy';
+
 /**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
@@ -18,6 +22,11 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  // Return mock connection during build time or with dummy URI
+  if (isBuildTime || isDummyUri) {
+    return { connection: { readyState: 1 } }; // Mock connection
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
