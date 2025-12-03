@@ -1,0 +1,624 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# Cookie files (contain authentication tokens)
+cookies.txt
+*.cookies
+
+# Additional sensitive files
+.firebase/
+firebase-debug.log
+firestore-debug.log
+service-account.json
+client-secret.json
+oauth-credentials.json
+
+# AWS and cloud credentials
+.aws/
+credentials
+config
+*.pem
+*.key
+*.crt
+
+# Database dumps and backups
+*.sql
+*.dump
+*.bak
+database.db
+*.sqlite3
+
+# Log files
+logs/
+*.log
+error.log
+access.log
+debug.log
+
+# IDE and editor files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary and cache files
+.cache/
+.tmp/
+temp/
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.old
+*.orig
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Sensitive files - NEVER commit these!
+# API keys, secrets, credentials
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# SSL certificates and keys
+*.key
+*.crt
+*.pem
+*.p12
+*.pfx
+*.cer
+*.der
+
+# AWS credentials
+.aws/
+credentials
+config
+
+# Google service account keys
+*.json
+!package.json
+!tsconfig.json
+!vitest.config.*
+!next.config.*
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Stripe
+stripe_*_test_*.pem
+stripe_*_live_*.pem
+
+# Payment processor keys
+*_secret_key
+*_publishable_key
+*_api_key
+*_app_id
+*_app_secret
+
+# OAuth
+oauth-*.json
+client_secrets.json
+
+# Database dumps
+*.sql
+*.dump
+*.bak
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+lib-cov/
+
+# Grunt intermediate storage
+.grunt/
+
+# Bower dependency directory
+bower_components/
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+
+# Sensitive configuration files
+config/production.json
+config/staging.json
+config/development.json
+config/local.json
+
+# API documentation with secrets
+api-docs/
+postman/
+
+# Local development files
+.local
+.dev
+.development
+
+# Sentry
+.sentryclirc
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Local Netlify folder
+.netlify
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Local development HTTPS certificates
+*.pem
+*.key
+*.crt
+
+# MongoDB
+mongod.lock
+storage.db
+
+# Redis
+dump.rdb
+
+# Email templates with sensitive data
+emails/
+templates/
+
+# Migration files that might contain sensitive data
+migrations/*.sql
+
+# Seed files with sensitive data
+seeds/*.sql
+seeds/*.json
+
+# Backup configurations
+backups/
+*.backup
+
+# Cache directories
+.cache/
+.tmp/
+temp/
+tmp/
+
+# Error logs
+error.log
+errors.log
+
+# Access logs
+access.log
+
+# Application logs
+app.log
+application.log
+
+# Security
+security.txt
+robots.txt
+
+# Private keys and certificates
+private/
+keys/
+certs/
+ssl/
+
+# API specifications with secrets
+swagger.json
+openapi.json
+
+# Docker secrets
+docker/secrets/
+*.secret
+
+# Kubernetes secrets
+k8s/secrets/
+
+# Terraform state
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Ansible vault
+vault.yml
+vault.yaml
+
+# Chef encrypted data bags
+data_bags/
+
+# Puppet secrets
+private/
+ssl/
+
+# Vagrant
+.vagrant/
+
+# Packer
+packer_cache/
+
+# Sensitive documentation
+docs/secrets/
+docs/api-keys/
+docs/credentials/
+
+# Test files with sensitive data
+test/fixtures/secrets/
+test/data/sensitive/
+
+# CI/CD secrets
+.github/workflows/secrets/
+.gitlab-ci.yml
+.travis.yml
+
+# Database connection strings
+connection-strings.txt
+db-config.json
+
+# API endpoints with secrets
+api-endpoints.json
+
+# Webhook URLs
+webhooks.json
+
+# Integration test credentials
+test-credentials.json
+
+# Demo data with real information
+demo-data/
+sample-data/
+
+# User uploaded files (should be in cloud storage)
+uploads/
+media/
+files/
+
+# Session files
+sessions/
+
+# Cache files
+*.cache
+.cache/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Swap files
+*.swp
+*.swo
+*.swn
+
+# Vi/Vim swap files
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs backup files
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# SublimeText
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+
+# Visual Studio
+*.suo
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.log
+*.svclog
+*.scc
+
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+# AppCode
+.idea/
+
+# SublimeText
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Sensitive data patterns
+*password*
+*secret*
+*key*
+*token*
+*credential*
+*auth*
+*api_key*
+*apikey*
+*access_token*
+*refresh_token*
+*session_key*
+*private_key*
+*public_key*
+*encryption_key*
+*signing_key*
+*webhook_secret*
+*client_secret*
+*app_secret*
+*consumer_key*
+*consumer_secret*
+*oauth*
+*jwt*
+*bearer*
+*authorization*
+*authentication*
+
+# Database URLs
+*mongodb://*
+*postgresql://*
+*mysql://*
+*redis://*
+*sqlite://*
+
+# Email addresses and phone numbers in files
+[email]
+[phone]
+
+# IP addresses
+[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}
+
+# URLs with sensitive parameters
+*?password=*
+*?key=*
+*?token=*
+*?secret=*
+*?api_key=*
+
+# Base64 encoded strings (potential secrets)
+[A-Za-z0-9+/]{20,}
+
+# Hex strings (potential hashes/keys)
+[0-9a-fA-F]{32,}
+
+# UUIDs (sometimes sensitive)
+[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
