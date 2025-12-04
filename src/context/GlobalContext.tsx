@@ -35,7 +35,18 @@ export default function GlobalProvider({
     let mounted = true;
     async function load() {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const token = localStorage.getItem("auth_token");
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const res = await fetch("/api/auth/me", {
+          headers,
+          credentials: "include",
+        });
         const json = await res.json();
         // Expect { user: null } or { user: {...} }
         if (mounted && json?.user && json.user.id) setUser(json.user);
@@ -55,7 +66,8 @@ export default function GlobalProvider({
   const login = (u: User) => setUser(u);
   const logout = () => {
     setUser(null);
-    // Optionally clear local storage keys used in onboarding
+    // Clear auth token and onboarding data
+    localStorage.removeItem("auth_token");
     localStorage.removeItem("onboarding_category");
     localStorage.removeItem("onboarding_niche");
     localStorage.removeItem("onboarding_template");
