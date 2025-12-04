@@ -593,6 +593,9 @@ $RECYCLE.BIN/
 *authorization*
 *authentication*
 
+# Exception for auth utility file
+!src/lib/auth.ts
+
 # Database URLs
 *mongodb://*
 *postgresql://*
