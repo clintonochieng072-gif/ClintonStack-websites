@@ -7,7 +7,7 @@ import Contact from "@/lib/models/Contact";
 
 export async function GET(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },

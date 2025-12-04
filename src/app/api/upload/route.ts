@@ -13,7 +13,7 @@ export const maxDuration = 60; // 60 seconds to handle large uploads
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getUserFromToken(req as any);
+    const user = await getUserFromToken();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

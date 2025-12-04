@@ -88,7 +88,7 @@ export async function GET(
 ) {
   await connectDb();
   const { slug } = await params;
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

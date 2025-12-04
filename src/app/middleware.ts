@@ -4,7 +4,7 @@ import { getUserFromToken } from "@/lib/auth";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const user = await getUserFromToken(req);
+  const user = await getUserFromToken();
 
   const isAuthRoute =
     pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register");

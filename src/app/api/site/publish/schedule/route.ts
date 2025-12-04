@@ -6,7 +6,7 @@ import { Site } from "@/lib/models/Site";
 
 export async function GET(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 
 export async function PUT(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },

@@ -8,7 +8,7 @@ import User from "@/lib/models/User";
 
 export async function GET(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },

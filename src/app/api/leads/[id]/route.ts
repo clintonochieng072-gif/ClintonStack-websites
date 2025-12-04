@@ -10,7 +10,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },
@@ -63,7 +63,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user) {
     return NextResponse.json(
       { success: false, message: "Unauthorized" },

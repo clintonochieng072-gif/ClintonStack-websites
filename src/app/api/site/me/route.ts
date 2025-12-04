@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   try {
     await connectDb();
     // @ts-ignore - NextRequest isn't being used directly; adapt if using NextRequest
-    const user = await getUserFromToken(req as any);
+    const user = await getUserFromToken();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

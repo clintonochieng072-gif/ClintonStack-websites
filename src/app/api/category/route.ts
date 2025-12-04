@@ -14,7 +14,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   await connectDb();
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

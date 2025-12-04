@@ -73,7 +73,7 @@ export async function GET(
 ) {
   await connectDb();
   const { id } = await params;
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -99,7 +99,7 @@ export async function PUT(
 ) {
   await connectDb();
   const { id } = await params;
-  const user = await getUserFromToken(req as any);
+  const user = await getUserFromToken();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

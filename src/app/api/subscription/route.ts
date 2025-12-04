@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     await connectDb();
-    const user = await getUserFromToken(req as any);
+    const user = await getUserFromToken();
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   try {
     await connectDb();
-    const user = await getUserFromToken(req as any);
+    const user = await getUserFromToken();
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
