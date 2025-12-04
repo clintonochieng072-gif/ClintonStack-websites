@@ -127,4 +127,5 @@ Located in `niches/*.json`. Example:
 - Auth is stubbed — replace `getUserFromToken` with your real auth.
 - No production file uploads or payments implemented.
 - Extend blocks by adding to niche configs and implementing editors/renderers.
-- **Recent Updates**: Fixed MongoDB connection issues and added missing auth routes (Dec 2025).
+- **Recent Updates**: Fixed MongoDB connection issues, implemented complete JWT authentication system with login/register pages and API routes (Dec 2025).
+  published
