@@ -596,6 +596,9 @@ $RECYCLE.BIN/
 # Exception for auth utility file
 !src/lib/auth.ts
 
+# Exception for public site components
+!src/components/public/
+
 # Database URLs
 *mongodb://*
 *postgresql://*
