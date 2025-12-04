@@ -1,14 +1,8 @@
-import mongoose from 'mongoose';
-
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
+import mongoose from "mongoose";
 
 // Skip database connection during build time
-const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.VERCEL;
-const isDummyUri = MONGODB_URI === 'mongodb://dummy';
+const isBuildTime =
+  process.env.NODE_ENV === "production" && !process.env.VERCEL;
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -22,9 +16,18 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+  const isDummyUri = MONGODB_URI === "mongodb://dummy";
+
   // Return mock connection during build time or with dummy URI
   if (isBuildTime || isDummyUri) {
     return { connection: { readyState: 1 } }; // Mock connection
+  }
+
+  if (!MONGODB_URI) {
+    throw new Error(
+      "Please define the MONGODB_URI environment variable inside .env.local"
+    );
   }
 
   if (cached.conn) {
