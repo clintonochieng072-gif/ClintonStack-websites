@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useGlobalContext } from "@/context/GlobalContext";
 
+export const dynamic = "force-dynamic";
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     name: "",
