@@ -108,8 +108,8 @@ export default function TestimonialsEditor({
       </div>
 
       <div className="space-y-4">
-        {testimonialItems.map((testimonial) => (
-          <Card key={testimonial.id} className="relative">
+        {testimonialItems.map((testimonial, index) => (
+          <Card key={testimonial.id || `testimonial-${index}`} className="relative">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-base">

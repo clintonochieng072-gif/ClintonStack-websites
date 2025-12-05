@@ -85,6 +85,32 @@ export default function LeadsPage() {
     }
   };
 
+  const exportLeads = async () => {
+    try {
+      const response = await fetch("/api/leads/export?format=csv", {
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        // Create a download link
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `leads-${new Date().toISOString().split("T")[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert("Failed to export leads");
+      }
+    } catch (error) {
+      console.error("Error exporting leads:", error);
+      alert("Error exporting leads");
+    }
+  };
+
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -157,7 +183,7 @@ export default function LeadsPage() {
               Manage your leads and customer relationships
             </p>
           </div>
-          <Button>
+          <Button onClick={exportLeads}>
             <Download className="w-4 h-4 mr-2" />
             Export Leads
           </Button>

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 export default function IntegrationsPage() {
   console.log("IntegrationsPage component loaded");
@@ -49,7 +51,7 @@ export default function IntegrationsPage() {
     try {
       const response = await fetch(`/api/site/${site._id}/integrations`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           integrations: { [field]: integrations[field] },
         }),

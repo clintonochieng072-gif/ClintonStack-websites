@@ -5,9 +5,14 @@ import useSWR, { mutate } from "swr";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/ImageUpload";
 import SaveButton from "@/components/SaveButton";
+import { defaultHomeContent } from "@/data/defaultHomeContent";
+import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) =>
-  fetch(url, { cache: "no-store" }).then((r) => r.json());
+  fetch(url, {
+    cache: "no-store",
+    headers: getAuthHeaders()
+  }).then((r) => r.json());
 
 export default function AboutPage() {
   const { data: siteData } = useSWR("/api/site/me", fetcher);
@@ -17,12 +22,23 @@ export default function AboutPage() {
   useEffect(() => {
     if (siteData?.data) {
       const site = siteData.data;
-      setFormData({
-        bio: site.blocks?.find((b: any) => b.type === "about")?.data?.bio || "",
-        profilePhoto:
-          site.blocks?.find((b: any) => b.type === "about")?.data
-            ?.profilePhoto || "",
-      });
+      const aboutBlock = site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "about");
+
+      // If about block exists, use saved data as the new baseline
+      // Only fall back to static defaults for completely new sites
+      if (aboutBlock?.data) {
+        // Saved data becomes the new "defaults" - preserve exactly what was saved
+        setFormData({
+          content: aboutBlock.data.content !== undefined ? aboutBlock.data.content : defaultHomeContent.about.content,
+          profilePhoto: aboutBlock.data.profilePhoto !== undefined ? aboutBlock.data.profilePhoto : "",
+        });
+      } else {
+        // No saved data exists, use static defaults for brand new sites
+        setFormData({
+          content: defaultHomeContent.about.content,
+          profilePhoto: "",
+        });
+      }
     }
   }, [siteData]);
 
@@ -53,7 +69,7 @@ export default function AboutPage() {
 
       const response = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ data: draftData }),
       });
 
@@ -81,12 +97,12 @@ export default function AboutPage() {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Bio
+            Content
           </label>
           <Textarea
-            value={formData.bio || ""}
-            onChange={(e) => updateFormData("bio", e.target.value)}
-            placeholder="Tell visitors about yourself"
+            value={formData.content || ""}
+            onChange={(e) => updateFormData("content", e.target.value)}
+            placeholder="Tell visitors about your company"
             rows={5}
           />
         </div>

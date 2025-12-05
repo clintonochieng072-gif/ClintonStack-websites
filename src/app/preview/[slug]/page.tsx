@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import PublicSiteContent from "@/components/public/PublicSiteContent";
 import { pusherClient } from "@/lib/pusher-client";
-import { getBaseUrl } from "@/lib/utils";
+import { getBaseUrl, getAuthHeaders } from "@/lib/utils";
 
 export default function PreviewSite() {
   const router = useRouter();
@@ -20,9 +20,7 @@ export default function PreviewSite() {
 
     const fetchSite = async () => {
       const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
-        headers: {
-          Cookie: "", // This will be set by the browser
-        },
+        headers: getAuthHeaders(),
       });
       if (res.ok) {
         const json = await res.json();

@@ -6,8 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/context/GlobalContext";
 import useSWR from "swr";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 export default function Header() {
   const { user } = useGlobal();
@@ -28,7 +30,7 @@ export default function Header() {
     try {
       const response = await fetch("/api/site/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ siteId: site?._id }),
       });
 

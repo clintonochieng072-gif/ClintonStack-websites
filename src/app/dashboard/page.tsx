@@ -17,11 +17,7 @@ export default function DashboardRedirect() {
         return;
       }
 
-      if (user.hasSites && user.firstSiteNiche) {
-        router.replace(`/dashboard/${user.firstSiteNiche}`);
-      } else {
-        router.replace("/dashboard/niches");
-      }
+      router.replace("/dashboard/real-estate");
     }
   }, [authLoading, user, router]);
 

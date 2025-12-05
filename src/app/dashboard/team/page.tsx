@@ -22,6 +22,7 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface TeamMember {
   _id: string;
@@ -58,7 +59,9 @@ export default function TeamPage() {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch("/api/team");
+      const response = await fetch("/api/team", {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
       if (data.success) {
         setTeamMembers(data.data);
@@ -74,7 +77,7 @@ export default function TeamPage() {
     try {
       const response = await fetch("/api/team", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(inviteForm),
       });
 
@@ -100,7 +103,7 @@ export default function TeamPage() {
     try {
       const response = await fetch(`/api/team/${memberId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
 
@@ -118,6 +121,7 @@ export default function TeamPage() {
     try {
       const response = await fetch(`/api/team/${memberId}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
 
       if (response.ok) {

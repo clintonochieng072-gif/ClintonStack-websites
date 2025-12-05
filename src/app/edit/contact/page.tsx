@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import ImageUpload from "@/components/ImageUpload";
 import SaveButton from "@/components/SaveButton";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
 import { getAuthHeaders } from "@/lib/utils";
@@ -15,7 +14,7 @@ const fetcher = (url: string) =>
     headers: getAuthHeaders()
   }).then((r) => r.json());
 
-export default function HeroPage() {
+export default function ContactPage() {
   const { data: siteData } = useSWR("/api/site/me", fetcher);
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -23,25 +22,34 @@ export default function HeroPage() {
   useEffect(() => {
     if (siteData?.data) {
       const site = siteData.data;
-      const heroBlock = site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "hero");
+      const contactBlock = site.userWebsite?.draft?.blocks?.find(
+        (b: any) => b.type === "contact"
+      );
 
-      // If hero block exists, use saved data as the new baseline
+      // If contact block exists, use saved data as the new baseline
       // Only fall back to static defaults for completely new sites
-      if (heroBlock?.data) {
+      if (contactBlock?.data) {
         // Saved data becomes the new "defaults" - preserve exactly what was saved
         setFormData({
-          title: heroBlock.data.title !== undefined ? heroBlock.data.title : defaultHomeContent.hero.title,
-          subtitle: heroBlock.data.subtitle !== undefined ? heroBlock.data.subtitle : defaultHomeContent.hero.subtitle,
-          ctaText: heroBlock.data.ctaText !== undefined ? heroBlock.data.ctaText : defaultHomeContent.hero.ctaText,
-          heroImage: heroBlock.data.heroImage !== undefined ? heroBlock.data.heroImage : defaultHomeContent.hero.heroImage,
+          email:
+            contactBlock.data.email !== undefined
+              ? contactBlock.data.email
+              : defaultHomeContent.contact.email,
+          phone:
+            contactBlock.data.phone !== undefined
+              ? contactBlock.data.phone
+              : defaultHomeContent.contact.phone,
+          address:
+            contactBlock.data.address !== undefined
+              ? contactBlock.data.address
+              : defaultHomeContent.contact.address,
         });
       } else {
         // No saved data exists, use static defaults for brand new sites
         setFormData({
-          title: defaultHomeContent.hero.title,
-          subtitle: defaultHomeContent.hero.subtitle,
-          ctaText: defaultHomeContent.hero.ctaText,
-          heroImage: defaultHomeContent.hero.heroImage,
+          email: defaultHomeContent.contact.email,
+          phone: defaultHomeContent.contact.phone,
+          address: defaultHomeContent.contact.address,
         });
       }
     }
@@ -62,15 +70,17 @@ export default function HeroPage() {
       const siteId = siteData.data._id;
       const draftData = siteData.data.userWebsite?.draft || {};
 
-      // Find or create hero block
-      let heroBlock = draftData.blocks?.find((b: any) => b.type === "hero");
-      if (!heroBlock) {
-        heroBlock = { type: "hero", data: {} };
+      // Find or create contact block
+      let contactBlock = draftData.blocks?.find(
+        (b: any) => b.type === "contact"
+      );
+      if (!contactBlock) {
+        contactBlock = { type: "contact", data: {} };
         draftData.blocks = draftData.blocks || [];
-        draftData.blocks.push(heroBlock);
+        draftData.blocks.push(contactBlock);
       }
 
-      heroBlock.data = { ...heroBlock.data, ...formData };
+      contactBlock.data = { ...contactBlock.data, ...formData };
 
       const response = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
@@ -80,12 +90,12 @@ export default function HeroPage() {
 
       if (response.ok) {
         mutate("/api/site/me");
-        alert("Hero section saved successfully!");
+        alert("Contact section saved successfully!");
       } else {
-        alert("Failed to save hero section");
+        alert("Failed to save contact section");
       }
     } catch (error) {
-      alert("Error saving hero section");
+      alert("Error saving contact section");
     }
     setIsSaving(false);
   };
@@ -93,52 +103,44 @@ export default function HeroPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Hero Section</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Contact Section
+        </h2>
         <p className="text-gray-600">
-          Edit your main headline, subtitle, and call-to-action
+          Edit your contact information displayed on the homepage
         </p>
       </div>
 
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Title
+            Email
           </label>
           <Input
-            value={formData.title || ""}
-            onChange={(e) => updateFormData("title", e.target.value)}
-            placeholder="Enter your main headline"
+            value={formData.email || ""}
+            onChange={(e) => updateFormData("email", e.target.value)}
+            placeholder="your@email.com"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Subtitle
+            Phone
+          </label>
+          <Input
+            value={formData.phone || ""}
+            onChange={(e) => updateFormData("phone", e.target.value)}
+            placeholder="+254 700 123 456"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Address
           </label>
           <Textarea
-            value={formData.subtitle || ""}
-            onChange={(e) => updateFormData("subtitle", e.target.value)}
-            placeholder="Enter a compelling subtitle"
+            value={formData.address || ""}
+            onChange={(e) => updateFormData("address", e.target.value)}
+            placeholder="Your business address"
             rows={3}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            CTA Text
-          </label>
-          <Input
-            value={formData.ctaText || ""}
-            onChange={(e) => updateFormData("ctaText", e.target.value)}
-            placeholder="Call to action button text"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hero Image
-          </label>
-          <ImageUpload
-            value={formData.heroImage || ""}
-            onChange={(url: string) => updateFormData("heroImage", url)}
-            placeholder="Upload hero background image"
           />
         </div>
       </div>
@@ -147,8 +149,8 @@ export default function HeroPage() {
         <SaveButton
           onClick={handleSave}
           loading={isSaving}
-          text="Save Hero"
-          loadingText="Saving Hero..."
+          text="Save Contact"
+          loadingText="Saving Contact..."
         />
       </div>
     </div>

@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface ImageUploadProps {
   value?: string;
@@ -41,6 +42,11 @@ export default function ImageUpload(props: ImageUploadPropsCombined) {
   const [preview, setPreview] = useState<string | null>(value || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Update preview when value prop changes
+  React.useEffect(() => {
+    setPreview(value || null);
+  }, [value]);
+
   const handleFileSelect = async (files: FileList | File) => {
     const fileList = files instanceof FileList ? Array.from(files) : [files];
 
@@ -70,8 +76,13 @@ export default function ImageUpload(props: ImageUploadPropsCombined) {
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
         try {
+          const authHeaders = getAuthHeaders();
+          // Remove Content-Type for FormData uploads (browser sets it automatically)
+          delete authHeaders["Content-Type"];
+
           const response = await fetch("/api/upload", {
             method: "POST",
+            headers: authHeaders,
             body: formData,
             signal: controller.signal,
           });

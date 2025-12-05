@@ -13,6 +13,7 @@ import { useSite } from "../../layout";
 import useSWR from "swr";
 import { mutate } from "swr";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 
 function AddPropertyPageContent() {
   const searchParams = useSearchParams();
@@ -22,7 +23,10 @@ function AddPropertyPageContent() {
 
   // Get categories from global API
   const { data: categoriesData } = useSWR("/api/category", (url: string) =>
-    fetch(url, { cache: "no-store" }).then((r) => r.json())
+    fetch(url, {
+      cache: "no-store",
+      headers: getAuthHeaders()
+    }).then((r) => r.json())
   );
 
   // Default categories to show first
@@ -132,7 +136,7 @@ function AddPropertyPageContent() {
       // Update site draft
       const updateRes = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           data: draftData,
         }),

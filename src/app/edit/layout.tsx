@@ -3,9 +3,12 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import useSWR from "swr";
 import DashboardLayout from "@/components/DashboardLayout";
+import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) =>
-  fetch(url, { cache: "no-store" }).then((r) => r.json());
+  fetch(url, { headers: getAuthHeaders(), cache: "no-store" }).then((r) =>
+    r.json()
+  );
 
 // Site Context for centralized data fetching
 const SiteContext = createContext<{

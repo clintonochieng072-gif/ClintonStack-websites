@@ -7,7 +7,6 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import PublishButton from "@/components/PublishButton";
 import {
   Edit,
   ExternalLink,
@@ -118,22 +117,19 @@ export default function NicheDashboardPage() {
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Website
                 </Button>
+                <Button
+                  onClick={() => router.push("/edit/properties/add")}
+                  variant="default"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Property
+                </Button>
                 <Button variant="outline" asChild>
                   <a href={`/site/${site.slug}`} target="_blank">
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    Preview Website
+                    View Public Site
                   </a>
                 </Button>
-                {niche === "real-estate-template-1" && (
-                  <Button
-                    onClick={() => router.push("/edit/properties/add")}
-                    variant="default"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Property
-                  </Button>
-                )}
-                <PublishButton siteId={site._id} />
               </div>
 
               <div>

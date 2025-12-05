@@ -24,10 +24,10 @@ import {
 export default function WebsiteBuilderPage() {
   const websitePages = [
     {
-      name: "Homepage",
+      name: "Hero Section",
       href: "/edit/hero",
       icon: Home,
-      description: "Main landing page",
+      description: "Main headline and CTA",
     },
     {
       name: "About",
@@ -42,14 +42,32 @@ export default function WebsiteBuilderPage() {
       description: "Your services",
     },
     {
+      name: "Pricing",
+      href: "/edit/pricing",
+      icon: Star,
+      description: "Pricing plans",
+    },
+    {
+      name: "Gallery",
+      href: "/edit/gallery",
+      icon: Palette,
+      description: "Photo gallery",
+    },
+    {
       name: "Testimonials",
       href: "/edit/testimonials",
       icon: Star,
       description: "Client reviews",
     },
     {
+      name: "Properties",
+      href: "/edit/properties",
+      icon: Home,
+      description: "Property listings",
+    },
+    {
       name: "Contact",
-      href: "/edit/contact-page",
+      href: "/edit/contact",
       icon: Mail,
       description: "Contact information",
     },

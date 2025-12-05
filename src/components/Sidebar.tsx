@@ -23,6 +23,18 @@ const menuItems = [
     description: "Quick analytics + overall status",
   },
   {
+    name: "Properties Manager",
+    href: "/edit/properties-manager",
+    icon: Home,
+    description: "Manage real estate listings",
+  },
+  {
+    name: "Website Builder",
+    href: "/edit",
+    icon: Globe,
+    description: "Edit all website content",
+  },
+  {
     name: "Analytics",
     href: "/dashboard/analytics",
     icon: BarChart3,
@@ -39,18 +51,6 @@ const menuItems = [
     href: "/dashboard/team",
     icon: UserCog,
     description: "Manage team members",
-  },
-  {
-    name: "Properties Manager",
-    href: "/edit/properties-manager",
-    icon: Home,
-    description: "Manage real estate listings",
-  },
-  {
-    name: "Website Builder",
-    href: "/edit",
-    icon: Globe,
-    description: "Edit all website content",
   },
   {
     name: "Media Library",

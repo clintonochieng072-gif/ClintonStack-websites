@@ -4,8 +4,13 @@ import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import TestimonialsEditor from "@/components/TestimonialsEditor";
 import { Button } from "@/components/ui/button";
+import { defaultHomeContent } from "@/data/defaultHomeContent";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, {
+    headers: getAuthHeaders()
+  }).then((r) => r.json());
 
 export default function TestimonialsPage() {
   const { data: siteData } = useSWR("/api/site/me", fetcher);
@@ -15,10 +20,27 @@ export default function TestimonialsPage() {
   useEffect(() => {
     if (siteData?.data) {
       const site = siteData.data;
-      setTestimonials(
-        site.blocks?.find((b: any) => b.type === "testimonials")?.data
-          ?.testimonials || []
+      const testimonialsBlock = site.userWebsite?.draft?.blocks?.find(
+        (b: any) => b.type === "testimonials"
       );
+
+      // If testimonials block exists, use saved data as the new baseline
+      // Only fall back to static defaults for completely new sites
+      if (testimonialsBlock?.data?.testimonials) {
+        // Saved data becomes the new "defaults" - ensure all have IDs
+        const testimonialsWithIds = testimonialsBlock.data.testimonials.map((testimonial: any, index: number) => ({
+          ...testimonial,
+          id: testimonial.id || `testimonial-${Date.now()}-${index}`,
+        }));
+        setTestimonials(testimonialsWithIds);
+      } else {
+        // No saved data exists, use static defaults for brand new sites - add IDs
+        const testimonialsWithIds = defaultHomeContent.testimonials.testimonials.map((testimonial: any, index: number) => ({
+          ...testimonial,
+          id: `default-${Date.now()}-${index}`,
+        }));
+        setTestimonials(testimonialsWithIds);
+      }
     }
   }, [siteData]);
 
@@ -48,7 +70,7 @@ export default function TestimonialsPage() {
 
       const response = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ data: draftData }),
       });
 

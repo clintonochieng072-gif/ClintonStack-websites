@@ -94,8 +94,8 @@ export default function ServicesEditor({
       </div>
 
       <div className="space-y-4">
-        {serviceItems.map((service) => (
-          <Card key={service.id} className="relative">
+        {serviceItems.map((service, index) => (
+          <Card key={service.id || `service-${index}`} className="relative">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-base">

@@ -7,9 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) =>
-  fetch(url, { cache: "no-store" }).then((r) => r.json());
+  fetch(url, {
+    cache: "no-store",
+    headers: getAuthHeaders(),
+  }).then((r) => r.json());
 
 export default function CategoriesPage() {
   const { data: categories, mutate: mutateCategories } = useSWR(
@@ -37,7 +41,10 @@ export default function CategoriesPage() {
         defaultCategories.map((name) =>
           fetch("/api/category", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              ...getAuthHeaders(),
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({ name }),
           })
         )
@@ -51,7 +58,7 @@ export default function CategoriesPage() {
       try {
         const response = await fetch("/api/category", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ name: newCategory.trim() }),
         });
 
@@ -81,13 +88,13 @@ export default function CategoriesPage() {
         // For simplicity, delete and recreate (since name is unique)
         await fetch("/api/category", {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingId }),
         });
 
         await fetch("/api/category", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ name: editingValue.trim() }),
         });
 
@@ -108,7 +115,7 @@ export default function CategoriesPage() {
       try {
         const response = await fetch("/api/category", {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ id }),
         });
 

@@ -16,14 +16,14 @@ export default function CTAPage() {
       const site = siteData.data;
       setFormData({
         title:
-          site.blocks?.find((b: any) => b.type === "cta")?.data?.title || "",
+          site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "cta")?.data?.title || "",
         subtitle:
-          site.blocks?.find((b: any) => b.type === "cta")?.data?.subtitle || "",
+          site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "cta")?.data?.subtitle || "",
         buttonText:
-          site.blocks?.find((b: any) => b.type === "cta")?.data?.buttonText ||
+          site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "cta")?.data?.buttonText ||
           "",
         buttonUrl:
-          site.blocks?.find((b: any) => b.type === "cta")?.data?.buttonUrl ||
+          site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "cta")?.data?.buttonUrl ||
           "",
       });
     }

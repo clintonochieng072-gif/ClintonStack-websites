@@ -4,9 +4,14 @@ import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import ServicesEditor from "@/components/ServicesEditor";
 import SaveButton from "@/components/SaveButton";
+import { defaultHomeContent } from "@/data/defaultHomeContent";
+import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) =>
-  fetch(url, { cache: "no-store" }).then((r) => r.json());
+  fetch(url, {
+    cache: "no-store",
+    headers: getAuthHeaders()
+  }).then((r) => r.json());
 
 export default function ServicesPage() {
   const { data: siteData } = useSWR("/api/site/me", fetcher);
@@ -16,10 +21,31 @@ export default function ServicesPage() {
   useEffect(() => {
     if (siteData?.data) {
       const site = siteData.data;
-      setServices(
-        site.blocks?.find((b: any) => b.type === "services")?.data?.services ||
-          []
+      const servicesBlock = site.userWebsite?.draft?.blocks?.find(
+        (b: any) => b.type === "services"
       );
+
+      // If services block exists, use saved data as the new baseline
+      // Only fall back to static defaults for completely new sites
+      if (servicesBlock?.data?.services) {
+        // Saved data becomes the new "defaults" - ensure all have IDs
+        const servicesWithIds = servicesBlock.data.services.map(
+          (service: any, index: number) => ({
+            ...service,
+            id: service.id || `service-${Date.now()}-${index}`,
+          })
+        );
+        setServices(servicesWithIds);
+      } else {
+        // No saved data exists, use static defaults for brand new sites - add IDs
+        const servicesWithIds = defaultHomeContent.services.services.map(
+          (service: any, index: number) => ({
+            ...service,
+            id: `default-service-${Date.now()}-${index}`,
+          })
+        );
+        setServices(servicesWithIds);
+      }
     }
   }, [siteData]);
 
@@ -49,7 +75,7 @@ export default function ServicesPage() {
 
       const response = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ data: draftData }),
       });
 

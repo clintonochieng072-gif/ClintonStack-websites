@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
+import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -64,22 +65,33 @@ export default function ContactPageEditor() {
       return;
     }
 
+    if (!siteData?.data) return;
+
     setSaving(true);
 
     try {
-      const res = await fetch("/api/site", {
+      const siteId = siteData.data._id;
+      const draftData = siteData.data.userWebsite?.draft || {};
+
+      // Find or create contact-page block
+      let contactPageBlock = draftData.blocks?.find((b: any) => b.type === "contact-page");
+      if (!contactPageBlock) {
+        contactPageBlock = { type: "contact-page", data: {} };
+        draftData.blocks = draftData.blocks || [];
+        draftData.blocks.push(contactPageBlock);
+      }
+
+      contactPageBlock.data = { ...contactPageBlock.data, ...formData };
+
+      const response = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          blocks: siteData?.data?.blocks?.map((b: any) =>
-            b.type === "contact-page" ? { ...b, data: formData } : b
-          ),
-        }),
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ data: draftData }),
       });
 
-      if (res.ok) {
+      if (response.ok) {
         setSaved(true);
-        mutate();
+        mutate("/api/site/me");
         setTimeout(() => setSaved(false), 1500);
       } else {
         alert("Failed to save changes.");

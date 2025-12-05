@@ -16,7 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
-import { getBaseUrl } from "@/lib/utils";
+import { getBaseUrl, getAuthHeaders } from "@/lib/utils";
 
 // ===========================
 // Premium Admin Dashboard
@@ -79,9 +79,7 @@ export default function PremiumDashboard({
     try {
       const response = await fetch("/api/site/publish", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ siteId: site._id }),
       });
 
