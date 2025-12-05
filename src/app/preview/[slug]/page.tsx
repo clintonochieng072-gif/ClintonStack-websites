@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import PublicSiteContent from "@/components/public/PublicSiteContent";
 import { pusherClient } from "@/lib/pusher-client";
+import { getBaseUrl } from "@/lib/utils";
 
 export default function PreviewSite() {
   const router = useRouter();
@@ -18,16 +19,11 @@ export default function PreviewSite() {
     if (!slug) return;
 
     const fetchSite = async () => {
-      const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-        }/api/site/preview/${slug}`,
-        {
-          headers: {
-            Cookie: "", // This will be set by the browser
-          },
-        }
-      );
+      const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
+        headers: {
+          Cookie: "", // This will be set by the browser
+        },
+      });
       if (res.ok) {
         const json = await res.json();
         setSite(json.data);

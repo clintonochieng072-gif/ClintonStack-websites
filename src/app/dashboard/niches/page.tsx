@@ -19,8 +19,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 const niches = [
   {
@@ -129,8 +131,7 @@ export default function NichesPage() {
       try {
         const response = await fetch("/api/site", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: getAuthHeaders(),
           body: JSON.stringify({ niche: nicheId }),
         });
 

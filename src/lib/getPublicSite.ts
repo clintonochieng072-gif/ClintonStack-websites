@@ -1,6 +1,8 @@
 // src/lib/getPublicSite.ts
+import { getBaseUrl } from "./utils";
+
 export async function getPublicSite(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   const res = await fetch(`${baseUrl}/api/site/public/${slug}`, {
     next: { revalidate: 300 }, // Cache for 5 minutes, then revalidate
   });

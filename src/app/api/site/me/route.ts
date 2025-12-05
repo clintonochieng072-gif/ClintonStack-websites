@@ -1,22 +1,51 @@
 // src/app/api/site/me/route.ts
-import { NextResponse } from "next/server";
-import { connectDb } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
 import { Site } from "@/lib/models/Site";
-import { getUserFromToken } from "@/lib/auth";
+import jwt from "jsonwebtoken";
+import User from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET(req: Request) {
+async function getUserFromRequest(request: NextRequest) {
   try {
-    await connectDb();
-    // @ts-ignore - NextRequest isn't being used directly; adapt if using NextRequest
-    const user = await getUserFromToken();
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    if (!token) return null;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    if (!decoded.userId) return null;
+
+    await dbConnect();
+    const user = await User.findById(decoded.userId)
+      .select("email onboarded username niche role")
+      .lean();
+
+    if (!user) return null;
+
+    return {
+      id: user._id.toString(),
+      email: user.email,
+      onboarded: user.onboarded === true,
+      username: user.username,
+      niche: user.niche || null,
+      role: user.role || "user",
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    await dbConnect();
+    const user = await getUserFromRequest(request);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Check if requesting all sites
-    const url = new URL(req.url);
+    const url = new URL(request.url);
     const all = url.searchParams.get("all");
 
     if (all === "true") {

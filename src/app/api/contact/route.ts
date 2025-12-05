@@ -5,6 +5,7 @@ import Contact from "@/lib/models/Contact";
 import { Site } from "@/lib/models/Site";
 import User from "@/lib/models/User";
 import nodemailer from "nodemailer";
+import { getBaseUrl } from "@/lib/utils";
 
 export async function POST(req: Request) {
   await connectDb();
@@ -60,18 +61,18 @@ export async function POST(req: Request) {
     // Send email notification to site owner
     try {
       const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true",
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "587"),
+        secure: process.env.EMAIL_SECURE === "true",
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
       });
 
       // Email to site owner
       await transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
         to: owner.email,
         subject: `New Contact Form Submission - ${site.name}`,
         html: `
@@ -89,16 +90,14 @@ export async function POST(req: Request) {
               <p><strong>Site:</strong> ${site.name} (${siteSlug})</p>
               <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
             </div>
-            <p>You can manage this lead in your <a href="${
-              process.env.NEXT_PUBLIC_BASE_URL
-            }/dashboard/leads" style="color: #007bff;">CRM Dashboard</a></p>
+            <p>You can manage this lead in your <a href="${getBaseUrl()}/dashboard/leads" style="color: #007bff;">CRM Dashboard</a></p>
           </div>
         `,
       });
 
       // Confirmation email to user
       await transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
         to: email,
         subject: `Thank you for contacting ${site.name}`,
         html: `

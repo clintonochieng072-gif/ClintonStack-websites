@@ -4,6 +4,7 @@ import { connectDb } from "@/lib/db";
 import { Site } from "@/lib/models/Site";
 import { getUserFromToken } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { getBaseUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -44,9 +45,7 @@ export async function POST(req: Request) {
   // Revalidate the public site cache
   revalidatePath(`/site/${site.slug}`);
 
-  const liveUrl = `${
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-  }/site/${site.slug}`;
+  const liveUrl = `${getBaseUrl()}/site/${site.slug}`;
 
   return NextResponse.json({
     success: true,

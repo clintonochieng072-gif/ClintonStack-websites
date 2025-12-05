@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
+import { getBaseUrl } from "@/lib/utils";
 
 // ===========================
 // Premium Admin Dashboard
@@ -68,9 +69,7 @@ export default function PremiumDashboard({
   ],
 }) {
   const router = useRouter();
-  const publicUrl = `${
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-  }/site/${site.slug}`;
+  const publicUrl = `${getBaseUrl()}/site/${site.slug}`;
 
   const handlePreview = () => {
     window.open(`/preview/${site.slug}`, "_blank");
