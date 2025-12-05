@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 
 function AddPropertyPageContent() {
   const searchParams = useSearchParams();
-  const editId = searchParams.get("id");
+  const editId = searchParams?.get("id") || null;
   const isEditing = !!editId;
   const { site } = useSite();
 

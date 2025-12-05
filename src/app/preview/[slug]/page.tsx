@@ -12,7 +12,7 @@ export default function PreviewSite() {
   const [site, setSite] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
 
-  const slug = params.slug as string;
+  const slug = (params as { slug: string }).slug;
 
   useEffect(() => {
     if (!slug) return;

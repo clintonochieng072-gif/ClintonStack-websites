@@ -25,7 +25,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export default function NicheDashboardPage() {
   const params = useParams();
   const router = useRouter();
-  const niche = params.niche as string;
+  const niche = (params as { niche: string }).niche;
 
   const { data: siteData, error } = useSWR("/api/site/me?all=true", fetcher);
   const [site, setSite] = useState<any>(null);

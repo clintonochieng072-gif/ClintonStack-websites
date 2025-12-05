@@ -30,6 +30,23 @@ async function dbConnect() {
     );
   }
 
+  // For Vercel serverless functions, don't cache connections across function calls
+  if (process.env.VERCEL) {
+    try {
+      const conn = await mongoose.connect(MONGODB_URI, {
+        bufferCommands: false,
+        maxPoolSize: 1, // Limit connection pool for serverless
+        serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+        socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      });
+      return conn;
+    } catch (e) {
+      console.error('MongoDB connection error in Vercel:', e);
+      throw e;
+    }
+  }
+
+  // Traditional caching for development/local
   if (cached.conn) {
     return cached.conn;
   }

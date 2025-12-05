@@ -1,25 +1,19 @@
-import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { name, username, email, password } = await request.json();
 
     if (!name || !username || !email || !password) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
     if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
 
     await dbConnect();
@@ -33,10 +27,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email or username already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "User with this email or username already exists" }, { status: 409 });
     }
 
     // Hash password
@@ -51,7 +42,7 @@ export async function POST(request: Request) {
       passwordHash,
       role: "user",
       onboarded: false,
-      emailVerified: true, // For simplicity, mark as verified
+      emailVerified: true,
     });
 
     await newUser.save();
@@ -79,9 +70,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error in /api/auth/register:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
