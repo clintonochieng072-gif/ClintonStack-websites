@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 import {
   Users,
   Eye,
@@ -58,7 +59,9 @@ export default function AnalyticsPage() {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`/api/analytics?range=${timeRange}`);
+      const response = await fetch(`/api/analytics?range=${timeRange}`, {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
       if (data.success) {
         setAnalytics(data.data);
@@ -72,7 +75,9 @@ export default function AnalyticsPage() {
 
   const exportAnalytics = async () => {
     try {
-      const response = await fetch(`/api/analytics/export?range=${timeRange}`);
+      const response = await fetch(`/api/analytics/export?range=${timeRange}`, {
+        headers: getAuthHeaders(),
+      });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");

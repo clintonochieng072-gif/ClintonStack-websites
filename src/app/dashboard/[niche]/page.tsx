@@ -19,8 +19,10 @@ import {
   Plus,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 export default function NicheDashboardPage() {
   const params = useParams();

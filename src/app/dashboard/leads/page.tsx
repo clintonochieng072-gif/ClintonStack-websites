@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/utils";
 import {
   Users,
   Mail,
@@ -54,7 +55,9 @@ export default function LeadsPage() {
 
   const fetchLeads = async () => {
     try {
-      const response = await fetch("/api/leads");
+      const response = await fetch("/api/leads", {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
       if (data.success) {
         setLeads(data.data);
@@ -70,7 +73,7 @@ export default function LeadsPage() {
     try {
       const response = await fetch(`/api/leads/${leadId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
 
