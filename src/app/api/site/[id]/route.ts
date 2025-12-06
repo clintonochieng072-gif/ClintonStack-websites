@@ -173,17 +173,19 @@ export async function PUT(
   const properties = await Property.find({ siteId: site._id }).lean();
 
   // Update property block inside blocks
-  site.userWebsite.draft.blocks = site.userWebsite.draft.blocks.map((block) => {
-    if (block.type === "properties") {
-      return {
-        ...block,
-        data: {
-          properties: properties,
-        },
-      };
+  site.userWebsite.draft.blocks = site.userWebsite.draft.blocks.map(
+    (block: any) => {
+      if (block.type === "properties") {
+        return {
+          ...block,
+          data: {
+            properties: properties,
+          },
+        };
+      }
+      return block;
     }
-    return block;
-  });
+  );
 
   // Mark the nested field as modified for Mongoose to save
   site.markModified("userWebsite.draft.blocks");
