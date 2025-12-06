@@ -1,8 +1,55 @@
 // src/app/site/[slug]/page.tsx
 import { Metadata } from "next";
-import { getPublicSite } from "@/lib/getPublicSite";
 import { getPreviewSite } from "@/lib/getPreviewSite";
+import { connectDb } from "@/lib/db";
+import { Site } from "@/lib/models/Site";
 import PublicSiteContent from "@/components/public/PublicSiteContent";
+
+async function getPublicSiteDirect(slug: string) {
+  try {
+    await connectDb();
+    const site = await Site.findOne({ slug, published: true });
+
+    if (!site) return null;
+
+    // Return site with full userWebsite object for public view
+    const siteObj = site.toObject();
+
+    // Ensure userWebsite exists and has data and integrations
+    siteObj.userWebsite = {
+      ...site.userWebsite,
+      data: site.userWebsite?.published || {},
+      integrations: site.userWebsite?.integrations || {},
+    };
+
+    const publishedData = siteObj.userWebsite.data;
+
+    // Convert flat data structure to blocks array if needed
+    if (!publishedData.blocks) {
+      const blockTypes = [
+        "hero",
+        "about",
+        "company",
+        "services",
+        "gallery",
+        "testimonials",
+        "contact",
+        "listings",
+        "properties",
+        "agents",
+        "faq",
+      ];
+      publishedData.blocks = Object.entries(publishedData)
+        .filter(([key]) => blockTypes.includes(key))
+        .map(([type, data]) => ({ type, data }));
+    }
+
+    return siteObj;
+  } catch (error) {
+    console.error("Error fetching public site:", error);
+    return null;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -16,7 +63,7 @@ export async function generateMetadata({
   const isPreview = sp.preview === "true";
   const site = isPreview
     ? await getPreviewSite(slug)
-    : await getPublicSite(slug);
+    : await getPublicSiteDirect(slug);
 
   if (!site) {
     return {
@@ -57,7 +104,7 @@ export default async function PublicSite({
   const isPreview = sp.preview === "true";
   const site = isPreview
     ? await getPreviewSite(slug)
-    : await getPublicSite(slug);
+    : await getPublicSiteDirect(slug);
 
   if (!site) {
     return (
