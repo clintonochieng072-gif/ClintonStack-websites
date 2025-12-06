@@ -44,6 +44,39 @@ async function getPublicSiteDirect(slug: string) {
         .map(([type, data]) => ({ type, data }));
     }
 
+    // Fetch and include published properties for this site owner
+    const Property = (await import("@/lib/models/Property")).default;
+    const properties = await Property.find({
+      userId: site.ownerId,
+      isPublished: true,
+    }).sort({ createdAt: -1 });
+
+    // Add properties to the site's data if not already present
+    const hasPropertiesBlock = publishedData.blocks?.some(
+      (block: any) => block.type === "properties"
+    );
+    if (!hasPropertiesBlock && properties.length > 0) {
+      publishedData.blocks = publishedData.blocks || [];
+      publishedData.blocks.push({
+        type: "properties",
+        data: {
+          properties: properties.map((prop) => ({
+            id: prop._id,
+            title: prop.title,
+            description: prop.description,
+            price: prop.price,
+            location: prop.location,
+            images: prop.images,
+            features: prop.features,
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            area: prop.area,
+            status: "for-sale", // Default status
+          })),
+        },
+      });
+    }
+
     return siteObj;
   } catch (error) {
     console.error("Error fetching public site:", error);
