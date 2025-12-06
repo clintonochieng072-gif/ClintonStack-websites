@@ -95,7 +95,7 @@ export default function PropertiesPage() {
 
       <div className="grid gap-4">
         {properties.length === 0 ? (
-          <Card>
+          <Card key="empty">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">

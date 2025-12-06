@@ -1,5 +1,6 @@
 // src/app/api/site/[id]/route.ts
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDb } from "@/lib/db";
 import { Site } from "@/lib/models/Site";
 import { getUserFromToken } from "@/lib/auth";
@@ -121,16 +122,7 @@ export async function GET(
   if (String(site.ownerId) !== String(user.id))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  // Return site with data set to draft for editor compatibility
-  const siteObj = site.toObject();
-  siteObj.data = site.userWebsite?.draft || {};
-
-  // Normalize blocks to ensure proper data structure
-  if (siteObj.data?.blocks) {
-    siteObj.data.blocks = normalizeSite(siteObj.data.blocks);
-  }
-
-  return NextResponse.json({ data: siteObj });
+  return NextResponse.json({ success: true });
 }
 
 export async function PUT(
@@ -168,11 +160,54 @@ export async function PUT(
     );
   }
 
-  // Sync properties into blocks
+  // Sync properties from blocks to Property collection
   const Property = (await import("@/lib/models/Property")).default;
+  const propertiesBlock = site.userWebsite.draft.blocks?.find(
+    (block: any) => block.type === "properties"
+  );
+  if (propertiesBlock?.data?.properties) {
+    const blockProperties = propertiesBlock.data.properties;
+    for (const prop of blockProperties) {
+      const propertyData = {
+        userId: site.ownerId,
+        siteId: site._id,
+        title: prop.title,
+        description: prop.description,
+        price: prop.price,
+        location: prop.location,
+        images: prop.images || [],
+        features: prop.features || [],
+        category: prop.category || "real-estate",
+        propertyType: prop.propertyType || "house",
+        bedrooms: prop.bedrooms,
+        bathrooms: prop.bathrooms,
+        area: prop.area,
+        status: prop.status || "for-sale",
+        isPublished: true,
+        paid: true, // Assume paid for editor-added
+        slug:
+          prop.slug ||
+          `${prop.title?.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+      };
+      if (
+        (prop.id || prop._id) &&
+        mongoose.Types.ObjectId.isValid(prop.id || prop._id)
+      ) {
+        // Update existing
+        await Property.findByIdAndUpdate(prop.id || prop._id, propertyData, {
+          upsert: true,
+        });
+      } else {
+        // Create new
+        await Property.create(propertyData);
+      }
+    }
+  }
+
+  // Fetch updated properties from collection
   const properties = await Property.find({ siteId: site._id }).lean();
 
-  // Update property block inside blocks
+  // Update property block inside blocks with collection data
   site.userWebsite.draft.blocks = site.userWebsite.draft.blocks.map(
     (block: any) => {
       if (block.type === "properties") {
@@ -197,5 +232,14 @@ export async function PUT(
     slug: site.slug,
   });
 
-  return NextResponse.json({ data: site });
+  // Return site with data set to draft for editor compatibility
+  const siteObj = site.toObject();
+  siteObj.data = site.userWebsite?.draft || {};
+
+  // Normalize blocks to ensure proper data structure
+  if (siteObj.data?.blocks) {
+    siteObj.data.blocks = normalizeSite(siteObj.data.blocks);
+  }
+
+  return NextResponse.json({ data: siteObj });
 }
