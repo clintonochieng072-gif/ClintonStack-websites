@@ -17,8 +17,6 @@ interface Plan {
   name: string;
   slug: string;
   price: number;
-  baseStorage: number;
-  maxImages: number;
   features: string[];
 }
 
@@ -26,29 +24,12 @@ interface Subscription {
   _id: string;
   status: string;
   planId: Plan;
-  extraStorageGB: number;
-  usage: {
-    storageUsed: number;
-    imagesUsed: number;
-    propertiesCount: number;
-  };
   trialEndsAt?: string;
   currentPeriodEnd: string;
 }
 
-interface UsageLimits {
-  storageGB: number;
-  maxImages: number;
-  maxProperties: number;
-  canPublish: boolean;
-  canUseCustomDomain: boolean;
-  canUseAnalytics: boolean;
-  teamAccounts: number;
-}
-
 export default function SubscriptionDashboard() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [limits, setLimits] = useState<UsageLimits | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,19 +38,11 @@ export default function SubscriptionDashboard() {
 
   const fetchSubscriptionData = async () => {
     try {
-      const [subRes, limitsRes] = await Promise.all([
-        fetch("/api/subscription"),
-        fetch("/api/subscription/limits"), // We'll create this endpoint
-      ]);
+      const subRes = await fetch("/api/subscription");
 
       if (subRes.ok) {
         const subData = await subRes.json();
         setSubscription(subData.data);
-      }
-
-      if (limitsRes.ok) {
-        const limitsData = await limitsRes.json();
-        setLimits(limitsData.data);
       }
     } catch (error) {
       console.error("Error fetching subscription data:", error);
@@ -115,18 +88,13 @@ export default function SubscriptionDashboard() {
     );
   }
 
-  if (!subscription || !limits) {
+  if (!subscription) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Unable to load subscription data</p>
       </div>
     );
   }
-
-  const storagePercentage =
-    (subscription.usage.storageUsed / limits.storageGB) * 100;
-  const imagesPercentage =
-    (subscription.usage.imagesUsed / limits.maxImages) * 100;
 
   return (
     <div className="space-y-6">
@@ -177,69 +145,6 @@ export default function SubscriptionDashboard() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Usage Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Storage Usage */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
-            <HardDrive className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {subscription.usage.storageUsed.toFixed(1)} GB
-            </div>
-            <p className="text-xs text-muted-foreground">
-              of {limits.storageGB} GB total
-            </p>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(storagePercentage, 100)}%` }}
-              ></div>
-            </div>
-            {subscription.extraStorageGB > 0 && (
-              <p className="text-xs text-green-600 mt-1">
-                +{subscription.extraStorageGB} GB extra storage
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Properties Count */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Properties</CardTitle>
-            <Building className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {subscription.usage.propertiesCount}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {limits.maxProperties === Infinity
-                ? "Unlimited"
-                : `of ${limits.maxProperties} allowed`}
-            </p>
-            {limits.maxProperties !== Infinity && (
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                <div
-                  className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(
-                      (subscription.usage.propertiesCount /
-                        limits.maxProperties) *
-                        100,
-                      100
-                    )}%`,
-                  }}
-                ></div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Plan Features */}
       <Card>

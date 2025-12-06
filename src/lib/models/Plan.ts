@@ -1,16 +1,14 @@
 import mongoose, { Document, Model } from "mongoose";
 
 export interface IPlan extends Document {
-  name: string; // Plan name (Starter, Standard, Premium, Elite)
+  name: string; // Plan name (Basic, Lifetime)
   slug: string; // URL-friendly identifier
   price: number; // Monthly price in KES
   currency: string; // Currency code (KES)
-  baseStorage: number; // Base storage in GB
-  maxImages: number; // Max images per month
   features: string[]; // Array of feature descriptions
-  extraStoragePrice: number; // Price per GB for extra storage
   isActive: boolean; // Whether plan is available
   sortOrder: number; // Display order
+  type: "subscription" | "one_time"; // Plan type
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,27 +35,12 @@ const PlanSchema = new mongoose.Schema<IPlan>(
       type: String,
       default: "KES",
     },
-    baseStorage: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    maxImages: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     features: [
       {
         type: String,
         required: true,
       },
     ],
-    extraStoragePrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     isActive: {
       type: Boolean,
       default: true,
@@ -65,6 +48,11 @@ const PlanSchema = new mongoose.Schema<IPlan>(
     sortOrder: {
       type: Number,
       default: 0,
+    },
+    type: {
+      type: String,
+      enum: ["subscription", "one_time"],
+      default: "subscription",
     },
   },
   {

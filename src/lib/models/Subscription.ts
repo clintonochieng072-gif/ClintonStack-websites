@@ -3,18 +3,11 @@ import mongoose, { Document, Model } from "mongoose";
 export interface ISubscription extends Document {
   userId: mongoose.Types.ObjectId; // Reference to User
   planId: mongoose.Types.ObjectId; // Reference to Plan
-  status: "active" | "cancelled" | "expired" | "trial"; // Subscription status
+  status: "active" | "cancelled" | "expired" | "trial" | "lifetime"; // Subscription status
   currentPeriodStart: Date; // Start of current billing period
   currentPeriodEnd: Date; // End of current billing period
   trialEndsAt?: Date; // Trial period end date
   cancelledAt?: Date; // Cancellation date
-  extraStorageGB: number; // Additional storage purchased (in GB)
-  usage: {
-    storageUsed: number; // Current storage used (in GB)
-    imagesUsed: number; // Images uploaded this month
-    propertiesCount: number; // Number of properties listed
-    lastResetDate: Date; // Last monthly reset date
-  };
   paymentMethod?: string; // Payment method reference
   autoRenew: boolean; // Whether subscription auto-renews
   createdAt: Date;
@@ -36,7 +29,7 @@ const SubscriptionSchema = new mongoose.Schema<ISubscription>(
     },
     status: {
       type: String,
-      enum: ["active", "cancelled", "expired", "trial"],
+      enum: ["active", "cancelled", "expired", "trial", "lifetime"],
       default: "trial",
     },
     currentPeriodStart: {
@@ -54,32 +47,6 @@ const SubscriptionSchema = new mongoose.Schema<ISubscription>(
     cancelledAt: {
       type: Date,
       default: null,
-    },
-    extraStorageGB: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    usage: {
-      storageUsed: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
-      imagesUsed: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
-      propertiesCount: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
-      lastResetDate: {
-        type: Date,
-        default: Date.now,
-      },
     },
     paymentMethod: {
       type: String,

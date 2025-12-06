@@ -1,116 +1,231 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Star, Zap } from "lucide-react";
+import {
+  Check,
+  Phone,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  CreditCard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
-interface Plan {
-  _id: string;
+interface BillingPlan {
+  type: "monthly" | "one_time";
   name: string;
-  slug: string;
   price: number;
-  currency: string;
-  baseStorage: number;
-  maxImages: number;
+  description: string;
   features: string[];
-  extraStoragePrice: number;
 }
 
-export default function PricingPage() {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+const BILLING_PLANS: BillingPlan[] = [
+  {
+    type: "monthly",
+    name: "Monthly Plan",
+    price: 999,
+    description: "Auto-renews every 30 days",
+    features: [
+      "Publish unlimited properties",
+      "Access to live property pages",
+      "30-day auto-renewal",
+      "Access locked if unpaid",
+    ],
+  },
+  {
+    type: "one_time",
+    name: "One-time Plan",
+    price: 3999,
+    description: "Lifetime access (first 10 users only)",
+    features: [
+      "Publish unlimited properties",
+      "Lifetime access to live pages",
+      "No recurring payments",
+      "Available for first 10 users",
+    ],
+  },
+];
+
+export default function BillingPage() {
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(
+    null
+  );
+  const [paymentStatus, setPaymentStatus] = useState<
+    "pending" | "success" | "failed" | null
+  >(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  const fetchPlans = async () => {
-    try {
-      const response = await fetch("/api/plans");
-      const data = await response.json();
-      if (data.success) {
-        setPlans(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching plans:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSelectPlan = (plan: BillingPlan) => {
+    setSelectedPlan(plan);
+    setShowPaymentDialog(true);
   };
 
-  const handleSelectPlan = async (planSlug: string) => {
-    setSelectedPlan(planSlug);
+  const initiatePropertyPayment = async () => {
+    if (!selectedPlan || !phoneNumber) return;
+
+    setPaymentInitiated(true);
+    setPaymentMessage("");
+
     try {
-      const response = await fetch("/api/subscription", {
-        method: "PUT",
+      // For demo purposes, we'll use a placeholder property ID
+      // In real implementation, this would come from the property being published
+      const propertyId = "demo-property-id";
+
+      const response = await fetch("/api/properties/publish", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planSlug }),
+        body: JSON.stringify({
+          propertyId: propertyId,
+          planType: selectedPlan.type,
+        }),
       });
 
       const data = await response.json();
+
       if (data.success) {
-        alert(`Successfully upgraded to ${data.data.planId.name} plan!`);
-        router.push("/dashboard");
+        setCheckoutRequestId(data.data.checkoutRequestId);
+        setPaymentStatus("pending");
+        setPaymentMessage(
+          data.data.customerMessage ||
+            "Payment initiated. Please complete the payment on your phone."
+        );
+        setShowPaymentDialog(false);
+        // Start polling for payment status
+        startPaymentStatusPolling(data.data.checkoutRequestId);
       } else {
-        alert(data.message || "Failed to upgrade plan");
+        setPaymentMessage(data.message || "Failed to initiate payment");
       }
     } catch (error) {
-      console.error("Error upgrading plan:", error);
-      alert("Failed to upgrade plan");
+      console.error("Error initiating payment:", error);
+      setPaymentMessage("Failed to initiate payment. Please try again.");
     } finally {
-      setSelectedPlan(null);
+      setPaymentInitiated(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading plans...</p>
-        </div>
-      </div>
-    );
-  }
+  const startPaymentStatusPolling = (requestId: string) => {
+    let pollCount = 0;
+    const maxPolls = 24; // 2 minutes at 5 second intervals
+
+    const pollStatus = async () => {
+      pollCount++;
+      try {
+        const response = await fetch(
+          `/api/payments/mpesa/status?CheckoutRequestID=${requestId}`
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          const status = data.data.payment.status;
+          setPaymentStatus(status);
+
+          if (status === "success") {
+            setPaymentMessage("Payment successful! Your property is now live.");
+            setTimeout(() => router.push("/dashboard"), 2000);
+          } else if (status === "failed") {
+            setPaymentMessage("Payment failed. Please try again.");
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        return false;
+      }
+    };
+
+    // Check immediately
+    pollStatus();
+
+    // Then poll every 5 seconds
+    const interval = setInterval(async () => {
+      const shouldStop = await pollStatus();
+      if (shouldStop || pollCount >= maxPolls) {
+        clearInterval(interval);
+        if (pollCount >= maxPolls && paymentStatus === "pending") {
+          setPaymentMessage(
+            "Payment status check timed out. Please check manually or contact support."
+          );
+        }
+      }
+    }, 5000);
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!checkoutRequestId) return;
+
+    setCheckingStatus(true);
+    try {
+      const response = await fetch(
+        `/api/payments/mpesa/status?CheckoutRequestID=${checkoutRequestId}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        const status = data.data.payment.status;
+        setPaymentStatus(status);
+
+        if (status === "success") {
+          setPaymentMessage("Payment successful! Your property is now live.");
+          setTimeout(() => router.push("/dashboard"), 2000);
+        } else if (status === "failed") {
+          setPaymentMessage("Payment failed. Please try again.");
+        } else {
+          setPaymentMessage("Payment is still processing. Please wait...");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking payment status:", error);
+      setPaymentMessage("Failed to check payment status. Please try again.");
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
+
+  const resetPaymentFlow = () => {
+    setShowPaymentDialog(false);
+    setSelectedPlan(null);
+    setPhoneNumber("");
+    setPaymentInitiated(false);
+    setCheckoutRequestId(null);
+    setPaymentStatus(null);
+    setCheckingStatus(false);
+    setPaymentMessage("");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
+            ClintonStack Property Publishing
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Start building your professional real estate website today. Upgrade
-            or downgrade at any time.
+            Choose a plan to publish your property live. Only paid properties
+            are visible to the public.
           </p>
         </div>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {plans.map((plan) => (
-            <Card
-              key={plan._id}
-              className={`relative ${
-                plan.slug === "premium"
-                  ? "border-blue-500 shadow-lg scale-105"
-                  : "border-gray-200"
-              }`}
-            >
-              {plan.slug === "premium" && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                    <Star className="w-4 h-4" />
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
+        {/* Billing Plans */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          {BILLING_PLANS.map((plan) => (
+            <Card key={plan.type} className="border-gray-200">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-2xl font-bold">
                   {plan.name}
@@ -119,11 +234,9 @@ export default function PricingPage() {
                   <span className="text-4xl font-bold text-gray-900">
                     {plan.price.toLocaleString()}
                   </span>
-                  <span className="text-gray-600 ml-1">KES/month</span>
+                  <span className="text-gray-600 ml-1">KES</span>
                 </div>
-                <div className="text-sm text-gray-500 mt-2">
-                  {plan.baseStorage}GB storage • {plan.maxImages} images/month
-                </div>
+                <p className="text-sm text-gray-500 mt-2">{plan.description}</p>
               </CardHeader>
 
               <CardContent>
@@ -137,82 +250,178 @@ export default function PricingPage() {
                 </ul>
 
                 <Button
-                  onClick={() => handleSelectPlan(plan.slug)}
-                  disabled={selectedPlan === plan.slug}
-                  className={`w-full ${
-                    plan.slug === "premium"
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : plan.slug === "elite"
-                      ? "bg-purple-600 hover:bg-purple-700"
-                      : ""
-                  }`}
-                  variant={plan.slug === "starter" ? "outline" : "default"}
+                  onClick={() => handleSelectPlan(plan)}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                 >
-                  {selectedPlan === plan.slug ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Upgrading...
-                    </>
-                  ) : plan.slug === "elite" ? (
-                    <>
-                      <Zap className="w-4 h-4 mr-2" />
-                      Get Lifetime Access
-                    </>
-                  ) : (
-                    `Choose ${plan.name}`
-                  )}
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Choose {plan.name}
                 </Button>
-
-                {plan.extraStoragePrice > 0 && (
-                  <p className="text-xs text-gray-500 text-center mt-3">
-                    Extra storage: {plan.extraStoragePrice.toLocaleString()}{" "}
-                    KES/GB
-                  </p>
-                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Payment Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5" />
+                Confirm Payment
+              </DialogTitle>
+              <DialogDescription>
+                Complete payment to publish your property live.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {selectedPlan && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm font-medium">Payment Summary</p>
+                  <p className="text-sm text-gray-600">
+                    Plan: {selectedPlan.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Amount: KES {selectedPlan.price.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {selectedPlan.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowPaymentDialog(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={initiatePropertyPayment}
+                  disabled={paymentInitiated}
+                  className="flex-1"
+                >
+                  {paymentInitiated ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    "Pay & Publish"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Status Display */}
+        {paymentStatus && (
+          <div className="max-w-2xl mx-auto mb-8">
+            <div
+              className={`p-4 rounded-lg border ${
+                paymentStatus === "success"
+                  ? "bg-green-50 border-green-200"
+                  : paymentStatus === "failed"
+                  ? "bg-red-50 border-red-200"
+                  : "bg-blue-50 border-blue-200"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {paymentStatus === "success" ? (
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                ) : paymentStatus === "failed" ? (
+                  <XCircle className="w-6 h-6 text-red-600" />
+                ) : (
+                  <RefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
+                )}
+                <div className="flex-1">
+                  <h3
+                    className={`font-medium ${
+                      paymentStatus === "success"
+                        ? "text-green-800"
+                        : paymentStatus === "failed"
+                        ? "text-red-800"
+                        : "text-blue-800"
+                    }`}
+                  >
+                    {paymentStatus === "success"
+                      ? "Payment Successful!"
+                      : paymentStatus === "failed"
+                      ? "Payment Failed"
+                      : "Payment Processing"}
+                  </h3>
+                  <p
+                    className={`text-sm ${
+                      paymentStatus === "success"
+                        ? "text-green-700"
+                        : paymentStatus === "failed"
+                        ? "text-red-700"
+                        : "text-blue-700"
+                    }`}
+                  >
+                    {paymentMessage}
+                  </p>
+                </div>
+                {paymentStatus === "pending" && (
+                  <Button
+                    onClick={checkPaymentStatus}
+                    disabled={checkingStatus}
+                    size="sm"
+                    variant="outline"
+                  >
+                    {checkingStatus ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin mr-1" />
+                        Checking...
+                      </>
+                    ) : (
+                      "Check Status"
+                    )}
+                  </Button>
+                )}
+                {paymentStatus !== "pending" && (
+                  <Button
+                    onClick={resetPaymentFlow}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Close
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info Section */}
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-2xl font-bold mb-4">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                Can I change plans anytime?
-              </h3>
+              <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                <span className="text-blue-600 font-bold">1</span>
+              </div>
               <p className="text-gray-600">
-                Yes, you can upgrade or downgrade your plan at any time. Changes
-                take effect immediately.
+                Create and preview your property listing
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                What happens to my data?
-              </h3>
+              <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                <span className="text-blue-600 font-bold">2</span>
+              </div>
               <p className="text-gray-600">
-                Your website and all data remain intact when changing plans.
-                Only feature access changes based on your plan.
+                Choose a plan and complete M-Pesa payment
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                Is there a free trial?
-              </h3>
+              <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                <span className="text-blue-600 font-bold">3</span>
+              </div>
               <p className="text-gray-600">
-                Yes, all plans include a 14-day free trial to test our platform.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2">
-                What payment methods do you accept?
-              </h3>
-              <p className="text-gray-600">
-                We accept M-Pesa, card payments, and bank transfers for Kenyan
-                customers.
+                Property goes live and stays active based on your plan
               </p>
             </div>
           </div>

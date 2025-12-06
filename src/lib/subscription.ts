@@ -84,6 +84,24 @@ export async function getUserLimits(
         canUseAnalytics: true,
         teamAccounts: 10,
       },
+      lifetime: {
+        storageGB: Infinity, // Unlimited
+        maxImages: Infinity, // Unlimited
+        maxProperties: Infinity, // Unlimited
+        canPublish: true,
+        canUseCustomDomain: true,
+        canUseAnalytics: true,
+        teamAccounts: 10,
+      },
+      monthly: {
+        storageGB: 10,
+        maxImages: 500,
+        maxProperties: 100,
+        canPublish: true,
+        canUseCustomDomain: true,
+        canUseAnalytics: true,
+        teamAccounts: 3,
+      },
     };
 
     const limits =

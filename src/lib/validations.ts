@@ -152,6 +152,44 @@ export const portfolioUpdateSchema = z.object({
   resumeUrl: z.string().url().optional(),
 });
 
+// Payment schemas
+export const mpesaPaymentInitiateSchema = z.object({
+  phoneNumber: z
+    .string()
+    .regex(/^254[0-9]{9}$/, "Phone number must be in format 254XXXXXXXXX")
+    .min(12, "Phone number must be 12 digits starting with 254")
+    .max(12, "Phone number must be 12 digits starting with 254"),
+  amount: z
+    .number()
+    .min(1, "Amount must be at least 1 KES")
+    .max(150000, "Amount cannot exceed 150,000 KES"),
+  planSlug: z
+    .string()
+    .min(1, "Plan slug is required")
+    .max(50, "Plan slug is too long"),
+});
+
+export const mpesaCallbackItemSchema = z.object({
+  Name: z.string(),
+  Value: z.union([z.string(), z.number()]),
+});
+
+export const mpesaCallbackSchema = z.object({
+  Body: z.object({
+    stkCallback: z.object({
+      MerchantRequestID: z.string(),
+      CheckoutRequestID: z.string(),
+      ResultCode: z.number(),
+      ResultDesc: z.string(),
+      CallbackMetadata: z
+        .object({
+          Item: z.array(mpesaCallbackItemSchema),
+        })
+        .optional(),
+    }),
+  }),
+});
+
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -160,3 +198,5 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type UpdateOnboardingInput = z.infer<typeof updateOnboardingSchema>;
 export type PortfolioUpdateInput = z.infer<typeof portfolioUpdateSchema>;
+export type MpesaPaymentInitiateInput = z.infer<typeof mpesaPaymentInitiateSchema>;
+export type MpesaCallbackInput = z.infer<typeof mpesaCallbackSchema>;

@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 const themeOptions = [
   {
@@ -53,7 +55,7 @@ export default function ThemePage() {
     try {
       const response = await fetch(`/api/site/${siteData.data._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           layout: selectedTheme,
         }),

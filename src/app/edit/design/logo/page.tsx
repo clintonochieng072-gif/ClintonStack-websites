@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import ImageUpload from "@/components/ImageUpload";
 import { Button } from "@/components/ui/button";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 export default function LogoPage() {
   const { data: siteData } = useSWR("/api/site/me", fetcher);
@@ -30,7 +32,7 @@ export default function LogoPage() {
     try {
       const response = await fetch(`/api/site/${siteData.data._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           logo: logo,
         }),

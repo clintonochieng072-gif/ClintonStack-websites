@@ -24,13 +24,13 @@ export async function GET(req: Request) {
       .exec();
 
     if (!subscription) {
-      // Create trial subscription for new users
-      const starterPlan = await Plan.findOne({ slug: "starter" });
-      if (starterPlan) {
+      // Create subscription for new users
+      const basicPlan = await Plan.findOne({ slug: "basic" });
+      if (basicPlan) {
         const newSubscription = await Subscription.create({
           userId: user.id,
-          planId: starterPlan._id,
-          status: "trial",
+          planId: basicPlan._id,
+          status: "active",
         });
 
         const populatedSubscription = await Subscription.findById(
@@ -92,15 +92,16 @@ export async function PUT(req: Request) {
 
     if (!subscription) {
       // Create new subscription
+      const status = plan.type === "one_time" ? "lifetime" : "active";
       subscription = await Subscription.create({
         userId: user.id,
         planId: plan._id,
-        status: "active",
+        status: status,
       });
     } else {
       // Update existing subscription
       subscription.planId = plan._id;
-      subscription.status = "active";
+      subscription.status = plan.type === "one_time" ? "lifetime" : "active";
       await subscription.save();
     }
 

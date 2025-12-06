@@ -3,18 +3,49 @@
 import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { Button } from "@/components/ui/button";
+import { getAuthHeaders } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 const fontOptions = [
-  { value: "Inter", label: "Inter" },
-  { value: "Roboto", label: "Roboto" },
-  { value: "Open Sans", label: "Open Sans" },
-  { value: "Lato", label: "Lato" },
-  { value: "Poppins", label: "Poppins" },
-  { value: "Montserrat", label: "Montserrat" },
-  { value: "Nunito", label: "Nunito" },
-  { value: "Source Sans Pro", label: "Source Sans Pro" },
+  // Sans Serif Fonts
+  { value: "Inter", label: "Inter", category: "Sans Serif" },
+  { value: "Roboto", label: "Roboto", category: "Sans Serif" },
+  { value: "Open Sans", label: "Open Sans", category: "Sans Serif" },
+  { value: "Lato", label: "Lato", category: "Sans Serif" },
+  { value: "Poppins", label: "Poppins", category: "Sans Serif" },
+  { value: "Montserrat", label: "Montserrat", category: "Sans Serif" },
+  { value: "Nunito", label: "Nunito", category: "Sans Serif" },
+  { value: "Source Sans Pro", label: "Source Sans Pro", category: "Sans Serif" },
+  { value: "DM Sans", label: "DM Sans", category: "Sans Serif" },
+  { value: "Work Sans", label: "Work Sans", category: "Sans Serif" },
+  { value: "Fira Sans", label: "Fira Sans", category: "Sans Serif" },
+  { value: "Barlow", label: "Barlow", category: "Sans Serif" },
+  { value: "Karla", label: "Karla", category: "Sans Serif" },
+  { value: "Rubik", label: "Rubik", category: "Sans Serif" },
+  { value: "Mulish", label: "Mulish", category: "Sans Serif" },
+  { value: "Quicksand", label: "Quicksand", category: "Sans Serif" },
+
+  // Serif Fonts
+  { value: "Playfair Display", label: "Playfair Display", category: "Serif" },
+  { value: "Merriweather", label: "Merriweather", category: "Serif" },
+  { value: "Crimson Text", label: "Crimson Text", category: "Serif" },
+  { value: "Lora", label: "Lora", category: "Serif" },
+  { value: "Source Serif Pro", label: "Source Serif Pro", category: "Serif" },
+  { value: "Libre Baskerville", label: "Libre Baskerville", category: "Serif" },
+  { value: "Crimson Pro", label: "Crimson Pro", category: "Serif" },
+  { value: "Vollkorn", label: "Vollkorn", category: "Serif" },
+
+  // Display/Creative Fonts
+  { value: "Oswald", label: "Oswald", category: "Display" },
+  { value: "Bebas Neue", label: "Bebas Neue", category: "Display" },
+  { value: "Raleway", label: "Raleway", category: "Display" },
+  { value: "Comfortaa", label: "Comfortaa", category: "Display" },
+  { value: "Righteous", label: "Righteous", category: "Display" },
+  { value: "Fredoka One", label: "Fredoka One", category: "Display" },
+  { value: "Bungee", label: "Bungee", category: "Display" },
+  { value: "Chewy", label: "Chewy", category: "Display" },
 ];
 
 export default function FontsPage() {
@@ -36,7 +67,7 @@ export default function FontsPage() {
     try {
       const response = await fetch(`/api/site/${siteData.data._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           theme: {
             ...siteData.data.theme,
@@ -66,27 +97,42 @@ export default function FontsPage() {
         <p className="text-gray-600">Choose the typography for your website</p>
       </div>
 
-      <div className="max-w-md space-y-4">
+      <div className="max-w-2xl space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-4">
             Primary Font
           </label>
-          <select
-            value={font}
-            onChange={(e) => setFont(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            style={{ fontFamily: font }}
-          >
-            {fontOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                style={{ fontFamily: option.value }}
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
+
+          {/* Font Categories */}
+          {["Sans Serif", "Serif", "Display"].map((category) => {
+            const categoryFonts = fontOptions.filter(f => f.category === category);
+            return (
+              <div key={category} className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
+                  {category}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {categoryFonts.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setFont(option.value)}
+                      className={`p-3 border rounded-lg text-left transition-all hover:shadow-md ${
+                        font === option.value
+                          ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      style={{ fontFamily: option.value }}
+                    >
+                      <div className="font-medium text-sm">{option.label}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Aa Bb Cc
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="p-4 bg-gray-50 rounded-md">
