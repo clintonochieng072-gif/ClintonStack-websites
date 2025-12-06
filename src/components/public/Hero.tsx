@@ -9,8 +9,10 @@ interface HeroProps {
 
 export default function Hero({ site }: HeroProps) {
   // Get hero data from site's blocks, merge with defaults like other blocks
-  const customBlocks = site?.userWebsite?.data?.blocks || [];
-  const customBlocksMap = new Map(customBlocks.map((block: any) => [block.type, block]));
+  const customBlocks = site?.publishedWebsite?.data?.blocks || [];
+  const customBlocksMap = new Map(
+    customBlocks.map((block: any) => [block.type, block])
+  );
 
   // Check if there's custom hero data
   const customHeroBlock = customBlocksMap.get("hero") as any;
@@ -19,10 +21,22 @@ export default function Hero({ site }: HeroProps) {
   if (customHeroBlock?.data) {
     // Merge custom data with defaults
     heroData = {
-      title: customHeroBlock.data.title !== undefined ? customHeroBlock.data.title : defaultHomeContent.hero.title,
-      subtitle: customHeroBlock.data.subtitle !== undefined ? customHeroBlock.data.subtitle : defaultHomeContent.hero.subtitle,
-      ctaText: customHeroBlock.data.ctaText !== undefined ? customHeroBlock.data.ctaText : defaultHomeContent.hero.ctaText,
-      heroImage: customHeroBlock.data.heroImage !== undefined ? customHeroBlock.data.heroImage : defaultHomeContent.hero.heroImage,
+      title:
+        customHeroBlock.data.title !== undefined
+          ? customHeroBlock.data.title
+          : defaultHomeContent.hero.title,
+      subtitle:
+        customHeroBlock.data.subtitle !== undefined
+          ? customHeroBlock.data.subtitle
+          : defaultHomeContent.hero.subtitle,
+      ctaText:
+        customHeroBlock.data.ctaText !== undefined
+          ? customHeroBlock.data.ctaText
+          : defaultHomeContent.hero.ctaText,
+      heroImage:
+        customHeroBlock.data.heroImage !== undefined
+          ? customHeroBlock.data.heroImage
+          : defaultHomeContent.hero.heroImage,
     };
   }
 

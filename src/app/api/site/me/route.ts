@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         .maxTimeMS(3000);
       return NextResponse.json({ data: sites });
     } else {
-      // Return the first site (for backward compatibility) - optimized
+      // Return the most recently updated site with content (for backward compatibility) - optimized
       const projection = {
         slug: 1,
         title: 1,
@@ -78,9 +78,22 @@ export async function GET(request: NextRequest) {
         ownerId: 1,
       };
 
-      const site = (await Site.findOne({ ownerId: user.id }, projection)
+      // First try to find a site with draft content (most recently edited)
+      let site = (await Site.findOne(
+        { ownerId: user.id, "userWebsite.draft": { $exists: true } },
+        projection
+      )
+        .sort({ updatedAt: -1 })
         .lean()
         .maxTimeMS(3000)) as any;
+
+      // If no site with draft content, get the most recently updated site
+      if (!site) {
+        site = (await Site.findOne({ ownerId: user.id }, projection)
+          .sort({ updatedAt: -1 })
+          .lean()
+          .maxTimeMS(3000)) as any;
+      }
 
       if (!site) {
         return NextResponse.json({ data: null });

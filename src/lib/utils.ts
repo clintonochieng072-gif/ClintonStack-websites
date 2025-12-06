@@ -39,3 +39,29 @@ export function getAuthHeaders(): Record<string, string> {
 
   return headers;
 }
+
+export async function apiPut(path: string, body: any) {
+  const res = await fetch(path, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API PUT ${path} failed: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export async function apiPost(path: string, body: any) {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API POST ${path} failed: ${res.status} ${text}`);
+  }
+  return res.json();
+}

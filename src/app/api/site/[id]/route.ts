@@ -113,8 +113,13 @@ export async function GET(
 ) {
   await connectDb();
   const { id } = await params;
+  const user = await getUserFromToken();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const site = await Site.findById(id);
   if (!site) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (String(site.ownerId) !== String(user.id))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Return site with data set to draft for editor compatibility
   const siteObj = site.toObject();
@@ -143,18 +148,46 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const payload = await req.json();
-  // expected fields: data, title, theme, published, layout, logo
+  // expected fields: data, title, theme, published, layout, logo, integrations
   if (!site.userWebsite) site.userWebsite = { draft: {}, published: {} };
 
   // Allow partial updates by deep merging with existing draft
   if (payload.data) {
     site.userWebsite.draft = deepMerge(site.userWebsite.draft, payload.data);
+    site.markModified("userWebsite.draft");
   }
   site.title = payload.title ?? site.title;
   site.theme = payload.theme ?? site.theme;
   site.published = payload.published ?? site.published;
   site.layout = payload.layout ?? site.layout;
   if (payload.logo !== undefined) site.logo = payload.logo;
+  if (payload.integrations) {
+    site.integrations = deepMerge(
+      site.integrations || {},
+      payload.integrations
+    );
+  }
+
+  // Sync properties into blocks
+  const Property = (await import("@/lib/models/Property")).default;
+  const properties = await Property.find({ siteId: site._id }).lean();
+
+  // Update property block inside blocks
+  site.userWebsite.draft.blocks = site.userWebsite.draft.blocks.map((block) => {
+    if (block.type === "properties") {
+      return {
+        ...block,
+        data: {
+          properties: properties,
+        },
+      };
+    }
+    return block;
+  });
+
+  // Mark the nested field as modified for Mongoose to save
+  site.markModified("userWebsite.draft.blocks");
+
   await site.save();
 
   // Broadcast site update to preview

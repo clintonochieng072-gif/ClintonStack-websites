@@ -1,55 +1,34 @@
 // src/app/api/site/publish/route.ts
-import { NextResponse } from "next/server";
-import { connectDb } from "@/lib/db";
-import { Site } from "@/lib/models/Site";
-import { getUserFromToken } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
-import { getBaseUrl } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+import { Site } from "@/lib/models/Site";
 
 export async function POST(req: Request) {
-  await connectDb();
-  const user = await getUserFromToken();
-  if (!user)
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
+  try {
+    const { siteId } = await req.json();
+    const site = await Site.findById(siteId);
 
-  const { siteId } = await req.json();
-  if (!siteId)
-    return NextResponse.json(
-      { success: false, message: "Site ID required" },
-      { status: 400 }
-    );
+    if (!site) {
+      return new Response("Site not found", { status: 404 });
+    }
 
-  const site = await Site.findById(siteId);
-  if (!site)
-    return NextResponse.json(
-      { success: false, message: "Site not found" },
-      { status: 404 }
-    );
-  if (String(site.ownerId) !== String(user.id))
-    return NextResponse.json(
-      { success: false, message: "Forbidden" },
-      { status: 403 }
-    );
+    // Copy the ENTIRE draft into publishedWebsite.data
+    site.publishedWebsite = {
+      data: {
+        ...site.userWebsite?.draft,
+      },
+      integrations: {
+        ...site.userWebsite?.integrations,
+      },
+    };
 
-  // Copy draft to published
-  if (!site.userWebsite) site.userWebsite = { draft: {}, published: {} };
-  site.userWebsite.published = { ...site.userWebsite.draft };
-  await site.save();
+    // Force mongoose to save nested object
+    site.markModified("publishedWebsite");
 
-  // Revalidate the public site cache
-  revalidatePath(`/site/${site.slug}`);
+    await site.save();
 
-  const liveUrl = `${getBaseUrl()}/site/${site.slug}`;
-
-  return NextResponse.json({
-    success: true,
-    message: "Site published successfully!",
-    liveUrl,
-  });
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new Response("Server error", { status: 500 });
+  }
 }

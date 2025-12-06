@@ -71,66 +71,42 @@ export default function PublishSettingsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Publish Website
+          Publishing Settings
         </h2>
         <p className="text-gray-600">
-          Make your website live for the world to see
+          Configure automatic publishing and view your live website
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Globe className="w-5 h-5" />
-            <span>Publication Status</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                {isPublished ? "Website is Live" : "Website is in Draft"}
-              </h3>
-              <p className="text-gray-600">
-                {isPublished
-                  ? "Your website is currently published and visible to visitors."
-                  : "Your website is in draft mode and not visible to the public."}
-              </p>
-            </div>
-            <div
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isPublished
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              {isPublished ? "Published" : "Draft"}
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <p className="text-sm text-gray-600">
-              Use the Publish button in the header to publish your changes.
-            </p>
-          </div>
-
-          {isPublished && site?.slug && (
+      {isPublished && site?.slug && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Globe className="w-5 h-5" />
+              <span>Live Website</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-md">
-              <p className="text-sm text-blue-800">
-                <strong>Your website is live at:</strong>{" "}
-                <a
-                  href={`${process.env.NEXT_PUBLIC_PUBLIC_URL}/site/${site.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  {process.env.NEXT_PUBLIC_PUBLIC_URL}/site/{site.slug}
-                </a>
+              <p className="text-sm text-blue-800 mb-2">
+                <strong>Your website is live at:</strong>
               </p>
+              <a
+                href={`${process.env.NEXT_PUBLIC_PUBLIC_URL}/site/${site.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                {process.env.NEXT_PUBLIC_PUBLIC_URL}/site/{site.slug}
+              </a>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="text-sm text-gray-600">
+              Use the View Public Site button in your dashboard to access your
+              live website.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Auto-Publish Scheduling */}
       <Card>

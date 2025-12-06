@@ -2,6 +2,7 @@ import mongoose, { Document, Model } from "mongoose";
 
 export interface IProperty extends Document {
   userId: mongoose.Types.ObjectId;
+  siteId: mongoose.Types.ObjectId;
   title: string;
   description: string;
   price: number;
@@ -29,6 +30,11 @@ const PropertySchema = new mongoose.Schema<IProperty>(
       ref: "User",
       required: true,
     },
+    siteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Site",
+      required: true,
+    },
     title: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
@@ -52,7 +58,7 @@ const PropertySchema = new mongoose.Schema<IProperty>(
 );
 
 // Index for better query performance
-PropertySchema.index({ userId: 1, isPublished: 1 });
+PropertySchema.index({ userId: 1, siteId: 1, isPublished: 1 });
 PropertySchema.index({ category: 1, isPublished: 1 });
 PropertySchema.index({ slug: 1 });
 

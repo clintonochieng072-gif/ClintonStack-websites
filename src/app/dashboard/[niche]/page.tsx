@@ -28,26 +28,22 @@ export default function NicheDashboardPage() {
   const router = useRouter();
   const niche = (params as { niche: string }).niche;
 
-  const { data: siteData, error } = useSWR("/api/site/me?all=true", fetcher);
+  const { data: siteData, error } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (siteData?.data) {
-      const sites = Array.isArray(siteData.data) ? siteData.data : [];
-      const userSite = sites.find((s: any) => s.niche === niche);
-      setSite(userSite || null);
+      setSite(siteData.data);
     }
-  }, [siteData, niche]);
+  }, [siteData]);
 
   // Check if user has access to this niche
   useEffect(() => {
-    if (siteData) {
-      const sites = Array.isArray(siteData.data) ? siteData.data : [];
-      const hasAccess = sites.some((s: any) => s.niche === niche);
-
-      if (!hasAccess) {
-        // User doesn't have this niche or no sites, redirect to niches page
+    if (siteData?.data) {
+      const currentSite = siteData.data;
+      if (!currentSite || currentSite.niche !== niche) {
+        // Current site is not for this niche, redirect to niches page
         router.replace("/dashboard/niches");
       }
     }

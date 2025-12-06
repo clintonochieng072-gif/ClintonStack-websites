@@ -7,12 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/ImageUpload";
 import SaveButton from "@/components/SaveButton";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, apiPut } from "@/lib/utils";
 
 const fetcher = (url: string) =>
   fetch(url, {
     cache: "no-store",
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   }).then((r) => r.json());
 
 export default function HeroPage() {
@@ -23,17 +23,31 @@ export default function HeroPage() {
   useEffect(() => {
     if (siteData?.data) {
       const site = siteData.data;
-      const heroBlock = site.userWebsite?.draft?.blocks?.find((b: any) => b.type === "hero");
+      const heroBlock = site.userWebsite?.draft?.blocks?.find(
+        (b: any) => b.type === "hero"
+      );
 
       // If hero block exists, use saved data as the new baseline
       // Only fall back to static defaults for completely new sites
       if (heroBlock?.data) {
         // Saved data becomes the new "defaults" - preserve exactly what was saved
         setFormData({
-          title: heroBlock.data.title !== undefined ? heroBlock.data.title : defaultHomeContent.hero.title,
-          subtitle: heroBlock.data.subtitle !== undefined ? heroBlock.data.subtitle : defaultHomeContent.hero.subtitle,
-          ctaText: heroBlock.data.ctaText !== undefined ? heroBlock.data.ctaText : defaultHomeContent.hero.ctaText,
-          heroImage: heroBlock.data.heroImage !== undefined ? heroBlock.data.heroImage : defaultHomeContent.hero.heroImage,
+          title:
+            heroBlock.data.title !== undefined
+              ? heroBlock.data.title
+              : defaultHomeContent.hero.title,
+          subtitle:
+            heroBlock.data.subtitle !== undefined
+              ? heroBlock.data.subtitle
+              : defaultHomeContent.hero.subtitle,
+          ctaText:
+            heroBlock.data.ctaText !== undefined
+              ? heroBlock.data.ctaText
+              : defaultHomeContent.hero.ctaText,
+          heroImage:
+            heroBlock.data.heroImage !== undefined
+              ? heroBlock.data.heroImage
+              : defaultHomeContent.hero.heroImage,
         });
       } else {
         // No saved data exists, use static defaults for brand new sites
@@ -72,18 +86,9 @@ export default function HeroPage() {
 
       heroBlock.data = { ...heroBlock.data, ...formData };
 
-      const response = await fetch(`/api/site/${siteId}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ data: draftData }),
-      });
-
-      if (response.ok) {
-        mutate("/api/site/me");
-        alert("Hero section saved successfully!");
-      } else {
-        alert("Failed to save hero section");
-      }
+      await apiPut(`/api/site/${siteId}`, { data: draftData });
+      mutate("/api/site/me");
+      alert("Hero section saved successfully!");
     } catch (error) {
       alert("Error saving hero section");
     }

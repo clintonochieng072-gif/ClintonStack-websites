@@ -5,6 +5,84 @@ import { connectDb } from "@/lib/db";
 import { Site } from "@/lib/models/Site";
 import PublicSiteContent from "@/components/public/PublicSiteContent";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function normalizeSite(blocks: any[]) {
+  if (!Array.isArray(blocks)) return [];
+
+  return blocks.map((block) => {
+    switch (block.type) {
+      case "services":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            services: Array.isArray(block.data?.services)
+              ? block.data.services
+              : [],
+            items: Array.isArray(block.data?.items) ? block.data.items : [],
+          },
+        };
+      case "gallery":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            images: Array.isArray(block.data?.images) ? block.data.images : [],
+            photos: Array.isArray(block.data?.photos) ? block.data.photos : [],
+          },
+        };
+      case "testimonials":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            testimonials: Array.isArray(block.data?.testimonials)
+              ? block.data.testimonials
+              : [],
+            items: Array.isArray(block.data?.items) ? block.data.items : [],
+          },
+        };
+      case "contact":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            email: block.data?.email || "",
+            phone: block.data?.phone || "",
+            address: block.data?.address || "",
+          },
+        };
+      case "hero":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            title: block.data?.title || "",
+            subtitle: block.data?.subtitle || "",
+            ctaText: block.data?.ctaText || "",
+            heroImage: block.data?.heroImage || "",
+          },
+        };
+      case "properties":
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            list: Array.isArray(block.data?.list)
+              ? block.data.list
+              : Array.isArray(block.data?.properties)
+              ? block.data.properties
+              : [],
+          },
+        };
+      default:
+        return block;
+    }
+  });
+}
+
 async function getPublicSiteDirect(slug: string) {
   try {
     await connectDb();
@@ -13,7 +91,8 @@ async function getPublicSiteDirect(slug: string) {
     if (!site) return null;
 
     // Start with published data
-    const publishedData = site.userWebsite?.published || {};
+    const publishedData = site.publishedWebsite?.data || {};
+    console.log("PUBLIC DATA:", publishedData);
 
     // Convert flat data structure to blocks array if needed
     if (!publishedData.blocks) {
@@ -35,36 +114,52 @@ async function getPublicSiteDirect(slug: string) {
         .map(([type, data]) => ({ type, data }));
     }
 
+    // Normalize blocks to ensure proper data structure
+    if (publishedData.blocks) {
+      publishedData.blocks = normalizeSite(publishedData.blocks);
+    }
+
     // Fetch and include published properties for this site owner
     const Property = (await import("@/lib/models/Property")).default;
-    const properties = await Property.find({
+    let properties = await Property.find({
       userId: site.ownerId,
       isPublished: true,
     }).sort({ createdAt: -1 });
 
-    // Add properties to the site's data if not already present
-    const hasPropertiesBlock = publishedData.blocks?.some(
+    // If no published properties, fall back to properties from blocks
+    if (properties.length === 0) {
+      const propertiesBlock = publishedData.blocks.find(
+        (block: any) => block.type === "properties"
+      );
+      properties = propertiesBlock?.data?.properties || [];
+    }
+
+    // Set the properties block to the fetched properties
+    publishedData.blocks = publishedData.blocks || [];
+    const propertiesBlockIndex = publishedData.blocks.findIndex(
       (block: any) => block.type === "properties"
     );
-    if (!hasPropertiesBlock && properties.length > 0) {
-      publishedData.blocks = publishedData.blocks || [];
+    const propertiesData = {
+      properties: properties.map((prop) => ({
+        id: prop._id ? prop._id.toString() : prop.id,
+        title: prop.title,
+        description: prop.description,
+        price: prop.price,
+        location: prop.location,
+        images: prop.images,
+        features: prop.features,
+        bedrooms: prop.bedrooms,
+        bathrooms: prop.bathrooms,
+        area: prop.area,
+        status: prop.status || "for-sale", // Use existing status or default
+      })),
+    };
+    if (propertiesBlockIndex >= 0) {
+      publishedData.blocks[propertiesBlockIndex].data = propertiesData;
+    } else {
       publishedData.blocks.push({
         type: "properties",
-        data: {
-          properties: properties.map((prop) => ({
-            id: prop._id.toString(),
-            title: prop.title,
-            description: prop.description,
-            price: prop.price,
-            location: prop.location,
-            images: prop.images,
-            features: prop.features,
-            bedrooms: prop.bedrooms,
-            bathrooms: prop.bathrooms,
-            area: prop.area,
-            status: "for-sale", // Default status
-          })),
-        },
+        data: propertiesData,
       });
     }
 
@@ -87,27 +182,19 @@ async function getPublicSiteDirect(slug: string) {
         : [],
       createdAt: site.createdAt?.toISOString(),
       updatedAt: site.updatedAt?.toISOString(),
-      userWebsite: {
-        data: publishedData,
-        integrations: {
-          phoneNumber: site.userWebsite?.integrations?.phoneNumber || "",
-          whatsappNumber: site.userWebsite?.integrations?.whatsappNumber || "",
-          tawkToId: site.userWebsite?.integrations?.tawkToId || "",
-          crispId: site.userWebsite?.integrations?.crispId || "",
-          googleAnalyticsId:
-            site.userWebsite?.integrations?.googleAnalyticsId || "",
-          googleTagManagerId:
-            site.userWebsite?.integrations?.googleTagManagerId || "",
-          metaPixelId: site.userWebsite?.integrations?.metaPixelId || "",
-          mailchimpApiKey:
-            site.userWebsite?.integrations?.mailchimpApiKey || "",
-          mailchimpListId:
-            site.userWebsite?.integrations?.mailchimpListId || "",
-          brevoApiKey: site.userWebsite?.integrations?.brevoApiKey || "",
-          googleMapsApiKey:
-            site.userWebsite?.integrations?.googleMapsApiKey || "",
-          customScript: site.userWebsite?.integrations?.customScript || "",
-        },
+      integrations: {
+        phoneNumber: site.integrations?.phoneNumber || "",
+        whatsappNumber: site.integrations?.whatsappNumber || "",
+        tawkToId: site.integrations?.tawkToId || "",
+        crispId: site.integrations?.crispId || "",
+        googleAnalyticsId: site.integrations?.googleAnalyticsId || "",
+        googleTagManagerId: site.integrations?.googleTagManagerId || "",
+        metaPixelId: site.integrations?.metaPixelId || "",
+        mailchimpApiKey: site.integrations?.mailchimpApiKey || "",
+        mailchimpListId: site.integrations?.mailchimpListId || "",
+        brevoApiKey: site.integrations?.brevoApiKey || "",
+        googleMapsApiKey: site.integrations?.googleMapsApiKey || "",
+        customScript: site.integrations?.customScript || "",
       },
       publishSchedule: site.publishSchedule
         ? {
@@ -120,6 +207,10 @@ async function getPublicSiteDirect(slug: string) {
             nextPublish: site.publishSchedule.nextPublish?.toISOString(),
           }
         : { enabled: false, frequency: "daily", time: "09:00" },
+      // ADD THIS:
+      publishedWebsite: {
+        data: publishedData,
+      },
     };
 
     return plainSite;
@@ -149,13 +240,13 @@ export async function generateMetadata({
     };
   }
 
-  const seo = site.userWebsite?.data?.seo || {};
+  const seo = site.publishedWebsite?.data?.seo || {};
   const title = seo.title || site.title || "ClintonStack Site";
   const description =
     seo.description ||
-    site.userWebsite?.data?.description ||
+    site.publishedWebsite?.data?.description ||
     "Professional real estate website";
-  const heroImage = site.userWebsite?.data?.blocks?.find(
+  const heroImage = site.publishedWebsite?.data?.blocks?.find(
     (b: any) => b.type === "hero"
   )?.data?.heroImage;
 

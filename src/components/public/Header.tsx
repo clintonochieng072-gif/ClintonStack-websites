@@ -33,8 +33,8 @@ const propertyTypes = [
 
 export default function Header({ site }: HeaderProps) {
   const logo =
-    site.userWebsite?.data?.theme?.logo ||
-    site.userWebsite?.data?.logo ||
+    site.publishedWebsite?.data?.theme?.logo ||
+    site.publishedWebsite?.data?.logo ||
     site.logo;
   const title = site.title || "ClintonStack";
   const [searchQuery, setSearchQuery] = useState("");

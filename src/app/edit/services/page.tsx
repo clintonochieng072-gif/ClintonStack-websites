@@ -5,12 +5,12 @@ import useSWR, { mutate } from "swr";
 import ServicesEditor from "@/components/ServicesEditor";
 import SaveButton from "@/components/SaveButton";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, apiPut } from "@/lib/utils";
 
 const fetcher = (url: string) =>
   fetch(url, {
     cache: "no-store",
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   }).then((r) => r.json());
 
 export default function ServicesPage() {
@@ -73,18 +73,9 @@ export default function ServicesPage() {
 
       servicesBlock.data.services = services;
 
-      const response = await fetch(`/api/site/${siteId}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ data: draftData }),
-      });
-
-      if (response.ok) {
-        mutate("/api/site/me");
-        alert("Services saved successfully!");
-      } else {
-        alert("Failed to save services");
-      }
+      await apiPut(`/api/site/${siteId}`, { data: draftData });
+      mutate("/api/site/me");
+      alert("Services saved successfully!");
     } catch (error) {
       alert("Error saving services");
     }

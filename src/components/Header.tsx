@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/context/GlobalContext";
 import useSWR from "swr";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, apiPost } from "@/lib/utils";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -15,6 +15,7 @@ export default function Header() {
   const { user } = useGlobal();
   const { data: siteData } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     if (siteData?.data) {
@@ -27,20 +28,14 @@ export default function Header() {
   };
 
   const handlePublish = async () => {
+    setPublishing(true);
     try {
-      const response = await fetch("/api/site/publish", {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ siteId: site?._id }),
-      });
-
-      if (response.ok) {
-        alert("Site published successfully!");
-      } else {
-        alert("Failed to publish site");
-      }
+      await apiPost("/api/site/publish", { siteId: site?._id });
+      alert("Site published successfully!");
     } catch (error) {
-      alert("Error publishing site");
+      alert(`Error publishing site: ${error}`);
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -73,8 +68,9 @@ export default function Header() {
                 size="lg"
                 className="px-8 py-4 text-lg"
                 onClick={handlePublish}
+                disabled={publishing}
               >
-                Publish
+                {publishing ? "Publishing..." : "Publish"}
               </Button>
               <span className="text-xs text-gray-500 mt-1 text-center max-w-32">
                 Make your latest changes live

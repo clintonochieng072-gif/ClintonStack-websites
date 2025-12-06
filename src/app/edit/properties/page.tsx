@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSite } from "../layout";
+import { getAuthHeaders } from "@/lib/utils";
 
 export default function PropertiesPage() {
   const { site, loading } = useSite();
@@ -26,7 +27,9 @@ export default function PropertiesPage() {
 
     try {
       // Get current site data
-      const siteRes = await fetch("/api/site/me");
+      const siteRes = await fetch("/api/site/me", {
+        headers: getAuthHeaders(),
+      });
       const siteData = await siteRes.json();
       if (!siteData.data) {
         alert("Failed to load site data");
@@ -53,7 +56,7 @@ export default function PropertiesPage() {
       // Update site draft
       const updateRes = await fetch(`/api/site/${siteId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           data: draftData,
         }),

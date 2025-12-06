@@ -11,11 +11,11 @@ interface Block {
 
 interface Site {
   title: string;
-  userWebsite?: {
+  integrations?: any;
+  publishedWebsite?: {
     data?: {
       blocks?: Block[];
     };
-    integrations?: any;
   };
 }
 
@@ -24,7 +24,7 @@ interface PublicSiteContentProps {
 }
 
 export default function PublicSiteContent({ site }: PublicSiteContentProps) {
-  const customBlocks = site.userWebsite?.data?.blocks || [];
+  const customBlocks = site.publishedWebsite?.data?.blocks || [];
 
   // Merge default blocks with custom blocks
   // Note: Hero is handled separately by the Hero component above
@@ -158,7 +158,7 @@ function TrustBadges() {
 
 function FeaturedProperties({ site }: { site: Site }) {
   // Get featured properties from the site's properties block
-  const propertiesBlock = site.userWebsite?.data?.blocks?.find(
+  const propertiesBlock = site.publishedWebsite?.data?.blocks?.find(
     (b: any) => b.type === "properties"
   );
   const allProperties = propertiesBlock?.data?.properties || [];

@@ -7,9 +7,41 @@ export interface ISite extends Document {
   niche: string | null;
   title?: string;
   published?: boolean;
+  integrations: {
+    phoneNumber?: string;
+    whatsappNumber?: string;
+    tawkToId?: string;
+    crispId?: string;
+    googleAnalyticsId?: string;
+    googleTagManagerId?: string;
+    metaPixelId?: string;
+    mailchimpApiKey?: string;
+    mailchimpListId?: string;
+    brevoApiKey?: string;
+    googleMapsApiKey?: string;
+    customScript?: string;
+  };
   userWebsite: {
     draft: { [key: string]: any }; // Draft content - always updated when admin saves
     published: { [key: string]: any }; // Published content - only updated when published
+    data: { [key: string]: any }; // Published content for public access
+    integrations: {
+      phoneNumber?: string;
+      whatsappNumber?: string;
+      tawkToId?: string;
+      crispId?: string;
+      googleAnalyticsId?: string;
+      googleTagManagerId?: string;
+      metaPixelId?: string;
+      mailchimpApiKey?: string;
+      mailchimpListId?: string;
+      brevoApiKey?: string;
+      googleMapsApiKey?: string;
+      customScript?: string;
+    };
+  };
+  publishedWebsite?: {
+    data: { [key: string]: any }; // Published content for public access
     integrations: {
       phoneNumber?: string;
       whatsappNumber?: string;
@@ -48,9 +80,41 @@ const SiteSchema = new Schema<ISite>(
     niche: { type: String, default: null },
     title: { type: String },
     published: { type: Boolean, default: false },
+    integrations: {
+      phoneNumber: { type: String, default: "" },
+      whatsappNumber: { type: String, default: "" },
+      tawkToId: { type: String, default: "" },
+      crispId: { type: String, default: "" },
+      googleAnalyticsId: { type: String, default: "" },
+      googleTagManagerId: { type: String, default: "" },
+      metaPixelId: { type: String, default: "" },
+      mailchimpApiKey: { type: String, default: "" },
+      mailchimpListId: { type: String, default: "" },
+      brevoApiKey: { type: String, default: "" },
+      googleMapsApiKey: { type: String, default: "" },
+      customScript: { type: String, default: "" },
+    },
     userWebsite: {
       draft: { type: Schema.Types.Mixed, default: {} },
       published: { type: Schema.Types.Mixed, default: {} },
+      data: { type: Schema.Types.Mixed, default: {} },
+      integrations: {
+        phoneNumber: { type: String, default: "" },
+        whatsappNumber: { type: String, default: "" },
+        tawkToId: { type: String, default: "" },
+        crispId: { type: String, default: "" },
+        googleAnalyticsId: { type: String, default: "" },
+        googleTagManagerId: { type: String, default: "" },
+        metaPixelId: { type: String, default: "" },
+        mailchimpApiKey: { type: String, default: "" },
+        mailchimpListId: { type: String, default: "" },
+        brevoApiKey: { type: String, default: "" },
+        googleMapsApiKey: { type: String, default: "" },
+        customScript: { type: String, default: "" },
+      },
+    },
+    publishedWebsite: {
+      data: { type: Schema.Types.Mixed, default: {} },
       integrations: {
         phoneNumber: { type: String, default: "" },
         whatsappNumber: { type: String, default: "" },

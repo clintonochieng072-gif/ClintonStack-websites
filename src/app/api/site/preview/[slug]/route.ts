@@ -97,7 +97,7 @@ export async function GET(
 
   console.log("Preview API - Raw site from DB:", {
     userWebsite: site.userWebsite,
-    integrations: site.userWebsite?.integrations,
+    integrations: site.integrations,
   });
 
   // Return site with full userWebsite object for preview
@@ -107,8 +107,8 @@ export async function GET(
   siteObj.userWebsite = {
     ...site.userWebsite,
     data: site.userWebsite?.draft || {},
-    integrations: site.userWebsite?.integrations || {},
   };
+  siteObj.integrations = site.integrations || {};
 
   const draftData = siteObj.userWebsite.data;
 
@@ -133,8 +133,8 @@ export async function GET(
   }
 
   console.log(
-    "Preview API - Final siteObj.userWebsite.integrations:",
-    siteObj.userWebsite.integrations
+    "Preview API - Final siteObj.integrations:",
+    siteObj.integrations
   );
 
   // Normalize blocks to ensure proper data structure
@@ -142,6 +142,42 @@ export async function GET(
     siteObj.userWebsite.data.blocks = normalizeSite(
       siteObj.userWebsite.data.blocks
     );
+  }
+
+  // Fetch and include published properties for this site owner
+  const Property = (await import("@/lib/models/Property")).default;
+  const properties = await Property.find({
+    userId: site.ownerId,
+    isPublished: true,
+  }).sort({ createdAt: -1 });
+
+  // Set the properties block to the fetched properties
+  siteObj.userWebsite.data.blocks = siteObj.userWebsite.data.blocks || [];
+  const propertiesBlockIndex = siteObj.userWebsite.data.blocks.findIndex(
+    (block: any) => block.type === "properties"
+  );
+  const propertiesData = {
+    properties: properties.map((prop) => ({
+      id: prop._id.toString(),
+      title: prop.title,
+      description: prop.description,
+      price: prop.price,
+      location: prop.location,
+      images: prop.images,
+      features: prop.features,
+      bedrooms: prop.bedrooms,
+      bathrooms: prop.bathrooms,
+      area: prop.area,
+      status: "for-sale", // Default status
+    })),
+  };
+  if (propertiesBlockIndex >= 0) {
+    siteObj.userWebsite.data.blocks[propertiesBlockIndex].data = propertiesData;
+  } else {
+    siteObj.userWebsite.data.blocks.push({
+      type: "properties",
+      data: propertiesData,
+    });
   }
 
   // RETURN THE WHOLE SITE → THIS IS THE MOST IMPORTANT FIX

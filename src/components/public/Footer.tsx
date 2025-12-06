@@ -8,7 +8,10 @@ interface FooterProps {
 }
 
 export default function Footer({ site }: FooterProps) {
-  const logo = site.userWebsite?.data?.theme?.logo || site.userWebsite?.data?.logo || site.logo;
+  const logo =
+    site.publishedWebsite?.data?.theme?.logo ||
+    site.publishedWebsite?.data?.logo ||
+    site.logo;
   const title = site.title || "ClintonStack";
 
   return (
@@ -37,19 +40,32 @@ export default function Footer({ site }: FooterProps) {
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
               Professional real estate services to help you find your perfect
-              home. Trusted by clients worldwide with verified listings and expert guidance.
+              home. Trusted by clients worldwide with verified listings and
+              expert guidance.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+              >
                 <Facebook className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-pink-400 transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-pink-400 transition-colors"
+              >
                 <Instagram className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-blue-300 transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-blue-300 transition-colors"
+              >
                 <Twitter className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-blue-500 transition-colors"
+              >
                 <Linkedin className="w-6 h-6" />
               </a>
             </div>
@@ -102,47 +118,28 @@ export default function Footer({ site }: FooterProps) {
           <div>
             <h3 className="font-semibold mb-6 text-lg">Contact Info</h3>
             <ul className="space-y-3 text-gray-300">
-              {site.userWebsite?.data?.contactInformation?.email && (
-                <li className="flex items-center">
-                  <span className="mr-2">📧</span>
-                  <Link
-                    href={`mailto:${site.userWebsite.data.contactInformation.email}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {site.userWebsite.data.contactInformation.email}
-                  </Link>
-                </li>
-              )}
-              {site.userWebsite?.data?.contactInformation?.phoneNumber && (
+              {site.integrations?.phoneNumber && (
                 <li className="flex items-center">
                   <span className="mr-2">📞</span>
                   <Link
-                    href={`tel:${site.userWebsite.data.contactInformation.phoneNumber}`}
+                    href={`tel:${site.integrations.phoneNumber}`}
                     className="hover:text-white transition-colors"
                   >
-                    {site.userWebsite.data.contactInformation.phoneNumber}
+                    {site.integrations.phoneNumber}
                   </Link>
                 </li>
               )}
-              {site.userWebsite?.data?.contactInformation?.address && (
-                <li className="flex items-start">
-                  <span className="mr-2 mt-1">📍</span>
-                  <span>{site.userWebsite.data.contactInformation.address}</span>
+              {!site.integrations?.phoneNumber && (
+                <li className="flex items-center">
+                  <span className="mr-2">📧</span>
+                  <Link
+                    href="mailto:contact@clintonstack.com"
+                    className="hover:text-white transition-colors"
+                  >
+                    contact@clintonstack.com
+                  </Link>
                 </li>
               )}
-              {!site.userWebsite?.data?.contactInformation?.email &&
-                !site.userWebsite?.data?.contactInformation?.phoneNumber &&
-                !site.userWebsite?.data?.contactInformation?.address && (
-                  <li className="flex items-center">
-                    <span className="mr-2">📧</span>
-                    <Link
-                      href="mailto:contact@clintonstack.com"
-                      className="hover:text-white transition-colors"
-                    >
-                      contact@clintonstack.com
-                    </Link>
-                  </li>
-                )}
             </ul>
           </div>
         </div>
@@ -151,13 +148,21 @@ export default function Footer({ site }: FooterProps) {
             <p className="text-gray-400 text-center md:text-left">
               &copy; {new Date().getFullYear()} {title}. All rights reserved.
               <span className="hidden md:inline"> • </span>
-              <span className="block md:inline mt-2 md:mt-0">Powered by ClintonStack</span>
+              <span className="block md:inline mt-2 md:mt-0">
+                Powered by ClintonStack
+              </span>
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
                 Terms & Conditions
               </Link>
             </div>
