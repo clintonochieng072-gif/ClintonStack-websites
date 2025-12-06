@@ -76,7 +76,10 @@ export async function GET(request: NextRequest) {
           payment.status = "success";
           await payment.save();
           updatedPayment = payment;
-        } else if (queryResponse.ResultCode !== "1032" && queryResponse.ResultCode !== "1037") {
+        } else if (
+          queryResponse.ResultCode !== "1032" &&
+          queryResponse.ResultCode !== "1037"
+        ) {
           // Payment failed (exclude "Request cancelled by user" and "Timeout")
           payment.status = "failed";
           await payment.save();
@@ -105,17 +108,17 @@ export async function GET(request: NextRequest) {
           currentPeriodEnd: subscription.currentPeriodEnd,
           trialEndsAt: subscription.trialEndsAt,
           cancelledAt: subscription.cancelledAt,
-          extraStorageGB: subscription.extraStorageGB,
-          usage: subscription.usage,
           autoRenew: subscription.autoRenew,
-          plan: plan ? {
-            id: plan._id,
-            name: plan.name,
-            slug: plan.slug,
-            price: plan.price,
-            type: plan.type,
-            features: plan.features,
-          } : null,
+          plan: plan
+            ? {
+                id: plan._id,
+                name: plan.name,
+                slug: plan.slug,
+                price: plan.price,
+                type: plan.type,
+                features: plan.features,
+              }
+            : null,
         };
       }
     }
