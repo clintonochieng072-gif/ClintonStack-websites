@@ -12,17 +12,8 @@ async function getPublicSiteDirect(slug: string) {
 
     if (!site) return null;
 
-    // Return site with full userWebsite object for public view
-    const siteObj = site.toObject();
-
-    // Ensure userWebsite exists and has data and integrations
-    siteObj.userWebsite = {
-      ...site.userWebsite,
-      data: site.userWebsite?.published || {},
-      integrations: site.userWebsite?.integrations || {},
-    };
-
-    const publishedData = siteObj.userWebsite.data;
+    // Start with published data
+    const publishedData = site.userWebsite?.published || {};
 
     // Convert flat data structure to blocks array if needed
     if (!publishedData.blocks) {
@@ -61,7 +52,7 @@ async function getPublicSiteDirect(slug: string) {
         type: "properties",
         data: {
           properties: properties.map((prop) => ({
-            id: prop._id,
+            id: prop._id.toString(),
             title: prop.title,
             description: prop.description,
             price: prop.price,
@@ -77,7 +68,61 @@ async function getPublicSiteDirect(slug: string) {
       });
     }
 
-    return siteObj;
+    // Create a completely plain object manually
+    const plainSite = {
+      _id: site._id.toString(),
+      ownerId:
+        typeof site.ownerId === "string"
+          ? site.ownerId
+          : site.ownerId.toString(),
+      slug: site.slug,
+      niche: site.niche,
+      title: site.title,
+      published: site.published,
+      layout: site.layout,
+      propertyTypes: Array.isArray(site.propertyTypes)
+        ? site.propertyTypes.map((pt: any) =>
+            typeof pt === "string" ? pt : pt.toString()
+          )
+        : [],
+      createdAt: site.createdAt?.toISOString(),
+      updatedAt: site.updatedAt?.toISOString(),
+      userWebsite: {
+        data: publishedData,
+        integrations: {
+          phoneNumber: site.userWebsite?.integrations?.phoneNumber || "",
+          whatsappNumber: site.userWebsite?.integrations?.whatsappNumber || "",
+          tawkToId: site.userWebsite?.integrations?.tawkToId || "",
+          crispId: site.userWebsite?.integrations?.crispId || "",
+          googleAnalyticsId:
+            site.userWebsite?.integrations?.googleAnalyticsId || "",
+          googleTagManagerId:
+            site.userWebsite?.integrations?.googleTagManagerId || "",
+          metaPixelId: site.userWebsite?.integrations?.metaPixelId || "",
+          mailchimpApiKey:
+            site.userWebsite?.integrations?.mailchimpApiKey || "",
+          mailchimpListId:
+            site.userWebsite?.integrations?.mailchimpListId || "",
+          brevoApiKey: site.userWebsite?.integrations?.brevoApiKey || "",
+          googleMapsApiKey:
+            site.userWebsite?.integrations?.googleMapsApiKey || "",
+          customScript: site.userWebsite?.integrations?.customScript || "",
+        },
+      },
+      publishSchedule: site.publishSchedule
+        ? {
+            enabled: site.publishSchedule.enabled,
+            frequency: site.publishSchedule.frequency,
+            time: site.publishSchedule.time,
+            dayOfWeek: site.publishSchedule.dayOfWeek,
+            dayOfMonth: site.publishSchedule.dayOfMonth,
+            lastPublished: site.publishSchedule.lastPublished?.toISOString(),
+            nextPublish: site.publishSchedule.nextPublish?.toISOString(),
+          }
+        : { enabled: false, frequency: "daily", time: "09:00" },
+    };
+
+    return plainSite;
   } catch (error) {
     console.error("Error fetching public site:", error);
     return null;
