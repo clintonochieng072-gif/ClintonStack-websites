@@ -14,6 +14,7 @@ export interface IProperty extends Document {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
+  status?: string;
   isPublished: boolean;
   paid: boolean;
   planType?: "monthly" | "one_time";
