@@ -8,6 +8,7 @@ import PublicSiteContent from "@/components/public/PublicSiteContent";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+
 function normalizeSite(blocks: any[]) {
   if (!Array.isArray(blocks)) return [];
 
@@ -71,9 +72,22 @@ function normalizeSite(blocks: any[]) {
           data: {
             ...block.data,
             list: Array.isArray(block.data?.list)
-              ? block.data.list
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : Array.isArray(block.data?.properties)
-              ? block.data.properties
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
+              : [],
+            properties: Array.isArray(block.data?.properties)
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
+              : Array.isArray(block.data?.list)
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : [],
           },
         };
@@ -119,49 +133,9 @@ async function getPublicSiteDirect(slug: string) {
       publishedData.blocks = normalizeSite(publishedData.blocks);
     }
 
-    // Fetch and include published properties for this site owner
-    const Property = (await import("@/lib/models/Property")).default;
-    let properties = await Property.find({
-      userId: site.ownerId,
-      isPublished: true,
-    }).sort({ createdAt: -1 });
-
-    // If no published properties, fall back to properties from blocks
-    if (properties.length === 0) {
-      const propertiesBlock = publishedData.blocks.find(
-        (block: any) => block.type === "properties"
-      );
-      properties = propertiesBlock?.data?.properties || [];
-    }
-
-    // Set the properties block to the fetched properties
-    publishedData.blocks = publishedData.blocks || [];
-    const propertiesBlockIndex = publishedData.blocks.findIndex(
-      (block: any) => block.type === "properties"
-    );
-    const propertiesData = {
-      properties: properties.map((prop) => ({
-        id: prop._id ? prop._id.toString() : prop.id,
-        title: prop.title,
-        description: prop.description,
-        price: prop.price,
-        location: prop.location,
-        images: prop.images,
-        features: prop.features,
-        bedrooms: prop.bedrooms,
-        bathrooms: prop.bathrooms,
-        area: prop.area,
-        status: prop.status || "for-sale", // Use existing status or default
-      })),
-    };
-    if (propertiesBlockIndex >= 0) {
-      publishedData.blocks[propertiesBlockIndex].data = propertiesData;
-    } else {
-      publishedData.blocks.push({
-        type: "properties",
-        data: propertiesData,
-      });
-    }
+    // For public site, use the properties from publishedWebsite.data.blocks
+    // (already copied from draft.blocks during publish)
+    // No need to fetch from Property collection - public site shows published content
 
     // Create a completely plain object manually
     const plainSite = {
@@ -270,10 +244,8 @@ export default async function PublicSite({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const isPreview = sp.preview === "true";
-  const site = isPreview
-    ? await getPreviewSite(slug)
-    : await getPublicSiteDirect(slug);
+  // Public site always shows published data, never draft/preview
+  const site = await getPublicSiteDirect(slug);
 
   if (!site) {
     return (
@@ -290,8 +262,8 @@ export default async function PublicSite({
     );
   }
 
-  // Check if site is published (not just preview mode)
-  if (!isPreview && !site.published) {
+  // Check if site is published
+  if (!site.published) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center bg-white p-8 rounded-lg shadow-md">

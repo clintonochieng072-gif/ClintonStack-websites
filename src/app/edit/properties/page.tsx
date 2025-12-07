@@ -7,6 +7,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSite } from "../layout";
 import { getAuthHeaders } from "@/lib/utils";
+import { mutate } from "swr";
 
 export default function PropertiesPage() {
   const { site, loading } = useSite();
@@ -14,11 +15,11 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     if (site) {
-      setProperties(
+      const props =
         site.userWebsite?.draft?.blocks?.find(
           (b: any) => b.type === "properties"
-        )?.data?.properties || []
-      );
+        )?.data?.properties || [];
+      setProperties(props);
     }
   }, [site]);
 
@@ -47,10 +48,12 @@ export default function PropertiesPage() {
         (b: any) => b.type === "properties"
       );
       if (propertiesBlock) {
+        const beforeCount = propertiesBlock.data.properties?.length || 0;
         propertiesBlock.data.properties =
           propertiesBlock.data.properties.filter(
-            (p: any) => p.id !== propertyId
+            (p: any) => p.id !== propertyId && p._id !== propertyId
           );
+        const afterCount = propertiesBlock.data.properties?.length || 0;
       }
 
       // Update site draft
@@ -68,8 +71,13 @@ export default function PropertiesPage() {
         return;
       }
 
-      // Update local state
-      setProperties(properties.filter((p) => p.id !== propertyId));
+      // Update local properties state immediately for instant UI feedback
+      setProperties((prev) =>
+        prev.filter((p) => (p._id || p.id) !== propertyId)
+      );
+
+      // Invalidate SWR cache to update the layout's site context
+      mutate("/api/site/me");
     } catch (error) {
       console.error("Delete error:", error);
       alert("Failed to delete property. Please try again.");
@@ -114,8 +122,8 @@ export default function PropertiesPage() {
             </CardContent>
           </Card>
         ) : (
-          properties.map((property) => (
-            <Card key={property.id}>
+          properties.map((property, index) => (
+            <Card key={property._id || property.id || index}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -137,7 +145,11 @@ export default function PropertiesPage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Link href={`/edit/properties/add?id=${property.id}`}>
+                    <Link
+                      href={`/edit/properties/add?id=${
+                        property._id || property.id
+                      }`}
+                    >
                       <Button variant="outline" size="sm">
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
@@ -146,7 +158,7 @@ export default function PropertiesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(property.id)}
+                      onClick={() => handleDelete(property._id || property.id)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />

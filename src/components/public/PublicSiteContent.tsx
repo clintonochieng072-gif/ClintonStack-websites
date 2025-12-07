@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -12,6 +14,11 @@ interface Block {
 interface Site {
   title: string;
   integrations?: any;
+  userWebsite?: {
+    data?: {
+      blocks?: Block[];
+    };
+  };
   publishedWebsite?: {
     data?: {
       blocks?: Block[];
@@ -24,7 +31,12 @@ interface PublicSiteContentProps {
 }
 
 export default function PublicSiteContent({ site }: PublicSiteContentProps) {
-  const customBlocks = site.publishedWebsite?.data?.blocks || [];
+  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
+  const isPreview = !site.publishedWebsite?.data; // If no publishedWebsite.data, it's preview mode
+  const siteData = isPreview
+    ? site.userWebsite?.data
+    : site.publishedWebsite?.data;
+  const customBlocks = siteData?.blocks || [];
 
   // Merge default blocks with custom blocks
   // Note: Hero is handled separately by the Hero component above
@@ -105,7 +117,8 @@ function BlockRenderer({ block }: { block: Block }) {
     case "about":
       return <AboutBlock data={block.data} />;
     case "properties":
-      return <PropertiesBlock data={block.data} />;
+      // Skip properties block - only show featured properties
+      return null;
     case "pricing":
       return <PricingBlock data={block.data} />;
     default:
@@ -157,8 +170,14 @@ function TrustBadges() {
 }
 
 function FeaturedProperties({ site }: { site: Site }) {
+  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
+  const isPreview = !site.publishedWebsite?.data;
+  const siteData = isPreview
+    ? site.userWebsite?.data
+    : site.publishedWebsite?.data;
+
   // Get featured properties from the site's properties block
-  const propertiesBlock = site.publishedWebsite?.data?.blocks?.find(
+  const propertiesBlock = siteData?.blocks?.find(
     (b: any) => b.type === "properties"
   );
   const allProperties = propertiesBlock?.data?.properties || [];
@@ -167,7 +186,7 @@ function FeaturedProperties({ site }: { site: Site }) {
   if (featuredProperties.length === 0) return null;
 
   return (
-    <section className="py-16 bg-white">
+    <section id="properties" className="py-16 bg-white">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -179,14 +198,24 @@ function FeaturedProperties({ site }: { site: Site }) {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {featuredProperties.map((property: any, index: number) => (
-            <div key={property.id || index} className="group cursor-pointer">
+            <div
+              key={property._id || property.id || index}
+              className="group cursor-pointer"
+              onClick={() => {
+                // Scroll to contact section for inquiries
+                const contactElement = document.getElementById("contact");
+                if (contactElement) {
+                  contactElement.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
               <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 {property.images && property.images.length > 0 && (
                   <div className="relative overflow-hidden">
                     <img
                       src={property.images[0]}
                       alt={property.title}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                       Featured
@@ -201,7 +230,40 @@ function FeaturedProperties({ site }: { site: Site }) {
                     <span className="text-lg mr-1">📍</span>
                     {property.location}
                   </p>
-                  <div className="flex items-center justify-between mb-4">
+
+                  {/* Features Section - Vertical List */}
+                  <div className="mb-4 space-y-1">
+                    {property.bedrooms && (
+                      <div className="text-sm text-gray-600">
+                        Beds: {property.bedrooms}
+                      </div>
+                    )}
+                    {property.bathrooms && (
+                      <div className="text-sm text-gray-600">
+                        Bathrooms: {property.bathrooms}
+                      </div>
+                    )}
+                    {property.sqft && (
+                      <div className="text-sm text-gray-600">
+                        Square feet: {property.sqft} sqft
+                      </div>
+                    )}
+                    {property.propertyType && (
+                      <div className="text-sm text-gray-600 capitalize">
+                        Type: {property.propertyType.replace(/-/g, " ")}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {property.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      {property.description}
+                    </p>
+                  )}
+
+                  {/* Price and Status */}
+                  <div className="flex items-center justify-between">
                     <span className="text-3xl font-bold text-blue-600">
                       ${property.price?.toLocaleString()}
                     </span>
@@ -209,26 +271,11 @@ function FeaturedProperties({ site }: { site: Site }) {
                       {property.status?.replace("-", " ")}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
-                    {property.bedrooms && (
-                      <div className="flex items-center justify-center gap-1">
-                        <span>🛏️</span>
-                        <span>{property.bedrooms}</span>
-                      </div>
-                    )}
-                    {property.bathrooms && (
-                      <div className="flex items-center justify-center gap-1">
-                        <span>🛁</span>
-                        <span>{property.bathrooms}</span>
-                      </div>
-                    )}
-                    {property.sqft && (
-                      <div className="flex items-center justify-center gap-1">
-                        <span>📐</span>
-                        <span>{property.sqft}</span>
-                      </div>
-                    )}
-                  </div>
+
+                  {/* Call to Action */}
+                  <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
@@ -286,7 +333,17 @@ function Neighborhoods() {
         </div>
         <div className="grid md:grid-cols-5 gap-6">
           {neighborhoods.map((neighborhood, index) => (
-            <div key={index} className="group cursor-pointer">
+            <div
+              key={index}
+              className="group cursor-pointer"
+              onClick={() => {
+                // Scroll to properties section
+                const propertiesElement = document.getElementById("properties");
+                if (propertiesElement) {
+                  propertiesElement.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
               <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                 <img
                   src={neighborhood.image}
@@ -360,7 +417,7 @@ function TestimonialsBlock({ data }: { data: any }) {
   const testimonials = data.testimonials || [];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section id="testimonials" className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Testimonials</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -378,7 +435,7 @@ function TestimonialsBlock({ data }: { data: any }) {
 
 function ContactBlock({ data }: { data: any }) {
   return (
-    <section className="py-16 bg-white">
+    <section id="contact" className="py-16 bg-white">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
         <div className="space-y-4">
@@ -405,7 +462,7 @@ function ContactBlock({ data }: { data: any }) {
 
 function AboutBlock({ data }: { data: any }) {
   return (
-    <section className="py-16 bg-gray-50">
+    <section id="about" className="py-16 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold mb-8">About Us</h2>
         {data.profilePhoto && (
@@ -435,7 +492,7 @@ function PropertiesBlock({ data }: { data: any }) {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {properties.map((property: any, index: number) => (
             <div
-              key={property.id || index}
+              key={property._id || property.id || index}
               className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               {property.images && property.images.length > 0 && (

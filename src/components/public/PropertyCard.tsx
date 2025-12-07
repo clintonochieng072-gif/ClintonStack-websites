@@ -10,6 +10,7 @@ interface PropertyCardProps {
     location: string;
     bedrooms?: number;
     bathrooms?: number;
+    area?: number;
     image?: string;
     images?: string[];
     excerpt?: string;
@@ -23,6 +24,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     location,
     bedrooms,
     bathrooms,
+    area,
     image,
     images,
     excerpt,
@@ -77,34 +79,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         )}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-500">
-            {bedrooms && (
-              <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {bedrooms} bed
-              </span>
-            )}
-            {bathrooms && (
-              <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {bathrooms} bath
-              </span>
-            )}
+            {bedrooms && <span>Beds: {bedrooms}</span>}
+            {bathrooms && <span>Bathrooms: {bathrooms}</span>}
+            {area && <span>Square Feet: {area}</span>}
           </div>
           <Link
             href="#contact"

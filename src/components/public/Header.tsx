@@ -3,42 +3,56 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import {
-  Search,
-  MapPin,
-  Home,
-  Building,
-  Car,
-  Wrench,
-  Briefcase,
-  Camera,
-  Heart,
-  Users,
-  Star,
-} from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface HeaderProps {
   site: any;
 }
 
-const propertyTypes = [
-  { id: "all", name: "All Properties", icon: Home },
-  { id: "house", name: "Houses", icon: Home },
-  { id: "apartment", name: "Apartments", icon: Building },
-  { id: "condo", name: "Condos", icon: Building },
-  { id: "townhouse", name: "Townhouses", icon: Building },
-  { id: "land", name: "Land", icon: MapPin },
-];
-
 export default function Header({ site }: HeaderProps) {
-  const logo =
-    site.publishedWebsite?.data?.theme?.logo ||
-    site.publishedWebsite?.data?.logo ||
-    site.logo;
+  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
+  const isPreview = !site.publishedWebsite?.data;
+  const siteData = isPreview
+    ? site.userWebsite?.data
+    : site.publishedWebsite?.data;
+
+  const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeSection, setActiveSection] = useState("home");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Track active section on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["home", "properties", "about", "testimonials", "contact"];
+      const scrollPosition = window.scrollY + 100;
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (
+            scrollPosition >= offsetTop &&
+            scrollPosition < offsetTop + offsetHeight
+          ) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -84,98 +98,146 @@ export default function Header({ site }: HeaderProps) {
               </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-md mx-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search properties, locations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="hidden lg:flex items-center space-x-6">
-              <a
-                href="#home"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            {/* Desktop Navigation Tabs */}
+            <nav className="hidden lg:flex items-center space-x-8">
+              <button
+                onClick={() => scrollToSection("home")}
+                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                  activeSection === "home"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : ""
+                }`}
               >
                 Home
-              </a>
-              <a
-                href="#properties"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              </button>
+              <button
+                onClick={() => scrollToSection("properties")}
+                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                  activeSection === "properties"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : ""
+                }`}
               >
                 Properties
-              </a>
-              <a
-                href="#about"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              </button>
+              <button
+                onClick={() => scrollToSection("about")}
+                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                  activeSection === "about"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : ""
+                }`}
               >
                 About
-              </a>
-              <a
-                href="#services"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              </button>
+              <button
+                onClick={() => scrollToSection("testimonials")}
+                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                  activeSection === "testimonials"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : ""
+                }`}
               >
-                Services
-              </a>
-              <a
-                href="#contact"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+                Testimonials
+              </button>
+              <button
+                onClick={() => scrollToSection("contact")}
+                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                  activeSection === "contact"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : ""
+                }`}
               >
                 Contact
-              </a>
+              </button>
             </nav>
 
-            {/* CTA Button */}
-            <div className="ml-6">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                List Property
-              </button>
-            </div>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Property Type Filters */}
-        <div className="bg-gray-50 border-t border-gray-200">
-          <div className="max-w-6xl mx-auto px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1">
-                <span className="text-sm font-medium text-gray-700 mr-4">
-                  Browse by Type:
-                </span>
-                {propertyTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <button
-                      key={type.id}
-                      onClick={() => setSelectedCategory(type.id)}
-                      className={`flex items-center space-x-1 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                        selectedCategory === type.id
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{type.name}</span>
-                    </button>
-                  );
-                })}
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-gray-200">
+            <nav className="max-w-6xl mx-auto px-6 py-4">
+              <div className="flex flex-col space-y-4">
+                <button
+                  onClick={() => {
+                    scrollToSection("home");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                    activeSection === "home" ? "text-blue-600" : ""
+                  }`}
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("properties");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                    activeSection === "properties" ? "text-blue-600" : ""
+                  }`}
+                >
+                  Properties
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("about");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                    activeSection === "about" ? "text-blue-600" : ""
+                  }`}
+                >
+                  About
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("testimonials");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                    activeSection === "testimonials" ? "text-blue-600" : ""
+                  }`}
+                >
+                  Testimonials
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("contact");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                    activeSection === "contact" ? "text-blue-600" : ""
+                  }`}
+                >
+                  Contact
+                </button>
               </div>
-
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <span>🏠 150+ Properties</span>
-                <span>⭐ 4.8/5 Rating</span>
-                <span>🏆 Trusted Since 2020</span>
-              </div>
-            </div>
+            </nav>
           </div>
-        </div>
+        )}
       </header>
     </>
   );

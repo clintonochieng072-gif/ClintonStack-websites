@@ -1,6 +1,9 @@
 // src/components/public/Hero.tsx
+"use client";
+
 import Image from "next/image";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
 
 interface HeroProps {
@@ -8,8 +11,15 @@ interface HeroProps {
 }
 
 export default function Hero({ site }: HeroProps) {
-  // Get hero data from site's blocks, merge with defaults like other blocks
-  const customBlocks = site?.publishedWebsite?.data?.blocks || [];
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
+  const isPreview = !site.publishedWebsite?.data;
+  const siteData = isPreview
+    ? site.userWebsite?.data
+    : site.publishedWebsite?.data;
+  const customBlocks = siteData?.blocks || [];
   const customBlocksMap = new Map(
     customBlocks.map((block: any) => [block.type, block])
   );
@@ -42,8 +52,32 @@ export default function Hero({ site }: HeroProps) {
 
   const { title, subtitle, ctaText, heroImage } = heroData;
 
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      // Simulate search API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Here you would typically call the search API
+      console.log("Searching for:", searchQuery);
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -67,11 +101,21 @@ export default function Hero({ site }: HeroProps) {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <button
+            onClick={() => scrollToSection("properties")}
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
+          >
             {ctaText}
             <ArrowRight className="w-5 h-5" />
           </button>
-          <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-blue-50 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <button
+            onClick={() => {
+              // Handle list property action
+              console.log("List property clicked");
+              // You could redirect to a listing page or open a modal
+            }}
+            className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-blue-50 active:bg-blue-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
+          >
             List Your Property
           </button>
         </div>
@@ -85,10 +129,24 @@ export default function Hero({ site }: HeroProps) {
                 type="text"
                 placeholder="Search locations, property types..."
                 className="w-full outline-none text-gray-700 placeholder-gray-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
-              Search
+            <button
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2"
+            >
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                "Search"
+              )}
             </button>
           </div>
         </div>

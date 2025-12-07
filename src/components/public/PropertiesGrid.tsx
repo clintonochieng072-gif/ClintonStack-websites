@@ -40,7 +40,7 @@ export default function PropertiesGrid({ data }: PropertiesGridProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {displayProperties.map((property: any, index: number) => (
-            <PropertyCard key={property.id || index} property={property} />
+            <PropertyCard key={property._id || property.id || index} property={property} />
           ))}
         </div>
         {properties.length > 6 && (

@@ -9,6 +9,17 @@ import { pusherServer } from "@/lib/pusher";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Add no-cache headers to all responses
+function addNoCacheHeaders(response: NextResponse) {
+  response.headers.set(
+    "Cache-Control",
+    "no-cache, no-store, must-revalidate, max-age=0"
+  );
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
+}
+
 function deepMerge(target: any, source: any): any {
   const result = { ...target };
   for (const key in source) {
@@ -88,17 +99,27 @@ function normalizeSite(blocks: any[]) {
           data: {
             ...block.data,
             list: Array.isArray(block.data?.list)
-              ? block.data.list
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : Array.isArray(block.data?.properties)
-              ? block.data.properties
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : [],
             properties: Array.isArray(block.data?.properties)
-              ? block.data.properties
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : Array.isArray(block.data?.list)
-              ? block.data.list
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : [],
             categories: Array.isArray(block.data?.categories)
-              ? block.data.categories
+              ? block.data.categories.map((cat: any) =>
+                  JSON.parse(JSON.stringify(cat))
+                )
               : [],
           },
         };
@@ -122,7 +143,7 @@ export async function GET(
   if (String(site.ownerId) !== String(user.id))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  return NextResponse.json({ success: true });
+  return addNoCacheHeaders(NextResponse.json({ success: true }));
 }
 
 export async function PUT(
@@ -145,7 +166,7 @@ export async function PUT(
 
   // Allow partial updates by deep merging with existing draft
   if (payload.data) {
-    site.userWebsite.draft = deepMerge(site.userWebsite.draft, payload.data);
+    site.userWebsite.draft = payload.data;
     site.markModified("userWebsite.draft");
   }
   site.title = payload.title ?? site.title;
@@ -159,68 +180,6 @@ export async function PUT(
       payload.integrations
     );
   }
-
-  // Sync properties from blocks to Property collection
-  const Property = (await import("@/lib/models/Property")).default;
-  const propertiesBlock = site.userWebsite.draft.blocks?.find(
-    (block: any) => block.type === "properties"
-  );
-  if (propertiesBlock?.data?.properties) {
-    const blockProperties = propertiesBlock.data.properties;
-    for (const prop of blockProperties) {
-      const propertyData = {
-        userId: site.ownerId,
-        siteId: site._id,
-        title: prop.title,
-        description: prop.description,
-        price: prop.price,
-        location: prop.location,
-        images: prop.images || [],
-        features: prop.features || [],
-        category: prop.category || "real-estate",
-        propertyType: prop.propertyType || "house",
-        bedrooms: prop.bedrooms,
-        bathrooms: prop.bathrooms,
-        area: prop.area,
-        status: prop.status || "for-sale",
-        isPublished: true,
-        paid: true, // Assume paid for editor-added
-        slug:
-          prop.slug ||
-          `${prop.title?.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-      };
-      if (
-        (prop.id || prop._id) &&
-        mongoose.Types.ObjectId.isValid(prop.id || prop._id)
-      ) {
-        // Update existing
-        await Property.findByIdAndUpdate(prop.id || prop._id, propertyData, {
-          upsert: true,
-        });
-      } else {
-        // Create new
-        await Property.create(propertyData);
-      }
-    }
-  }
-
-  // Fetch updated properties from collection
-  const properties = await Property.find({ siteId: site._id }).lean();
-
-  // Update property block inside blocks with collection data
-  site.userWebsite.draft.blocks = site.userWebsite.draft.blocks.map(
-    (block: any) => {
-      if (block.type === "properties") {
-        return {
-          ...block,
-          data: {
-            properties: properties,
-          },
-        };
-      }
-      return block;
-    }
-  );
 
   // Mark the nested field as modified for Mongoose to save
   site.markModified("userWebsite.draft.blocks");
@@ -241,5 +200,8 @@ export async function PUT(
     siteObj.data.blocks = normalizeSite(siteObj.data.blocks);
   }
 
-  return NextResponse.json({ data: siteObj });
+  // Serialize to plain objects to avoid Mongoose document issues
+  const serializedSiteObj = JSON.parse(JSON.stringify(siteObj));
+
+  return addNoCacheHeaders(NextResponse.json({ data: serializedSiteObj }));
 }

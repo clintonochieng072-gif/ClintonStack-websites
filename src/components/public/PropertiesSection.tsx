@@ -84,26 +84,11 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
-                  {property.bedrooms && (
-                    <div className="flex items-center">
-                      <span className="mr-1">🛏️</span>
-                      {property.bedrooms} bed
-                      {property.bedrooms !== 1 ? "s" : ""}
-                    </div>
-                  )}
+                  {property.bedrooms && <div>Beds: {property.bedrooms}</div>}
                   {property.bathrooms && (
-                    <div className="flex items-center">
-                      <span className="mr-1">🛁</span>
-                      {property.bathrooms} bath
-                      {property.bathrooms !== 1 ? "s" : ""}
-                    </div>
+                    <div>Bathrooms: {property.bathrooms}</div>
                   )}
-                  {property.sqft && (
-                    <div className="flex items-center">
-                      <span className="mr-1">📐</span>
-                      {property.sqft} sqft
-                    </div>
-                  )}
+                  {property.sqft && <div>Square Feet: {property.sqft}</div>}
                 </div>
 
                 {property.description && (

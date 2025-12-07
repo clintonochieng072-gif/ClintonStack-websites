@@ -10,8 +10,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import ImageUpload from "@/components/ImageUpload";
 import { useSite } from "../../layout";
-import useSWR from "swr";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 import { motion } from "framer-motion";
 import { getAuthHeaders } from "@/lib/utils";
 
@@ -21,37 +20,23 @@ function AddPropertyPageContent() {
   const isEditing = !!editId;
   const { site } = useSite();
 
-  // Get categories from global API
-  const { data: categoriesData } = useSWR("/api/category", (url: string) =>
-    fetch(url, {
-      cache: "no-store",
-      headers: getAuthHeaders()
-    }).then((r) => r.json())
+  // Fetch categories from the categories API
+  const { data: categories } = useSWR(
+    "/api/category",
+    (url: string) =>
+      fetch(url, {
+        cache: "no-store",
+        headers: getAuthHeaders(),
+      }).then((r) => r.json())
   );
-
-  // Default categories to show first
-  const defaultCategories = [
-    "House",
-    "Apartment",
-    "Condo",
-    "Townhouse",
-    "Land",
-  ];
-
-  // Sort categories: defaults first, then custom ones
-  const categories = categoriesData || [];
-  const sortedCategories = [
-    ...defaultCategories.filter((cat) =>
-      categories.some((c: any) => c.name === cat)
-    ),
-    ...categories.filter((cat: any) => !defaultCategories.includes(cat.name)),
-  ];
 
   // Helper function to convert property type value back to display name
   const getPropertyTypeDisplay = (value: string) => {
     // Handle both old format (spaces) and new format (hyphens)
     return value.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  const [selectedPropertyType, setSelectedPropertyType] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -67,17 +52,31 @@ function AddPropertyPageContent() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
   useEffect(() => {
     if (isEditing && site) {
       const propertiesBlock = site.userWebsite?.draft?.blocks?.find(
         (b: any) => b.type === "properties"
       );
       const property = propertiesBlock?.data?.properties?.find(
-        (p: any) => p.id === editId
+        (p: any) => p.id === editId || p._id === editId
       );
 
       if (property) {
-        setFormData(property);
+        // Ensure all form fields are strings to avoid null value errors in controlled inputs
+        setFormData({
+          title: property.title || "",
+          description: property.description || "",
+          price: property.price || "",
+          location: property.location || "",
+          bedrooms: property.bedrooms || "",
+          bathrooms: property.bathrooms || "",
+          sqft: property.sqft || "",
+          propertyType: property.propertyType || "",
+          status: property.status || "for-sale",
+          images: property.images || [],
+        });
+        setSelectedPropertyType(property.propertyType || "");
       }
     }
   }, [isEditing, editId, site]);
@@ -115,7 +114,7 @@ function AddPropertyPageContent() {
       if (isEditing) {
         // Update existing property
         const index = propertiesBlock.data.properties.findIndex(
-          (p: any) => p.id === editId
+          (p: any) => p.id === editId || p._id === editId
         );
         if (index !== -1) {
           propertiesBlock.data.properties[index] = {
@@ -181,7 +180,7 @@ function AddPropertyPageContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center space-x-4">
         <Link href="/edit/properties">
           <Button variant="outline" size="sm">
@@ -202,6 +201,7 @@ function AddPropertyPageContent() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -209,142 +209,148 @@ function AddPropertyPageContent() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Property Title
+                Property Title *
               </label>
               <Input
                 value={formData.title}
                 onChange={(e) => updateFormData("title", e.target.value)}
                 placeholder="e.g., Modern 3BR Apartment Downtown"
+                required
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                Property Type *
+              </label>
+              <select
+                value={selectedPropertyType}
+                onChange={(e) => {
+                  setSelectedPropertyType(e.target.value);
+                  updateFormData("propertyType", e.target.value);
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="">Select property type</option>
+                {categories?.map((category: any) => (
+                  <option key={category._id} value={category.name}>
+                    {getPropertyTypeDisplay(category.name)}
+                  </option>
+                )) || (
+                  <>
+                    <option value="house">House</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="condo">Condo</option>
+                    <option value="townhouse">Townhouse</option>
+                    <option value="land">Land</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status *
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => updateFormData("status", e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="for-sale">For Sale</option>
+                <option value="for-rent">For Rent</option>
+                <option value="sold">Sold</option>
+                <option value="rented">Rented</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Price *
+              </label>
+              <Input
+                type="number"
+                value={formData.price}
+                onChange={(e) => updateFormData("price", e.target.value)}
+                placeholder="250000"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location *
+              </label>
+              <Input
+                value={formData.location}
+                onChange={(e) => updateFormData("location", e.target.value)}
+                placeholder="City, State"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description *
               </label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => updateFormData("description", e.target.value)}
                 placeholder="Detailed description of the property"
                 rows={4}
+                required
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price
-                </label>
-                <Input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => updateFormData("price", e.target.value)}
-                  placeholder="250000"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
-                <Input
-                  value={formData.location}
-                  onChange={(e) => updateFormData("location", e.target.value)}
-                  placeholder="City, State"
-                />
-              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Property Details */}
         <Card>
           <CardHeader>
             <CardTitle>Property Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bedrooms
-                </label>
-                <Input
-                  type="number"
-                  value={formData.bedrooms}
-                  onChange={(e) => updateFormData("bedrooms", e.target.value)}
-                  placeholder="3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bathrooms
-                </label>
-                <Input
-                  type="number"
-                  value={formData.bathrooms}
-                  onChange={(e) => updateFormData("bathrooms", e.target.value)}
-                  placeholder="2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Square Feet
-                </label>
-                <Input
-                  type="number"
-                  value={formData.sqft}
-                  onChange={(e) => updateFormData("sqft", e.target.value)}
-                  placeholder="1500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bedrooms
+              </label>
+              <Input
+                type="number"
+                value={formData.bedrooms}
+                onChange={(e) => updateFormData("bedrooms", e.target.value)}
+                placeholder="3"
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Property Type
-                </label>
-                <select
-                  value={formData.propertyType}
-                  onChange={(e) =>
-                    updateFormData("propertyType", e.target.value)
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                >
-                  <option value="">Select Property Type</option>
-                  {sortedCategories.map((category: any, index: number) => {
-                    const value = category.name
-                      ? category.name.toLowerCase().replace(/\s+/g, "-")
-                      : category.toLowerCase().replace(/\s+/g, "-");
-                    const display = category.name || category;
-                    return (
-                      <option key={index} value={value}>
-                        {display}
-                      </option>
-                    );
-                  })}
-                </select>
-                {categories.length === 0 && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    No property types available. Add categories in Properties
-                    Manager.
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => updateFormData("status", e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                >
-                  <option value="for-sale">For Sale</option>
-                  <option value="for-rent">For Rent</option>
-                  <option value="sold">Sold</option>
-                  <option value="rented">Rented</option>
-                </select>
-              </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bathrooms
+              </label>
+              <Input
+                type="number"
+                value={formData.bathrooms}
+                onChange={(e) => updateFormData("bathrooms", e.target.value)}
+                placeholder="2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Square Feet
+              </label>
+              <Input
+                type="number"
+                value={formData.sqft}
+                onChange={(e) => updateFormData("sqft", e.target.value)}
+                placeholder="1500"
+              />
             </div>
           </CardContent>
         </Card>
 
+        {/* Property Images */}
         <Card>
           <CardHeader>
             <CardTitle>Property Images</CardTitle>
@@ -352,27 +358,29 @@ function AddPropertyPageContent() {
           <CardContent className="space-y-4">
             <ImageUpload
               onChange={addImage}
-              placeholder="Upload property images"
+              placeholder="Upload property images (multiple allowed)"
               multiple={true}
             />
-            <div className="grid grid-cols-4 gap-4">
-              {formData.images.map((image, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={image}
-                    alt={`Property ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
+            {formData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={image}
+                      alt={`Property ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -381,7 +389,7 @@ function AddPropertyPageContent() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-blue-600 hover:bg-blue-700 transition-all ${
+              className={`bg-blue-600 hover:bg-blue-700 transition-all px-8 py-3 ${
                 isSubmitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >

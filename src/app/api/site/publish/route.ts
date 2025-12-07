@@ -11,15 +11,15 @@ export async function POST(req: Request) {
       return new Response("Site not found", { status: 404 });
     }
 
-    // Copy the ENTIRE draft into publishedWebsite.data
-    site.publishedWebsite = {
+    // Copy draft blocks, theme, layout to published
+    site.userWebsite.publishedWebsite = {
       data: {
-        ...site.userWebsite?.draft,
+        blocks: JSON.parse(JSON.stringify(site.userWebsite?.draft?.blocks || [])),
       },
-      integrations: {
-        ...site.userWebsite?.integrations,
-      },
+      theme: JSON.parse(JSON.stringify(site.userWebsite?.draft?.theme || {})),
+      layout: JSON.parse(JSON.stringify(site.userWebsite?.draft?.layout || {})),
     };
+
 
     // Force mongoose to save nested object
     site.markModified("publishedWebsite");

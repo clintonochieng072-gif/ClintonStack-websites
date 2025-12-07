@@ -8,6 +8,17 @@ import User from "@/lib/models/User";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Add no-cache headers to all responses
+function addNoCacheHeaders(response: NextResponse) {
+  response.headers.set(
+    "Cache-Control",
+    "no-cache, no-store, must-revalidate, max-age=0"
+  );
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
+}
+
 async function getUserFromRequest(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -64,7 +75,7 @@ export async function GET(request: NextRequest) {
         .sort({ createdAt: -1 })
         .lean()
         .maxTimeMS(3000);
-      return NextResponse.json({ data: sites });
+      return addNoCacheHeaders(NextResponse.json({ data: sites }));
     } else {
       // Return the most recently updated site with content (for backward compatibility) - optimized
       const projection = {
@@ -116,7 +127,9 @@ export async function GET(request: NextRequest) {
             ?.properties?.length || 0,
       };
 
-      return NextResponse.json({ data: { ...site, counts } });
+      return addNoCacheHeaders(
+        NextResponse.json({ data: { ...site, counts } })
+      );
     }
   } catch (err) {
     console.error("GET /api/site/me error", err);

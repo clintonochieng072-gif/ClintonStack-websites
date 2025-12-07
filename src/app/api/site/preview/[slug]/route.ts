@@ -70,9 +70,22 @@ function normalizeSite(blocks: any[]) {
           data: {
             ...block.data,
             list: Array.isArray(block.data?.list)
-              ? block.data.list
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : Array.isArray(block.data?.properties)
-              ? block.data.properties
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
+              : [],
+            properties: Array.isArray(block.data?.properties)
+              ? block.data.properties.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
+              : Array.isArray(block.data?.list)
+              ? block.data.list.map((prop: any) =>
+                  JSON.parse(JSON.stringify(prop))
+                )
               : [],
           },
         };
@@ -109,6 +122,8 @@ export async function GET(
     data: site.userWebsite?.draft || {},
   };
   siteObj.integrations = site.integrations || {};
+  // Remove publishedWebsite for preview - preview only shows draft
+  delete siteObj.publishedWebsite;
 
   const draftData = siteObj.userWebsite.data;
 
@@ -144,42 +159,12 @@ export async function GET(
     );
   }
 
-  // Fetch and include published properties for this site owner
-  const Property = (await import("@/lib/models/Property")).default;
-  const properties = await Property.find({
-    userId: site.ownerId,
-    isPublished: true,
-  }).sort({ createdAt: -1 });
+  // For preview, use the properties from draft.blocks (already set above)
+  // No need to fetch from Property collection - preview shows draft content
 
-  // Set the properties block to the fetched properties
-  siteObj.userWebsite.data.blocks = siteObj.userWebsite.data.blocks || [];
-  const propertiesBlockIndex = siteObj.userWebsite.data.blocks.findIndex(
-    (block: any) => block.type === "properties"
-  );
-  const propertiesData = {
-    properties: properties.map((prop) => ({
-      id: prop._id.toString(),
-      title: prop.title,
-      description: prop.description,
-      price: prop.price,
-      location: prop.location,
-      images: prop.images,
-      features: prop.features,
-      bedrooms: prop.bedrooms,
-      bathrooms: prop.bathrooms,
-      area: prop.area,
-      status: "for-sale", // Default status
-    })),
-  };
-  if (propertiesBlockIndex >= 0) {
-    siteObj.userWebsite.data.blocks[propertiesBlockIndex].data = propertiesData;
-  } else {
-    siteObj.userWebsite.data.blocks.push({
-      type: "properties",
-      data: propertiesData,
-    });
-  }
+  // Serialize to plain objects to avoid Mongoose document issues
+  const serializedSiteObj = JSON.parse(JSON.stringify(siteObj));
 
   // RETURN THE WHOLE SITE → THIS IS THE MOST IMPORTANT FIX
-  return NextResponse.json({ data: siteObj });
+  return NextResponse.json({ data: serializedSiteObj });
 }

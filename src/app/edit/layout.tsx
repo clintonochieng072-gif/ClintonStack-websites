@@ -6,9 +6,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { getAuthHeaders } from "@/lib/utils";
 
 const fetcher = (url: string) =>
-  fetch(url, { headers: getAuthHeaders(), cache: "no-store" }).then((r) =>
-    r.json()
-  );
+  fetch(url, {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+    next: { revalidate: 0 },
+  }).then((r) => r.json());
 
 // Site Context for centralized data fetching
 const SiteContext = createContext<{
@@ -33,6 +35,11 @@ export default function EditLayout({
   const { data: siteData, error } = useSWR("/api/site/me", fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 0,
+    revalidateOnReconnect: true,
+    revalidateOnMount: true,
+    refreshInterval: 0,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
   });
   const [loading, setLoading] = useState(!siteData && !error);
 

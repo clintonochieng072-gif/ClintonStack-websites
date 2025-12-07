@@ -30,6 +30,11 @@ export default function PreviewSite() {
     };
 
     fetchSite();
+
+    // Also poll for updates every 5 seconds as fallback
+    const interval = setInterval(fetchSite, 5000);
+
+    return () => clearInterval(interval);
   }, [slug]);
 
   useEffect(() => {
@@ -37,14 +42,21 @@ export default function PreviewSite() {
 
     const channel = pusherClient.subscribe(`site-${slug}`);
 
-    channel.bind("site-updated", () => {
-      router.refresh();
+    channel.bind("site-updated", async () => {
+      // Refetch site data instantly without page refresh
+      const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setSite(json.data);
+      }
     });
 
     return () => {
       pusherClient.unsubscribe(`site-${slug}`);
     };
-  }, [slug, router]);
+  }, [slug]);
 
   if (loading) {
     return (

@@ -8,6 +8,17 @@ import User from "@/lib/models/User";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Add no-cache headers to all responses
+function addNoCacheHeaders(response: NextResponse) {
+  response.headers.set(
+    "Cache-Control",
+    "no-cache, no-store, must-revalidate, max-age=0"
+  );
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
+}
+
 async function getUserFromRequest(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -69,9 +80,12 @@ export async function POST(request: NextRequest) {
       published: true,
     });
 
-    return NextResponse.json({ data: site });
+    return addNoCacheHeaders(NextResponse.json({ data: site }));
   } catch (error) {
     console.error("Error creating site:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
