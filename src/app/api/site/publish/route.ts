@@ -12,14 +12,15 @@ export async function POST(req: Request) {
     }
 
     // Copy draft blocks, theme, layout to published
-    site.userWebsite.publishedWebsite = {
+    site.publishedWebsite = {
       data: {
-        blocks: JSON.parse(JSON.stringify(site.userWebsite?.draft?.blocks || [])),
+        blocks: JSON.parse(
+          JSON.stringify(site.userWebsite?.draft?.blocks || [])
+        ),
       },
       theme: JSON.parse(JSON.stringify(site.userWebsite?.draft?.theme || {})),
       layout: JSON.parse(JSON.stringify(site.userWebsite?.draft?.layout || {})),
     };
-
 
     // Force mongoose to save nested object
     site.markModified("publishedWebsite");
