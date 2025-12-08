@@ -10,6 +10,8 @@ type User = {
   role?: string;
   hasSites?: boolean;
   firstSiteNiche?: string | null;
+  subscriptionStatus?: string;
+  subscriptionType?: string | null;
   // add other safe fields you want client-side
 };
 

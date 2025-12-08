@@ -19,7 +19,6 @@ export default function Header({ site }: HeaderProps) {
   const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
   const [activeSection, setActiveSection] = useState("home");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
@@ -98,8 +97,8 @@ export default function Header({ site }: HeaderProps) {
               </div>
             </div>
 
-            {/* Desktop Navigation Tabs */}
-            <nav className="hidden lg:flex items-center space-x-8">
+            {/* Navigation Tabs - Always visible horizontally */}
+            <nav className="flex items-center space-x-4 lg:space-x-8">
               <button
                 onClick={() => scrollToSection("home")}
                 className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
@@ -152,92 +151,9 @@ export default function Header({ site }: HeaderProps) {
               </button>
             </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-200">
-            <nav className="max-w-6xl mx-auto px-6 py-4">
-              <div className="flex flex-col space-y-4">
-                <button
-                  onClick={() => {
-                    scrollToSection("home");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                    activeSection === "home" ? "text-blue-600" : ""
-                  }`}
-                >
-                  Home
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("properties");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                    activeSection === "properties" ? "text-blue-600" : ""
-                  }`}
-                >
-                  Properties
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("about");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                    activeSection === "about" ? "text-blue-600" : ""
-                  }`}
-                >
-                  About
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("testimonials");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                    activeSection === "testimonials" ? "text-blue-600" : ""
-                  }`}
-                >
-                  Testimonials
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("contact");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                    activeSection === "contact" ? "text-blue-600" : ""
-                  }`}
-                >
-                  Contact
-                </button>
-              </div>
-            </nav>
-          </div>
-        )}
       </header>
     </>
   );

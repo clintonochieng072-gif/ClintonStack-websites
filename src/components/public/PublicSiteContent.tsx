@@ -4,6 +4,7 @@ import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Hero from "./Hero";
+import FloatingButtons from "./FloatingButtons";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
 
 interface Block {
@@ -100,6 +101,12 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
 
       {/* Website Footer */}
       <Footer site={site} />
+
+      {/* Floating Contact Buttons */}
+      <FloatingButtons
+        phoneNumber={site.integrations?.phoneNumber}
+        whatsappNumber={site.integrations?.whatsappNumber}
+      />
     </div>
   );
 }
@@ -265,17 +272,13 @@ function FeaturedProperties({ site }: { site: Site }) {
                   {/* Price and Status */}
                   <div className="flex items-center justify-between">
                     <span className="text-3xl font-bold text-blue-600">
-                      ${property.price?.toLocaleString()}
+                      KES {property.price?.toLocaleString()}
                     </span>
                     <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
                       {property.status?.replace("-", " ")}
                     </span>
                   </div>
 
-                  {/* Call to Action */}
-                  <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
-                    View Details
-                  </button>
                 </div>
               </div>
             </div>

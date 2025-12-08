@@ -1,4 +1,55 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+interface PaymentStats {
+  totalRevenue: number;
+  successfulPayments: number;
+  pendingPayments: number;
+  failedPayments: number;
+}
+
+interface RecentPayment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  planType: string;
+  phoneNumber: string;
+  user: {
+    name: string;
+    email: string;
+  } | null;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
+  const [paymentStats, setPaymentStats] = useState<PaymentStats | null>(null);
+  const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPaymentData();
+  }, []);
+
+  const fetchPaymentData = async () => {
+    try {
+      const response = await fetch("/api/admin/payments");
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setPaymentStats(data.data.statistics);
+          setRecentPayments(data.data.recentPayments);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching payment data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 w-full">
       {/* -------------------------------------- */}
@@ -26,9 +77,19 @@ export default function AdminDashboard() {
         <DashboardCard
           icon={<BarChartIcon />}
           title="Revenue"
-          value="$12,847"
+          value={
+            paymentStats
+              ? `KES ${paymentStats.totalRevenue.toLocaleString()}`
+              : "KES 0"
+          }
         />
-        <DashboardCard icon={<ShieldIcon />} title="Reports" value="23" />
+        <DashboardCard
+          icon={<CreditCardIcon />}
+          title="Successful Payments"
+          value={
+            paymentStats ? paymentStats.successfulPayments.toString() : "0"
+          }
+        />
       </section>
 
       {/* -------------------------------------- */}
@@ -40,6 +101,85 @@ export default function AdminDashboard() {
         <div className="h-52 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl flex items-center justify-center text-gray-400">
           <p>Analytics Chart Placeholder</p>
         </div>
+      </section>
+
+      {/* -------------------------------------- */}
+      {/* PAYMENTS OVERVIEW */}
+      {/* -------------------------------------- */}
+      <section className="bg-white p-6 rounded-2xl shadow-sm border mb-10">
+        <h3 className="text-lg font-semibold mb-4">PayHero Payments</h3>
+
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Payment Statistics */}
+            {paymentStats && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {paymentStats.successfulPayments}
+                  </div>
+                  <div className="text-sm text-green-800">
+                    Successful Payments
+                  </div>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {paymentStats.pendingPayments}
+                  </div>
+                  <div className="text-sm text-yellow-800">
+                    Pending Payments
+                  </div>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {paymentStats.failedPayments}
+                  </div>
+                  <div className="text-sm text-red-800">Failed Payments</div>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Payments */}
+            <div>
+              <h4 className="font-semibold mb-3">Recent Successful Payments</h4>
+              {recentPayments.length === 0 ? (
+                <p className="text-gray-500 text-sm">No payments yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {recentPayments.map((payment) => (
+                    <div
+                      key={payment.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div>
+                        <div className="font-medium">
+                          KES {payment.amount.toLocaleString()} -{" "}
+                          {payment.planType}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {payment.user?.name || "Unknown User"} •{" "}
+                          {payment.phoneNumber}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">
+                          {new Date(payment.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-green-600 font-medium">
+                          {payment.status}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* -------------------------------------- */}
@@ -192,6 +332,22 @@ function ShieldIcon() {
       strokeWidth="2"
     >
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
+function CreditCardIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <rect width="20" height="14" x="2" y="5" rx="2" />
+      <line x1="2" x2="22" y1="10" y2="10" />
     </svg>
   );
 }

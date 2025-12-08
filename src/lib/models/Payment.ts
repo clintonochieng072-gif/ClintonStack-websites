@@ -4,35 +4,44 @@ export interface IPayment extends Document {
   amount: number;
   currency: string;
   status: "pending" | "success" | "failed";
-  providerReference: string;
-  ownerPortfolio?: mongoose.Types.ObjectId; // Optional for non-portfolio payments
-  userId?: mongoose.Types.ObjectId; // For subscription payments
-  planId?: mongoose.Types.ObjectId; // For subscription payments
-  propertyId?: mongoose.Types.ObjectId; // For property publishing payments
-  planType?: "monthly" | "one_time"; // For property publishing payments
-  checkoutRequestId?: string; // M-Pesa specific
-  merchantRequestId?: string; // M-Pesa specific
-  phoneNumber?: string; // M-Pesa phone number
-  transactionDate?: string; // M-Pesa transaction date
+  providerReference: string; // PayHero transaction ID
+  checkoutRequestId?: string; // PayHero checkout request ID for STK Push
+  userId: mongoose.Types.ObjectId; // Required for subscription payments
+  planType: "monthly" | "lifetime"; // Required for subscription payments
+  propertyId?: mongoose.Types.ObjectId; // Optional for property publishing payments
+  phoneNumber?: string; // Phone number used for payment
+  paymentMethod: "payhero"; // Payment provider
+  callbackMetadata?: any; // Additional data from PayHero webhook
   createdAt: Date;
+  updatedAt: Date;
 }
 
-const PaymentSchema = new mongoose.Schema<IPayment>({
-  amount: Number,
-  currency: String,
-  status: { type: String, enum: ["pending", "success", "failed"] },
-  providerReference: String,
-  ownerPortfolio: { type: mongoose.Schema.Types.ObjectId, ref: "Portfolio" },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  planId: { type: mongoose.Schema.Types.ObjectId, ref: "Plan" },
-  propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
-  planType: { type: String, enum: ["monthly", "one_time"] },
-  checkoutRequestId: String,
-  merchantRequestId: String,
-  phoneNumber: String,
-  transactionDate: String,
-  createdAt: { type: Date, default: Date.now },
-});
+const PaymentSchema = new mongoose.Schema<IPayment>(
+  {
+    amount: { type: Number, required: true },
+    currency: { type: String, default: "KES" },
+    status: {
+      type: String,
+      enum: ["pending", "success", "failed"],
+      required: true,
+    },
+    providerReference: { type: String, required: true }, // PayHero transaction ID
+    checkoutRequestId: { type: String }, // PayHero checkout request ID
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    planType: { type: String, enum: ["monthly", "lifetime"], required: true },
+    propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
+    phoneNumber: { type: String }, // Phone number used for payment
+    paymentMethod: { type: String, default: "payhero" },
+    callbackMetadata: { type: mongoose.Schema.Types.Mixed }, // Additional PayHero data
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const Payment: Model<IPayment> =
   mongoose.models.Payment || mongoose.model<IPayment>("Payment", PaymentSchema);

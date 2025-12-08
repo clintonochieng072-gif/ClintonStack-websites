@@ -45,7 +45,7 @@ const BILLING_PLANS: BillingPlan[] = [
   {
     type: "one_time",
     name: "One-time Plan",
-    price: 3999,
+    price: 5,
     description: "Lifetime access (first 10 users only)",
     features: [
       "Publish unlimited properties",

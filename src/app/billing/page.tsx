@@ -13,6 +13,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import SubscriptionDashboard from "@/components/SubscriptionDashboard";
+import PaymentModal from "@/components/PaymentModal";
 
 interface BillingHistory {
   id: string;
@@ -39,6 +40,7 @@ export default function BillingPage() {
   const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -175,10 +177,10 @@ export default function BillingPage() {
                   <Button
                     variant="outline"
                     className="h-20 flex-col gap-2"
-                    onClick={() => router.push("/pricing")}
+                    onClick={() => setShowPaymentModal(true)}
                   >
                     <CreditCard className="w-6 h-6" />
-                    Change Plan
+                    Subscribe Now
                   </Button>
                   <Button
                     variant="outline"
@@ -186,7 +188,7 @@ export default function BillingPage() {
                     onClick={() => setActiveTab("methods")}
                   >
                     <Calendar className="w-6 h-6" />
-                    Update Payment
+                    Payment Methods
                   </Button>
                   <Button
                     variant="outline"
@@ -194,7 +196,7 @@ export default function BillingPage() {
                     onClick={() => setActiveTab("history")}
                   >
                     <Receipt className="w-6 h-6" />
-                    View Invoices
+                    Billing History
                   </Button>
                 </div>
               </CardContent>
@@ -322,6 +324,16 @@ export default function BillingPage() {
           </Card>
         )}
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          // Refresh the page to show updated subscription status
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

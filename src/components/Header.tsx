@@ -1,21 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, User } from "lucide-react";
+import { Bell, User, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useGlobal } from "@/context/GlobalContext";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getAuthHeaders, apiPost } from "@/lib/utils";
+import PaymentModal from "@/components/PaymentModal";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
 export default function Header() {
-  const { user } = useGlobal();
+  const { user, logout } = useGlobal();
+  const router = useRouter();
   const { data: siteData } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     if (siteData?.data) {
@@ -28,15 +32,27 @@ export default function Header() {
   };
 
   const handlePublish = async () => {
-    setPublishing(true);
-    try {
-      await apiPost("/api/site/publish", { siteId: site?._id });
-      alert("Site published successfully!");
-    } catch (error) {
-      alert(`Error publishing site: ${error}`);
-    } finally {
-      setPublishing(false);
+    // Check if subscription is active
+    if (user?.subscriptionStatus === "active") {
+      // Publish directly
+      setPublishing(true);
+      try {
+        await apiPost("/api/site/publish", { siteId: site?._id });
+        alert("Site published successfully!");
+      } catch (error: any) {
+        alert(`Error publishing site: ${error.message || error}`);
+      } finally {
+        setPublishing(false);
+      }
+    } else {
+      // Show payment modal
+      setShowPaymentModal(true);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/auth/login");
   };
 
   return (
@@ -83,6 +99,16 @@ export default function Header() {
             <Bell className="w-5 h-5" />
           </Button>
 
+          {/* Logout */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5" />
+          </Button>
+
           {/* User Avatar */}
           <Avatar>
             <AvatarImage src="" alt={user?.email || "User"} />
@@ -92,6 +118,25 @@ export default function Header() {
           </Avatar>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={async () => {
+          setShowPaymentModal(false);
+          // Publish the site after payment
+          setPublishing(true);
+          try {
+            await apiPost("/api/site/publish", { siteId: site?._id });
+            alert("Site published successfully!");
+          } catch (error: any) {
+            alert(`Error publishing site: ${error.message || error}`);
+          } finally {
+            setPublishing(false);
+          }
+        }}
+      />
     </header>
   );
 }

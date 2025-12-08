@@ -52,13 +52,21 @@ export default function Home() {
           <p className="text-xl text-gray-600 mb-8">
             Simple website builder for your business
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 mb-8">
             <Link
-              href="/auth/register"
+              href="/client-signup"
               className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Get Started
+              Build Your Website
             </Link>
+            <Link
+              href="/affiliate-signup"
+              className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Become an Affiliate
+            </Link>
+          </div>
+          <div className="flex justify-center">
             <Link
               href="/auth/login"
               className="px-8 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
@@ -100,18 +108,26 @@ export default function Home() {
         {/* CTA */}
         <section className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to Build Your Website?
+            Ready to Get Started?
           </h2>
           <p className="text-gray-600 mb-8">
             Join thousands of businesses creating stunning websites with
-            ClintonStack.
+            ClintonStack, or earn commissions as an affiliate.
           </p>
-          <Link
-            href="/auth/register"
-            className="px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Start Building Today
-          </Link>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/client-signup"
+              className="px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Start Building Today
+            </Link>
+            <Link
+              href="/affiliate-signup"
+              className="px-8 py-4 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Earn as Affiliate
+            </Link>
+          </div>
         </section>
       </div>
     </div>

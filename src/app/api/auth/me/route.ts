@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
     const user = await User.findById(decoded.userId)
-      .select("email onboarded username niche role")
+      .select("email onboarded username niche role subscriptionStatus subscriptionType")
       .lean();
 
     if (!user) {
@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
       username: user.username,
       niche: user.niche || null,
       role: user.role || "user",
+      subscriptionStatus: user.subscriptionStatus || "inactive",
+      subscriptionType: user.subscriptionType || null,
     };
 
     return NextResponse.json({ user: userData });

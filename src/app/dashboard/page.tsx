@@ -17,6 +17,12 @@ export default function DashboardRedirect() {
         return;
       }
 
+      if (user.role === "affiliate") {
+        router.replace("/dashboard/affiliate");
+        return;
+      }
+
+      // Default to client dashboard
       router.replace("/dashboard/real-estate");
     }
   }, [authLoading, user, router]);

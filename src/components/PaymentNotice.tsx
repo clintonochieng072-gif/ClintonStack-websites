@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 interface PaymentNoticeProps {
   onClose: () => void;
@@ -7,7 +7,7 @@ interface PaymentNoticeProps {
 const PaymentNotice = ({ onClose }: PaymentNoticeProps) => {
   const handlePayNow = () => {
     alert(
-      `M-Pesa Payment Instructions:\n\n1. Open M-Pesa on your phone\n2. Tap "Send Money"\n3. Enter Payee Number: 254745408764\n4. Enter Amount: 999\n5. Enter your M-Pesa PIN and send\n\nAfter sending, contact the admin via WhatsApp or Call to confirm payment.`
+      `M-Pesa Payment Instructions:\n\n1. Open M-Pesa on your phone\n2. Tap "Send Money"\n3. Enter Payee Number: 254745408764\n4. Enter Amount: 5\n5. Enter your M-Pesa PIN and send\n\nAfter sending, contact the admin via WhatsApp or Call to confirm payment.`
     );
   };
 
@@ -28,12 +28,14 @@ const PaymentNotice = ({ onClose }: PaymentNoticeProps) => {
         <h2 className="text-xl font-bold mb-4">Editing Trial Ended</h2>
         <p className="mb-4">
           Your editing trial has ended. To unlock full editing access, please
-          pay a one-time subscription fee of <strong>KES 999</strong>.
+          pay a one-time subscription fee of <strong>KES 5</strong>.
         </p>
         <p className="mb-4">
-          Send KES 999 via M-Pesa to <strong>254745408764</strong>.
+          Send KES 5 via M-Pesa to <strong>254745408764</strong>.
         </p>
-        <p className="mb-6">After payment, contact admin to activate your account manually.</p>
+        <p className="mb-6">
+          After payment, contact admin to activate your account manually.
+        </p>
         <div className="flex flex-col gap-2">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"

@@ -8,14 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Globe, Edit, Upload } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGlobal } from "@/context/GlobalContext";
+import PaymentModal from "@/components/PaymentModal";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function MyWebsitePage() {
   const router = useRouter();
+  const { user } = useGlobal();
   const { data: siteData, error, mutate } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     if (siteData?.data) {
@@ -24,22 +28,29 @@ export default function MyWebsitePage() {
   }, [siteData]);
 
   const handlePublish = async () => {
-    setPublishing(true);
-    try {
-      const response = await fetch("/api/site/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (response.ok) {
-        mutate(); // Refresh the site data
-      } else {
-        console.error("Failed to publish");
+    if (user?.subscriptionStatus === "active") {
+      // Publish directly
+      setPublishing(true);
+      try {
+        const response = await fetch("/api/site/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ siteId: site._id }),
+        });
+        if (response.ok) {
+          mutate(); // Refresh the site data
+        } else {
+          console.error("Failed to publish");
+        }
+      } catch (error) {
+        console.error("Error publishing:", error);
+      } finally {
+        setPublishing(false);
       }
-    } catch (error) {
-      console.error("Error publishing:", error);
-    } finally {
-      setPublishing(false);
+    } else {
+      // Show payment modal
+      setShowPaymentModal(true);
     }
   };
 
@@ -154,6 +165,34 @@ export default function MyWebsitePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={async () => {
+            setShowPaymentModal(false);
+            // Publish the site after payment
+            setPublishing(true);
+            try {
+              const response = await fetch("/api/site/publish", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ siteId: site._id }),
+              });
+              if (response.ok) {
+                mutate(); // Refresh the site data
+              } else {
+                console.error("Failed to publish");
+              }
+            } catch (error) {
+              console.error("Error publishing:", error);
+            } finally {
+              setPublishing(false);
+            }
+          }}
+        />
       </motion.div>
     </DashboardLayout>
   );

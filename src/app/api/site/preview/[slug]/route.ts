@@ -121,7 +121,8 @@ export async function GET(
     ...site.userWebsite,
     data: site.userWebsite?.draft || {},
   };
-  siteObj.integrations = site.integrations || {};
+  // For preview, use userWebsite integrations (draft integrations)
+  siteObj.integrations = site.userWebsite?.integrations || {};
   // Remove publishedWebsite for preview - preview only shows draft
   delete siteObj.publishedWebsite;
 

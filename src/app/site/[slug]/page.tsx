@@ -156,7 +156,7 @@ async function getPublicSiteDirect(slug: string) {
         : [],
       createdAt: site.createdAt?.toISOString(),
       updatedAt: site.updatedAt?.toISOString(),
-      integrations: {
+      integrations: site.publishedWebsite?.integrations || {
         phoneNumber: site.integrations?.phoneNumber || "",
         whatsappNumber: site.integrations?.whatsappNumber || "",
         tawkToId: site.integrations?.tawkToId || "",

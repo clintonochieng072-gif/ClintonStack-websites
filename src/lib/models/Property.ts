@@ -17,7 +17,7 @@ export interface IProperty extends Document {
   status?: string;
   isPublished: boolean;
   paid: boolean;
-  planType?: "monthly" | "one_time";
+  planType?: "monthly" | "lifetime" | "one_time";
   paymentExpiresAt?: Date;
   slug: string;
   createdAt: Date;
@@ -49,7 +49,7 @@ const PropertySchema = new mongoose.Schema<IProperty>(
     area: Number,
     isPublished: { type: Boolean, default: false },
     paid: { type: Boolean, default: false },
-    planType: { type: String, enum: ["monthly", "one_time"] },
+    planType: { type: String, enum: ["monthly", "lifetime", "one_time"] },
     paymentExpiresAt: Date,
     slug: { type: String, required: true, unique: true },
   },

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { getUserFromToken } from "@/lib/auth";
-import { getAccessToken, initiateSTKPush } from "@/lib/mpesa";
 import Property from "@/lib/models/Property";
-import Payment from "@/lib/models/Payment";
 import { getBaseUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -64,100 +62,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine plan amount
-    let planAmount: number;
+    // Determine plan details
     let planName: string;
 
     if (planType === "monthly") {
-      planAmount = 999;
       planName = "Monthly Plan";
     } else {
-      // Check if user is within first 10 users for one-time plan
-      const totalUsers = await Property.distinct("userId").then(
-        (users) => users.length
-      );
-      if (totalUsers >= 10) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "One-time plan is only available for the first 10 users",
-          },
-          { status: 400 }
-        );
-      }
-      planAmount = 3999;
       planName = "One-time Plan";
     }
 
-    // Get M-Pesa access token
-    const accessToken = await getAccessToken();
+    // Mark property as published (no payment required)
+    property.isPublished = true;
+    property.paid = true;
+    property.planType = planType;
 
-    // Generate callback URL
-    const baseUrl = getBaseUrl();
-    const callbackUrl = `${baseUrl}/api/payments/mpesa/callback`;
-
-    // Prepare transaction details
-    const accountReference = `Property-${propertyId}`;
-    const transactionDesc = `ClintonStack Property Publish Payment - ${planName}`;
-
-    // Use sandbox phone number
-    const phoneNumber = process.env.MPESA_PHONE_NUMBER!;
-
-    // Initiate STK Push
-    const stkResponse = await initiateSTKPush(
-      accessToken,
-      process.env.MPESA_SHORTCODE!,
-      process.env.MPESA_PASSKEY!,
-      planAmount,
-      phoneNumber,
-      accountReference,
-      transactionDesc,
-      callbackUrl
-    );
-
-    // Check if STK Push was initiated successfully
-    if (stkResponse.ResponseCode !== "0") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to initiate payment",
-          mpesaResponse: stkResponse,
-        },
-        { status: 400 }
-      );
+    // Set expiration date for monthly plans (30 days from now)
+    if (planType === "monthly") {
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 30);
+      property.paymentExpiresAt = expirationDate;
     }
 
-    // Create pending payment record
-    const payment = await Payment.create({
-      amount: planAmount,
-      currency: "KES",
-      status: "pending",
-      providerReference: stkResponse.CheckoutRequestID,
-      userId: user.id,
-      propertyId: propertyId,
-      planType: planType,
-      checkoutRequestId: stkResponse.CheckoutRequestID,
-      merchantRequestId: stkResponse.MerchantRequestID,
-      phoneNumber: phoneNumber,
-    });
+    await property.save();
 
     // Return success response
     return NextResponse.json({
       success: true,
-      message:
-        "Payment initiated successfully. Please complete the payment on your phone.",
+      message: "Property published successfully.",
       data: {
-        checkoutRequestId: stkResponse.CheckoutRequestID,
-        merchantRequestId: stkResponse.MerchantRequestID,
-        responseCode: stkResponse.ResponseCode,
-        responseDescription: stkResponse.ResponseDescription,
-        customerMessage: stkResponse.CustomerMessage,
         plan: {
           type: planType,
           name: planName,
-          amount: planAmount,
         },
-        paymentId: payment._id,
+        propertyId: propertyId,
       },
     });
   } catch (error) {

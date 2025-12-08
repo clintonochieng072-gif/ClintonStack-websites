@@ -10,7 +10,7 @@ export interface IUser extends Document {
   username: string; // Unique username (lowercased)
   email: string; // Unique email address (lowercased)
   passwordHash: string; // Hashed password using bcrypt
-  role: "user" | "admin"; // User role for authorization
+  role: "client" | "affiliate" | "admin"; // User role for authorization
   category: string | null; // User's professional category
   niche: string | null; // User's specific niche
   template: string | null; // Selected portfolio template
@@ -25,6 +25,16 @@ export interface IUser extends Document {
   lastLogin?: Date; // Last login timestamp
   trialEndsAt?: Date; // Trial period end date
   emailVerified: boolean; // Email verification status
+  // Billing fields
+  subscriptionStatus: "active" | "inactive"; // Subscription status
+  subscriptionType: "monthly" | "lifetime" | null; // Type of subscription
+  subscriptionExpiresAt?: Date | null; // Expiration date for monthly subscriptions
+  // Affiliate fields
+  referralCode?: string; // Unique referral code for affiliates
+  totalEarnings?: number; // Total earnings from referrals
+  withdrawableBalance?: number; // Amount available for withdrawal
+  // Client fields
+  referrerId?: string; // ID of affiliate who referred this client
   createdAt: Date; // Account creation timestamp
   comparePassword(candidatePassword: string): Promise<boolean>; // Password comparison method
 }
@@ -54,8 +64,8 @@ const UserSchema = new mongoose.Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user",
+    enum: ["client", "affiliate", "admin"],
+    default: "client",
   },
   category: {
     type: String,
@@ -113,6 +123,41 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: Boolean,
     default: true,
   },
+  // Billing fields
+  subscriptionStatus: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "inactive",
+  },
+  subscriptionType: {
+    type: String,
+    enum: ["monthly", "lifetime", null],
+    default: null,
+  },
+  subscriptionExpiresAt: {
+    type: Date,
+    default: null,
+  },
+  // Affiliate fields
+  referralCode: {
+    type: String,
+    default: null,
+    unique: true,
+    sparse: true,
+  },
+  totalEarnings: {
+    type: Number,
+    default: 0,
+  },
+  withdrawableBalance: {
+    type: Number,
+    default: 0,
+  },
+  // Client fields
+  referrerId: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -130,6 +175,7 @@ UserSchema.methods.comparePassword = async function (
 };
 
 const User: Model<IUser> =
-  (mongoose.models && mongoose.models.User) || mongoose.model<IUser>("User", UserSchema);
+  (mongoose.models && mongoose.models.User) ||
+  mongoose.model<IUser>("User", UserSchema);
 
 export default User;

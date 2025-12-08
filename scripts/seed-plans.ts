@@ -29,7 +29,7 @@ const plansData = [
   {
     name: "Lifetime Access",
     slug: "lifetime",
-    price: 3999,
+    price: 5,
     currency: "KES",
     features: [
       "All features unlocked",

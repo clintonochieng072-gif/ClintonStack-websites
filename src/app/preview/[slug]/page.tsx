@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import PublicSiteContent from "@/components/public/PublicSiteContent";
+import FloatingButtons from "@/components/public/FloatingButtons";
 import { pusherClient } from "@/lib/pusher-client";
 import { getBaseUrl, getAuthHeaders } from "@/lib/utils";
 
@@ -98,6 +99,12 @@ export default function PreviewSite() {
         🔍 Preview Mode - This is not the live site
       </div>
       <PublicSiteContent site={site} />
+
+      {/* Floating Contact Buttons */}
+      <FloatingButtons
+        phoneNumber={site.integrations?.phoneNumber}
+        whatsappNumber={site.integrations?.whatsappNumber}
+      />
     </>
   );
 }

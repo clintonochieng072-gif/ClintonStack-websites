@@ -12,7 +12,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "restore-env": "node scripts/restore-env.js"
+    "restore-env": "node scripts/restore-env.js",
+    "seed-billing": "node scripts/seed-billing-stats.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
