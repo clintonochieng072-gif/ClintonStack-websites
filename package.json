@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
     "restore-env": "node scripts/restore-env.js",
-    "seed-billing": "node scripts/seed-billing-stats.ts"
+    "seed-billing": "node scripts/seed-billing-stats.ts",
+    "release-pending-earnings": "tsx scripts/release-pending-earnings.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
@@ -23,6 +24,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
+    "@types/node-cron": "^3.0.11",
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
@@ -36,6 +38,7 @@
     "mongoose": "^7.0.0",
     "multer": "^2.0.2",
     "next": "^16.0.7",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10",
     "pusher": "^5.2.0",
     "pusher-js": "^8.4.0",
@@ -62,6 +65,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.0.13"
   }

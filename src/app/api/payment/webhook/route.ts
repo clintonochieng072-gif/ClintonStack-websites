@@ -12,9 +12,21 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const signature = req.headers.get("x-intasend-signature");
+    const challenge = req.headers.get("x-intasend-challenge");
 
     console.log("IntaSend webhook received:", JSON.stringify(body, null, 2));
     console.log("Signature:", signature);
+    console.log("Challenge:", challenge);
+
+    // Verify webhook challenge if provided
+    const expectedChallenge = process.env.INTASEND_WEBHOOK_CHALLENGE;
+    if (challenge && expectedChallenge && challenge !== expectedChallenge) {
+      console.error("Invalid webhook challenge:", challenge);
+      return NextResponse.json(
+        { success: false, message: "Invalid challenge" },
+        { status: 401 }
+      );
+    }
 
     // IntaSend webhook structure
     // {

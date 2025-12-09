@@ -43,25 +43,25 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
-        <header className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+        <header className="text-center mb-12 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
             ClintonStack
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Simple website builder for your business
           </p>
-          <div className="flex justify-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
             <Link
               href="/client-signup"
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
             >
               Build Your Website
             </Link>
             <Link
-              href="/affiliate-signup"
-              className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              href="/affiliate-program"
+              className="px-6 sm:px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
             >
               Become an Affiliate
             </Link>
@@ -69,7 +69,7 @@ export default function Home() {
           <div className="flex justify-center">
             <Link
               href="/auth/login"
-              className="px-8 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              className="px-6 sm:px-8 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
             >
               Login
             </Link>
@@ -77,28 +77,28 @@ export default function Home() {
         </header>
 
         {/* Features */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+        <section className="mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
             Why Choose ClintonStack?
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-4">Simple & Easy</h3>
-              <p className="text-gray-600">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Simple & Easy</h3>
+              <p className="text-gray-600 text-sm sm:text-base">
                 Create professional websites in minutes. No coding or design
                 skills required.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-4">Business Focused</h3>
-              <p className="text-gray-600">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Business Focused</h3>
+              <p className="text-gray-600 text-sm sm:text-base">
                 Tailored for different business types with industry-specific
                 features.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-4">Instant Publishing</h3>
-              <p className="text-gray-600">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md sm:col-span-2 lg:col-span-1">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Instant Publishing</h3>
+              <p className="text-gray-600 text-sm sm:text-base">
                 Publish your website instantly and share it with the world.
               </p>
             </div>
@@ -107,23 +107,23 @@ export default function Home() {
 
         {/* CTA */}
         <section className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
             Ready to Get Started?
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
             Join thousands of businesses creating stunning websites with
             ClintonStack, or earn commissions as an affiliate.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
             <Link
               href="/client-signup"
-              className="px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-base sm:text-lg rounded-lg hover:bg-blue-700 transition-colors text-center"
             >
               Start Building Today
             </Link>
             <Link
-              href="/affiliate-signup"
-              className="px-8 py-4 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700 transition-colors"
+              href="/affiliate-program"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white text-base sm:text-lg rounded-lg hover:bg-green-700 transition-colors text-center"
             >
               Earn as Affiliate
             </Link>

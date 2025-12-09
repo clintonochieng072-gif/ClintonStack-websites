@@ -31,8 +31,16 @@ export interface IUser extends Document {
   subscriptionExpiresAt?: Date | null; // Expiration date for monthly subscriptions
   // Affiliate fields
   referralCode?: string; // Unique referral code for affiliates
-  totalEarnings?: number; // Total earnings from referrals
-  withdrawableBalance?: number; // Amount available for withdrawal
+  availableBalance?: number; // Amount available for withdrawal (real money only)
+  totalEarned?: number; // Total earnings from referrals
+  withdrawalHistory?: {
+    withdrawalId: string;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    requestedAt: Date;
+    processedAt?: Date;
+    phoneNumber?: string;
+  }[]; // History of withdrawal requests
   // Client fields
   referrerId?: string; // ID of affiliate who referred this client
   createdAt: Date; // Account creation timestamp
@@ -145,14 +153,46 @@ const UserSchema = new mongoose.Schema<IUser>({
     unique: true,
     sparse: true,
   },
-  totalEarnings: {
+  availableBalance: {
     type: Number,
     default: 0,
+    min: 0,
   },
-  withdrawableBalance: {
+  totalEarned: {
     type: Number,
     default: 0,
+    min: 0,
   },
+  withdrawalHistory: [
+    {
+      withdrawalId: {
+        type: String,
+        required: true,
+      },
+      amount: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "completed", "failed"],
+        required: true,
+      },
+      requestedAt: {
+        type: Date,
+        required: true,
+      },
+      processedAt: {
+        type: Date,
+        default: null,
+      },
+      phoneNumber: {
+        type: String,
+        default: null,
+      },
+    },
+  ],
   // Client fields
   referrerId: {
     type: String,

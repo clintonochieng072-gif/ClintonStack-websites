@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Menu, Copy, ExternalLink, Wallet, Package, Users, TrendingUp, Clock } from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface Referral {
   _id: string;
@@ -42,10 +44,24 @@ interface AffiliateStats {
   }[];
 }
 
+interface AffiliateBalance {
+  availableBalance: number;
+  totalEarned: number;
+  withdrawalHistory: {
+    withdrawalId: string;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    requestedAt: Date;
+    processedAt?: Date;
+    phoneNumber?: string;
+  }[];
+}
+
 export default function AffiliateDashboard() {
   const { user, logout } = useGlobalContext();
   const router = useRouter();
   const [stats, setStats] = useState<AffiliateStats | null>(null);
+  const [balance, setBalance] = useState<AffiliateBalance | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -54,6 +70,9 @@ export default function AffiliateDashboard() {
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [productLoading, setProductLoading] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Removed countdown - commissions are immediately available
 
   useEffect(() => {
     if (user && user.role === "affiliate") {
@@ -66,11 +85,13 @@ export default function AffiliateDashboard() {
 
   const fetchAffiliateData = async () => {
     try {
-      const [statsRes, referralsRes, productsRes] = await Promise.all([
-        fetch("/api/affiliate/stats"),
-        fetch("/api/affiliate/referrals"),
-        fetch("/api/affiliate/products"),
-      ]);
+      const [statsRes, referralsRes, productsRes, balanceRes] =
+        await Promise.all([
+          fetch("/api/affiliate/stats"),
+          fetch("/api/affiliate/referrals"),
+          fetch("/api/affiliate/products"),
+          fetch("/api/affiliate/balance"),
+        ]);
 
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -87,6 +108,11 @@ export default function AffiliateDashboard() {
         setProducts(productsData);
         // For now, select all products by default
         setSelectedProducts(productsData.map((p: Product) => p._id));
+      }
+
+      if (balanceRes.ok) {
+        const balanceData = await balanceRes.json();
+        setBalance(balanceData);
       }
     } catch (error) {
       console.error("Error fetching affiliate data:", error);
@@ -124,7 +150,20 @@ export default function AffiliateDashboard() {
   };
 
   const handleWithdrawal = async () => {
-    if (!stats?.withdrawableBalance || stats.withdrawableBalance < 1000) return;
+    if (!balance?.availableBalance || balance.availableBalance < 200) return;
+    if (!phoneNumber.trim()) {
+      alert("Please enter your M-Pesa phone number");
+      return;
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^(\+254|0)7[0-9]{8}$/;
+    if (!phoneRegex.test(phoneNumber.trim())) {
+      alert(
+        "Please enter a valid Kenyan Safaricom M-Pesa number (e.g., 0712345678 or +254712345678)"
+      );
+      return;
+    }
 
     setWithdrawLoading(true);
     try {
@@ -134,14 +173,14 @@ export default function AffiliateDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: stats.withdrawableBalance,
-          paymentMethod: "mpesa", // Default to M-Pesa
-          paymentDetails: null,
+          amount: balance.availableBalance,
+          phoneNumber: phoneNumber.trim(),
         }),
       });
 
       if (response.ok) {
         alert("Withdrawal request submitted successfully!");
+        setPhoneNumber(""); // Clear phone number
         // Refresh data
         fetchAffiliateData();
       } else {
@@ -171,362 +210,220 @@ export default function AffiliateDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className="hidden lg:block">
+        <AffiliateSidebar />
+      </div>
+
+      {/* Mobile sidebar */}
+      {sidebarOpen && (
+        <div className="fixed left-0 top-0 h-full w-64 z-50 lg:hidden">
+          <AffiliateSidebar mobile onClose={() => setSidebarOpen(false)} />
+        </div>
+      )}
+
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm border-b lg:ml-64">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Affiliate Dashboard
-              </h1>
-              <p className="text-sm text-gray-600">
-                Track your referrals and earnings
-              </p>
+            <div className="flex items-center">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 mr-4"
+              >
+                <Menu size={20} />
+              </button>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Affiliate Dashboard
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Track your referrals and earnings
+                </p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
               disabled={logoutLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-3 py-2 sm:px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              {logoutLoading ? "Logging out..." : "Logout"}
+              <span className="hidden sm:inline">
+                {logoutLoading ? "Logging out..." : "Logout"}
+              </span>
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">
-              Total Referrals
-            </h3>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats?.totalReferrals || 0}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">
-              Pending Payments
-            </h3>
-            <p className="text-3xl font-bold text-yellow-600">
-              {stats?.pendingPayments || 0}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">
-              Total Earnings
-            </h3>
-            <p className="text-3xl font-bold text-green-600">
-              KES {stats?.totalEarnings || 0}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">
-              Withdrawable Balance
-            </h3>
-            <p className="text-3xl font-bold text-blue-600">
-              KES {stats?.withdrawableBalance || 0}
-            </p>
-          </div>
+      <div className="lg:ml-64 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            Welcome back! 👋
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Here's what's happening with your affiliate program today.
+          </p>
         </div>
 
-        {/* Product Performance */}
-        {stats?.productStats && stats.productStats.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Product Performance
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stats.productStats.map((productStat) => (
-                <div
-                  key={productStat.productId}
-                  className="border rounded-lg p-4"
-                >
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    {productStat.productName}
-                  </h3>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Referrals:</span>
-                      <span className="font-medium">
-                        {productStat.referralCount}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Paid:</span>
-                      <span className="font-medium text-green-600">
-                        {productStat.paidReferralCount}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Earnings:</span>
-                      <span className="font-medium text-green-600">
-                        KES {productStat.earnings}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600 mb-1">Total Referrals</p>
+                <p className="text-3xl font-bold text-blue-900">{stats?.totalReferrals || 0}</p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600" />
             </div>
           </div>
-        )}
 
-        {/* Products to Promote */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Products to Promote
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <div key={product._id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {product.description}
-                    </p>
-                    <p className="text-sm font-medium text-green-600 mt-2">
-                      Commission: KES {product.commissionRate}
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={selectedProducts.includes(product._id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedProducts([...selectedProducts, product._id]);
-                      } else {
-                        setSelectedProducts(
-                          selectedProducts.filter((id) => id !== product._id)
-                        );
-                      }
-                    }}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                </div>
-                {selectedProducts.includes(product._id) && (
-                  <div className="mt-3 pt-3 border-t">
-                    <p className="text-xs text-gray-500 mb-2">Referral Link:</p>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        readOnly
-                        value={`${window.location.origin}/client-signup?ref=${
-                          stats?.referralCode || ""
-                        }&product=${product.slug}`}
-                        className="flex-1 text-xs px-2 py-1 border border-gray-300 rounded bg-gray-50"
-                      />
-                      <button
-                        onClick={async () => {
-                          setCopyLoading(true);
-                          try {
-                            const link = `${
-                              window.location.origin
-                            }/client-signup?ref=${
-                              stats?.referralCode || ""
-                            }&product=${product.slug}`;
-                            await navigator.clipboard.writeText(link);
-                            alert(`Referral link for ${product.name} copied!`);
-                          } catch (error) {
-                            alert("Failed to copy link");
-                          } finally {
-                            setCopyLoading(false);
-                          }
-                        }}
-                        disabled={copyLoading}
-                        className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        {copyLoading ? "..." : "Copy"}
-                      </button>
-                    </div>
-                  </div>
-                )}
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-600 mb-1">Available Balance</p>
+                <p className="text-3xl font-bold text-green-900">KES {balance?.availableBalance || 0}</p>
               </div>
-            ))}
+              <Wallet className="w-8 h-8 text-green-600" />
+            </div>
           </div>
-          {products.length === 0 && (
-            <p className="text-gray-500 text-center py-8">
-              No products available for promotion at this time.
-            </p>
-          )}
+
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600 mb-1">Total Earned</p>
+                <p className="text-3xl font-bold text-purple-900">KES {balance?.totalEarned || 0}</p>
+              </div>
+              <Package className="w-8 h-8 text-purple-600" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600 mb-1">Success Rate</p>
+                <p className="text-3xl font-bold text-orange-900">
+                  {stats?.totalReferrals
+                    ? Math.round(((stats.totalReferrals - (stats.pendingPayments || 0)) / stats.totalReferrals) * 100)
+                    : 0}%
+                </p>
+              </div>
+              <ExternalLink className="w-8 h-8 text-orange-600" />
+            </div>
+          </div>
         </div>
 
-        {/* Referral Link */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Your Referral Link
-          </h2>
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              readOnly
-              value={
-                stats?.referralCode
-                  ? `${window.location.origin}/client-signup?ref=${stats.referralCode}`
-                  : ""
-              }
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-            />
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={copyReferralLink}
               disabled={copyLoading}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="flex items-center justify-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors cursor-pointer"
             >
-              {copyLoading ? "Copying..." : "Copy Link"}
+              <Copy className="w-5 h-5 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">
+                {copyLoading ? "Copying..." : "Copy Link"}
+              </span>
             </button>
+
+            <Link
+              href="/dashboard/affiliate/products"
+              className="flex items-center justify-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors"
+            >
+              <Package className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-medium text-green-900">Promote Products</span>
+            </Link>
+
+            <Link
+              href="/dashboard/affiliate/withdraw"
+              className="flex items-center justify-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors"
+            >
+              <Wallet className="w-5 h-5 text-purple-600" />
+              <span className="text-sm font-medium text-purple-900">Withdraw Funds</span>
+            </Link>
+
+            <Link
+              href="/dashboard/affiliate/referrals"
+              className="flex items-center justify-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg border border-orange-200 transition-colors"
+            >
+              <Users className="w-5 h-5 text-orange-600" />
+              <span className="text-sm font-medium text-orange-900">View Referrals</span>
+            </Link>
           </div>
         </div>
 
-        {/* Referral Management */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Referral Management
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Signup Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Payment Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Commission
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {referrals.map((referral) => (
-                  <tr key={referral._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {referral.clientName || "Unknown"}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {referral.clientEmail || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {referral.productName || "General"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(referral.signupDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          referral.paymentStatus === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {referral.paymentStatus}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
-                      {referral.commissionEarned > 0
-                        ? `KES ${referral.commissionEarned}`
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
-                {referrals.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-4 text-center text-gray-500"
-                    >
-                      No referrals yet. Share your referral link to start
-                      earning!
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Recent Activity */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
 
-        {/* Withdrawal Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Withdraw Funds
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Current Balance
-              </h3>
-              <p className="text-3xl font-bold text-blue-600">
-                KES {stats?.withdrawableBalance || 0}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                Available for withdrawal
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Request Withdrawal
-              </h3>
-              {(stats?.withdrawableBalance || 0) >= 1000 ? (
-                <button
-                  onClick={handleWithdrawal}
-                  disabled={withdrawLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          {referrals.length > 0 ? (
+            <div className="space-y-4">
+              {referrals.slice(0, 5).map((referral) => (
+                <div key={referral._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        New referral: {referral.clientName || "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(referral.signupDate).toLocaleDateString()} • {referral.productName || "General"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-green-600">
+                      +KES {referral.commissionEarned || 0}
+                    </p>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      referral.paymentStatus === "paid"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}>
+                      {referral.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {referrals.length > 5 && (
+                <Link
+                  href="/dashboard/affiliate/referrals"
+                  className="block text-center text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  {withdrawLoading ? "Processing..." : "Withdraw Funds"}
-                </button>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  Minimum withdrawal: KES 1,000
-                </p>
+                  View all {referrals.length} referrals →
+                </Link>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Profile & Settings */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Profile & Settings
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Affiliate Profile
-              </h3>
-              <div className="space-y-2">
-                <p>
-                  <strong>Email:</strong> {user?.email}
-                </p>
-                <p>
-                  <strong>Referral Code:</strong> {stats?.referralCode}
-                </p>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Security
-              </h3>
-              <button
-                onClick={() => alert("Password change feature coming soon!")}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+          ) : (
+            <div className="text-center py-8">
+              <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No activity yet</h3>
+              <p className="text-gray-500 mb-4">
+                Start promoting products to see your referral activity here.
+              </p>
+              <Link
+                href="/dashboard/affiliate/products"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Change Password
-              </button>
+                <Package className="w-4 h-4 mr-2" />
+                Browse Products
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

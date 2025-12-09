@@ -116,7 +116,7 @@ export default function PaymentModal({
       }
 
       // Start polling for payment status
-      pollPaymentStatus(data.data.checkoutRequestId);
+      pollPaymentStatus(data.data.transactionId);
     } catch (error: any) {
       setPaymentStatus("error");
       setErrorMessage(error.message || "Payment failed. Please try again.");
@@ -124,11 +124,11 @@ export default function PaymentModal({
     }
   };
 
-  const pollPaymentStatus = async (checkoutRequestId: string) => {
+  const pollPaymentStatus = async (transactionId: string) => {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(
-          `/api/billing/status?checkoutRequestId=${checkoutRequestId}`,
+          `/api/billing/status?transactionId=${transactionId}`,
           {
             headers: getAuthHeaders(),
           }
@@ -175,7 +175,7 @@ export default function PaymentModal({
 
   const resetModal = () => {
     setSelectedPlan(null);
-    setPhoneNumber("");
+    setPhoneNumber("+254");
     setIsProcessing(false);
     setPaymentStatus("idle");
     setErrorMessage("");
@@ -317,8 +317,8 @@ export default function PaymentModal({
                         disabled={isProcessing}
                       />
                       <p className="text-sm text-gray-500 mt-1">
-                        Enter your phone number for PayHero payment (e.g.,
-                        0712345678 or 254712345678)
+                        Enter your phone number for IntaSend M-Pesa payment
+                        (e.g., 0712345678 or 254712345678)
                       </p>
                     </div>
 
@@ -338,14 +338,14 @@ export default function PaymentModal({
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           {paymentStatus === "processing"
-                            ? "Processing Payment..."
+                            ? "Processing STK Push…"
                             : "Checking Status..."}
                         </>
                       ) : (
                         <>
                           <CreditCard className="w-4 h-4 mr-2" />
                           Pay KES {selectedPlan.price.toLocaleString()} with
-                          PayHero
+                          IntaSend
                         </>
                       )}
                     </Button>
@@ -353,7 +353,7 @@ export default function PaymentModal({
                     {paymentStatus === "processing" && (
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
                         <p className="text-blue-800">
-                          📱 Check your phone and complete the PayHero payment
+                          📱 Check your phone and complete the M-Pesa STK push
                           prompt.
                         </p>
                         <p className="text-sm text-blue-600 mt-2">

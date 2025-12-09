@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
       (sum, earning) => sum + earning.paidEarnings,
       0
     );
-    const withdrawableBalance = user.withdrawableBalance || 0;
+    const availableBalance = user.availableBalance || 0;
 
     return NextResponse.json({
       totalReferrals,
       pendingPayments,
       totalEarnings,
-      withdrawableBalance,
+      availableBalance: user.availableBalance || 0,
       referralCode: user.referralCode,
       productStats,
     });

@@ -132,12 +132,12 @@ export default function WebsiteBuilderPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
           Website Builder
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm sm:text-base">
           Edit all your website content in one place
         </p>
       </div>
@@ -241,19 +241,19 @@ export default function WebsiteBuilderPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <Button variant="outline" className="flex items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <Button variant="outline" className="flex items-center justify-center w-full">
               <Plus className="w-4 h-4 mr-2" />
-              Add New Section
+              <span className="text-sm sm:text-base">Add New Section</span>
             </Button>
-            <Button variant="outline" className="flex items-center">
+            <Button variant="outline" className="flex items-center justify-center w-full">
               <Wand2 className="w-4 h-4 mr-2" />
-              Customize Theme
+              <span className="text-sm sm:text-base">Customize Theme</span>
             </Button>
-            <Link href="/edit/settings/publish">
-              <Button variant="outline" className="flex items-center">
+            <Link href="/edit/settings/publish" className="w-full">
+              <Button variant="outline" className="flex items-center justify-center w-full">
                 <Settings className="w-4 h-4 mr-2" />
-                Publish Settings
+                <span className="text-sm sm:text-base">Publish Settings</span>
               </Button>
             </Link>
           </div>

@@ -12,6 +12,7 @@ import {
   BarChart3,
   Users,
   UserCog,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,12 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobile?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -74,12 +80,24 @@ export default function Sidebar() {
     setIsHydrated(true);
   }, []);
 
+  const sidebarClasses = mobile
+    ? "flex flex-col h-full"
+    : "fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-lg z-10";
+
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-lg z-10">
+    <div className={sidebarClasses}>
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-900">ClintonStack</h1>
+          {mobile && onClose && (
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg hover:bg-gray-100"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         {/* Menu */}

@@ -31,7 +31,7 @@ const WithdrawalRequestSchema = new mongoose.Schema<IWithdrawalRequest>({
   amount: {
     type: Number,
     required: true,
-    min: 300, // Minimum withdrawal amount
+    min: 200, // Minimum withdrawal amount
   },
   status: {
     type: String,

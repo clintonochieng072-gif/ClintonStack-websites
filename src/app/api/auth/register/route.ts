@@ -64,6 +64,31 @@ export async function POST(request: NextRequest) {
       // Find referrer by referral code
       const referrer = await User.findOne({ referralCode, role: "affiliate" });
       if (referrer) {
+        // Self-referral prevention
+        if (referrer.email === email.toLowerCase()) {
+          return NextResponse.json(
+            { error: "You cannot refer yourself" },
+            { status: 400 }
+          );
+        }
+
+        // Check for duplicate accounts (same email domain or similar patterns)
+        const emailDomain = email.split('@')[1];
+        const referrerEmailDomain = referrer.email.split('@')[1];
+
+        // Prevent multiple accounts from same domain
+        const existingUsersFromDomain = await User.countDocuments({
+          email: { $regex: `@${emailDomain}$`, $options: 'i' },
+          role: "client"
+        });
+
+        if (existingUsersFromDomain >= 2) {
+          return NextResponse.json(
+            { error: "Multiple accounts from the same email domain are not allowed" },
+            { status: 400 }
+          );
+        }
+
         referrerId = referrer._id.toString();
       }
 

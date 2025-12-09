@@ -1,9 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, Menu, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useGlobal } from "@/context/GlobalContext";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -13,7 +20,11 @@ import PaymentModal from "@/components/PaymentModal";
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useGlobal();
   const router = useRouter();
   const { data: siteData } = useSWR("/api/site/me", fetcher);
@@ -56,66 +67,129 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 left-64 right-0 z-50 bg-white border-b">
-      <div className="flex items-center justify-between h-16 px-6">
+    <header className="sticky top-0 lg:left-64 right-0 z-50 bg-white border-b">
+      <div className="flex items-center justify-between h-16 px-4 sm:px-6">
+        {/* Mobile menu button */}
+        <div className="flex items-center lg:hidden">
+          {onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="p-2 rounded-lg hover:bg-gray-100 mr-4"
+            >
+              <Menu size={20} />
+            </button>
+          )}
+        </div>
+
         {/* Left side - can add breadcrumbs or title */}
         <div className="flex-1"></div>
 
         {/* Right side */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* HeaderActions */}
-          <div className="flex items-center space-x-6">
+          <div className="hidden sm:flex items-center space-x-6">
             <div className="flex flex-col items-center">
               <Button
                 variant="outline"
-                size="lg"
-                className="px-8 py-4 text-lg"
+                size="sm"
+                className="px-4 py-2 text-sm"
                 onClick={handlePreview}
               >
                 Preview
               </Button>
-              <span className="text-xs text-gray-500 mt-1 text-center max-w-32">
-                See how your website currently looks
+              <span className="text-xs text-gray-500 mt-1 text-center max-w-24">
+                See how your website looks
               </span>
             </div>
             <div className="flex flex-col items-center">
               <Button
                 variant="default"
-                size="lg"
-                className="px-8 py-4 text-lg"
+                size="sm"
+                className="px-4 py-2 text-sm"
                 onClick={handlePublish}
                 disabled={publishing}
               >
                 {publishing ? "Publishing..." : "Publish"}
               </Button>
-              <span className="text-xs text-gray-500 mt-1 text-center max-w-32">
-                Make your latest changes live
+              <span className="text-xs text-gray-500 mt-1 text-center max-w-24">
+                Make changes live
               </span>
             </div>
           </div>
 
-          {/* Notifications */}
-          <Button variant="ghost" size="icon">
-            <Bell className="w-5 h-5" />
-          </Button>
+          {/* Mobile HeaderActions */}
+          <div className="flex sm:hidden items-center space-x-2">
+            <Button variant="outline" size="sm" onClick={handlePreview}>
+              Preview
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishing}
+            >
+              {publishing ? "..." : "Publish"}
+            </Button>
+          </div>
 
-          {/* Logout */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            <LogOut className="w-5 h-5" />
-          </Button>
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title="Notifications">
+                <Bell className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="p-4">
+                <h4 className="font-semibold">Notifications</h4>
+                <p className="text-sm text-gray-600">You have no new notifications</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">Welcome to your dashboard!</p>
+                  <p className="text-xs text-gray-500">Get started by exploring your website</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">Site published successfully</p>
+                  <p className="text-xs text-gray-500">Your changes are now live</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Avatar */}
-          <Avatar>
-            <AvatarImage src="" alt={user?.email || "User"} />
-            <AvatarFallback>
-              <User className="w-4 h-4" />
-            </AvatarFallback>
-          </Avatar>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title="User Menu">
+                <Avatar>
+                  <AvatarImage src="" alt={user?.email || "User"} />
+                  <AvatarFallback>
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => router.push("/settings")}>
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/affiliate/profile")}
+              >
+                <UserCircle className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDb } from "@/lib/db";
+import dbConnect from "@/lib/mongodb";
 import { getUserFromToken } from "@/lib/auth";
-import { payHeroService } from "@/lib/payhero";
+import { intaSendService } from "@/lib/intasend";
 import Payment from "@/lib/models/Payment";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectDb();
+    await dbConnect();
     const user = await getUserFromToken();
 
     if (!user) {
@@ -19,18 +19,21 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const checkoutRequestId = searchParams.get("checkoutRequestId");
+    const transactionId = searchParams.get("transactionId");
 
-    if (!checkoutRequestId) {
+    if (!transactionId) {
       return NextResponse.json(
-        { success: false, message: "Checkout request ID is required" },
+        { success: false, message: "Transaction ID is required" },
         { status: 400 }
       );
     }
 
     // Find the payment record
     const payment = await Payment.findOne({
-      checkoutRequestId,
+      $or: [
+        { checkoutRequestId: transactionId },
+        { providerReference: transactionId },
+      ],
       userId: user.id,
     });
 
@@ -41,58 +44,75 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // If payment is already completed, return the status
+    // If payment is already completed (success or failed), return the status
     if (payment.status === "success" || payment.status === "failed") {
       return NextResponse.json({
         success: true,
         data: {
+          transactionId: payment.checkoutRequestId,
           status: payment.status,
-          message:
-            payment.status === "success"
-              ? "Payment completed successfully"
-              : "Payment failed",
+          amount: payment.amount,
+          phoneNumber: payment.phoneNumber,
+          planType: payment.planType,
         },
       });
     }
 
-    // Check status with PayHero
-    const statusResponse = await payHeroService.checkPaymentStatus(
-      checkoutRequestId
-    );
+    // Otherwise, check with IntaSend for the latest status
+    try {
+      const verificationResult = await intaSendService.verifyPayment(transactionId);
 
-    if (!statusResponse.success || !statusResponse.data) {
-      return NextResponse.json(
-        { success: false, message: "Failed to check payment status" },
-        { status: 500 }
-      );
-    }
+      if (verificationResult.success && verificationResult.data) {
+        const intasendStatus = verificationResult.data.status;
 
-    const { status, resultCode, resultDesc, callbackMetadata } =
-      statusResponse.data;
+        // Update payment status if it has changed
+        if (intasendStatus !== payment.status) {
+          await Payment.findByIdAndUpdate(payment._id, {
+            status: intasendStatus === "COMPLETE" ? "success" :
+                   intasendStatus === "FAILED" ? "failed" : "pending",
+            callbackMetadata: verificationResult.data,
+            updatedAt: new Date(),
+          });
+        }
 
-    // Update payment status if it has changed
-    if (status !== payment.status) {
-      await Payment.findByIdAndUpdate(payment._id, {
-        status,
-        callbackMetadata,
-        updatedAt: new Date(),
+        return NextResponse.json({
+          success: true,
+          data: {
+            transactionId: verificationResult.data.transaction_id,
+            status: intasendStatus === "COMPLETE" ? "success" :
+                   intasendStatus === "FAILED" ? "failed" : "pending",
+            amount: verificationResult.data.amount,
+            phoneNumber: verificationResult.data.phone_number,
+            planType: payment.planType,
+          },
+        });
+      } else {
+        // If verification fails, return current payment status
+        return NextResponse.json({
+          success: true,
+          data: {
+            transactionId: payment.checkoutRequestId,
+            status: payment.status,
+            amount: payment.amount,
+            phoneNumber: payment.phoneNumber,
+            planType: payment.planType,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error verifying payment with IntaSend:", error);
+      // Return current payment status if verification fails
+      return NextResponse.json({
+        success: true,
+        data: {
+          transactionId: payment.checkoutRequestId,
+          status: payment.status,
+          amount: payment.amount,
+          phoneNumber: payment.phoneNumber,
+          planType: payment.planType,
+        },
       });
     }
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        status,
-        resultCode,
-        resultDesc,
-        message:
-          status === "success"
-            ? "Payment completed successfully"
-            : status === "failed"
-            ? "Payment failed"
-            : "Payment is being processed",
-      },
-    });
   } catch (error: any) {
     console.error("Payment status check error:", error);
     return NextResponse.json(

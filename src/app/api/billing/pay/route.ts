@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDb } from "@/lib/db";
+import dbConnect from "@/lib/mongodb";
 import { getUserFromToken } from "@/lib/auth";
-import { payHeroService } from "@/lib/payhero";
+import { intaSendService } from "@/lib/intasend";
 import Payment from "@/lib/models/Payment";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    await connectDb();
+    await dbConnect();
     const user = await getUserFromToken();
 
     if (!user) {
@@ -50,6 +50,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Environment preflight for IntaSend
+    const { INTASEND_SECRET_KEY, INTASEND_AUTH_SCHEME, INTASEND_WALLET_ID } = process.env as Record<string, string | undefined>;
+    if (!INTASEND_SECRET_KEY) {
+      return NextResponse.json(
+        { success: false, message: "Payment configuration error: INTASEND_SECRET_KEY is not set on the server" },
+        { status: 500 }
+      );
+    }
+    const mask = (s: string) => (s ? `${s.slice(0, 2)}...${s.slice(-4)}(${s.length})` : "unset");
+    console.log("IntaSend config preflight:", {
+      scheme: INTASEND_AUTH_SCHEME || "Bearer",
+      secretKey: mask(INTASEND_SECRET_KEY),
+      walletId: mask(INTASEND_WALLET_ID || ""),
+    });
+
     // Format phone number (ensure it starts with 254)
     let formattedPhone = phoneNumber.replace(/\s+/g, "");
     if (formattedPhone.startsWith("0")) {
@@ -78,27 +93,24 @@ export async function POST(req: NextRequest) {
       amount,
       currency: "KES",
       status: "pending",
-      providerReference: `PAYHERO-${Date.now()}-${user.id}`,
+      providerReference: `INTASEND-${Date.now()}-${user.id}`,
       userId: user.id,
       planType,
       phoneNumber: formattedPhone,
-      paymentMethod: "payhero",
+      paymentMethod: "intasend",
     });
 
-    console.log("Billing API - Initiating STK Push:");
+    console.log("Billing API - Initiating IntaSend STK Push:");
     console.log("User ID:", user.id);
     console.log("Plan Type:", planType);
     console.log("Amount:", amount);
     console.log("Formatted Phone:", formattedPhone);
 
     // Initiate STK Push
-    const stkPushResponse = await payHeroService.initiateSTKPush({
-      phoneNumber: formattedPhone,
+    const stkPushResponse = await intaSendService.initiateSTKPush({
       amount,
-      accountReference: `SUB-${planType}-${user.id}`,
-      transactionDesc: `${
-        planType === "monthly" ? "Monthly" : "Lifetime"
-      } Subscription Payment`,
+      phoneNumber: formattedPhone,
+      reference: `SUB-${planType}-${user.id}-${Date.now()}`,
     });
 
     console.log("STK Push Response:", stkPushResponse);
@@ -116,20 +128,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Update payment with checkout request ID
+    // Update payment with transaction ID
     await Payment.findByIdAndUpdate(payment._id, {
-      checkoutRequestId: stkPushResponse.data.checkoutRequestId,
-      providerReference: stkPushResponse.data.checkoutRequestId, // Use checkoutRequestId as provider reference
+      checkoutRequestId: stkPushResponse.data.transaction_id,
+      providerReference: stkPushResponse.data.transaction_id,
     });
 
     return NextResponse.json({
       success: true,
-      message:
-        stkPushResponse.data.customerMessage ||
-        "Payment initiated successfully",
+      message: "Payment initiated successfully. Check your phone for STK push.",
       data: {
-        checkoutRequestId: stkPushResponse.data.checkoutRequestId,
-        customerMessage: stkPushResponse.data.customerMessage,
+        transactionId: stkPushResponse.data.transaction_id,
+        status: stkPushResponse.data.status,
+        amount: stkPushResponse.data.amount,
+        phoneNumber: stkPushResponse.data.phone_number,
       },
     });
   } catch (error: any) {

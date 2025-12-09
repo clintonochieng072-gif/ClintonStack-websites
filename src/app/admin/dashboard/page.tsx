@@ -107,7 +107,7 @@ export default function AdminDashboard() {
       {/* PAYMENTS OVERVIEW */}
       {/* -------------------------------------- */}
       <section className="bg-white p-6 rounded-2xl shadow-sm border mb-10">
-        <h3 className="text-lg font-semibold mb-4">PayHero Payments</h3>
+        <h3 className="text-lg font-semibold mb-4">Payment Overview</h3>
 
         {loading ? (
           <div className="flex items-center justify-center h-32">
