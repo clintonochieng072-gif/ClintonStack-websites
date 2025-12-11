@@ -102,7 +102,7 @@ export async function activateSubscription(
     console.log(`Subscription activated for user ${userId}: ${planType} plan`);
 
     // Process affiliate commission if user was referred
-    if (updatedUser.referrerId) {
+    if (updatedUser.referredBy) {
       try {
         await processAffiliateCommission(updatedUser._id.toString(), amount);
       } catch (commissionError) {

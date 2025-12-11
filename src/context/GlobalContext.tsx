@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { pusherClient } from "@/lib/pusher-client";
 
 type User = {
   id?: string;
@@ -12,6 +14,7 @@ type User = {
   firstSiteNiche?: string | null;
   subscriptionStatus?: string;
   subscriptionType?: string | null;
+  has_paid?: boolean;
   // add other safe fields you want client-side
 };
 
@@ -31,48 +34,92 @@ export default function GlobalProvider({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const { data: session, status, update } = useSession();
 
-  // Restore session on app load
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const token = localStorage.getItem("auth_token");
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-
-        const res = await fetch("/api/auth/me", {
-          headers,
-          credentials: "include",
-        });
-        const json = await res.json();
-        // Expect { user: null } or { user: {...} }
-        if (mounted && json?.user && json.user.id) setUser(json.user);
-        else if (mounted) setUser(null);
-      } catch (err) {
-        if (mounted) setUser(null);
-      } finally {
-        if (mounted) setAuthLoading(false);
+  const loadUser = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
+
+      const res = await fetch("/api/auth/me", {
+        headers,
+        credentials: "include",
+      });
+      const json = await res.json();
+      // Expect { user: null } or { user: {...} }
+      if (json?.user && json.user.id) setUser(json.user);
+      else setUser(null);
+    } catch (err) {
+      setUser(null);
     }
-    load();
+  };
+
+  // Handle NextAuth session
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (session?.user) {
+      // NextAuth user - fetch fresh data from API
+      let mounted = true;
+      loadUser().finally(() => {
+        if (mounted) setAuthLoading(false);
+      });
+      return () => {
+        mounted = false;
+      };
+    } else {
+      // Fall back to custom JWT system
+      let mounted = true;
+      loadUser().finally(() => {
+        if (mounted) setAuthLoading(false);
+      });
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [session, status]);
+
+  // Listen for real-time user updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = pusherClient.subscribe(`user-${user.id}`);
+    channel.bind("payment-approved", () => {
+      // Refresh user data
+      loadUser();
+      // Refresh session
+      update();
+    });
+
     return () => {
-      mounted = false;
+      channel.unbind_all();
+      pusherClient.unsubscribe(`user-${user.id}`);
     };
-  }, []);
+  }, [user?.id, update]);
 
   const login = (u: User) => setUser(u);
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     // Clear auth token and onboarding data
     localStorage.removeItem("auth_token");
     localStorage.removeItem("onboarding_category");
     localStorage.removeItem("onboarding_niche");
     localStorage.removeItem("onboarding_template");
+    // Call logout API to clear httpOnly cookie
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout API error:", error);
+    }
+    // Sign out from NextAuth if there's a session
+    if (session) {
+      await signOut({ callbackUrl: "/" });
+    }
   };
 
   return (

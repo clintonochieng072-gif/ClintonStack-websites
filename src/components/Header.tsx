@@ -15,7 +15,7 @@ import { useGlobal } from "@/context/GlobalContext";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getAuthHeaders, apiPost } from "@/lib/utils";
-import PaymentModal from "@/components/PaymentModal";
+import ManualPaymentModal from "@/components/ManualPaymentModal";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -28,6 +28,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useGlobal();
   const router = useRouter();
   const { data: siteData } = useSWR("/api/site/me", fetcher);
+  const { data: notificationsData, mutate: mutateNotifications } = useSWR(
+    "/api/notifications",
+    fetcher
+  );
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -43,22 +47,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   const handlePublish = async () => {
-    // Check if subscription is active
-    if (user?.subscriptionStatus === "active") {
-      // Publish directly
-      setPublishing(true);
-      try {
-        await apiPost("/api/site/publish", { siteId: site?._id });
-        alert("Site published successfully!");
-      } catch (error: any) {
-        alert(`Error publishing site: ${error.message || error}`);
-      } finally {
-        setPublishing(false);
-      }
-    } else {
-      // Show payment modal
-      setShowPaymentModal(true);
-    }
+    // Always show manual payment modal for now
+    setShowPaymentModal(true);
   };
 
   const handleLogout = () => {
@@ -140,23 +130,71 @@ export default function Header({ onMenuClick }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <div className="p-4">
+              <div className="p-4 border-b">
                 <h4 className="font-semibold">Notifications</h4>
-                <p className="text-sm text-gray-600">You have no new notifications</p>
+                <p className="text-sm text-gray-600">
+                  {notificationsData?.unreadCount > 0
+                    ? `You have ${
+                        notificationsData.unreadCount
+                      } unread notification${
+                        notificationsData.unreadCount > 1 ? "s" : ""
+                      }`
+                    : "No new notifications"}
+                </p>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Welcome to your dashboard!</p>
-                  <p className="text-xs text-gray-500">Get started by exploring your website</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Site published successfully</p>
-                  <p className="text-xs text-gray-500">Your changes are now live</p>
-                </div>
-              </DropdownMenuItem>
+              <div className="max-h-80 overflow-y-auto">
+                {notificationsData?.notifications?.length > 0 ? (
+                  notificationsData.notifications.map((notification: any) => (
+                    <DropdownMenuItem key={notification._id} className="p-4">
+                      <div className="flex flex-col space-y-1 w-full">
+                        <div className="flex items-start justify-between">
+                          <p
+                            className={`text-sm font-medium ${
+                              !notification.read ? "font-semibold" : ""
+                            }`}
+                          >
+                            {notification.title}
+                          </p>
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(
+                            notification.createdAt
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <>
+                    <DropdownMenuItem className="p-4">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">
+                          Welcome to your dashboard!
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Get started by exploring your website
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="p-4">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">
+                          Site published successfully
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Your changes are now live
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -193,22 +231,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
+      {/* Manual Payment Modal */}
+      <ManualPaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onSuccess={async () => {
+        onSuccess={() => {
           setShowPaymentModal(false);
-          // Publish the site after payment
-          setPublishing(true);
-          try {
-            await apiPost("/api/site/publish", { siteId: site?._id });
-            alert("Site published successfully!");
-          } catch (error: any) {
-            alert(`Error publishing site: ${error.message || error}`);
-          } finally {
-            setPublishing(false);
-          }
+          // Note: Publishing will happen after admin approval
         }}
       />
     </header>

@@ -18,6 +18,7 @@ A multi-tenant SaaS platform that allows users to instantly get a fully function
 - TypeScript
 - Tailwind CSS
 - MongoDB + Mongoose
+- PostgreSQL + Prisma
 - SWR for data fetching
 
 ## Setup & Run
@@ -33,6 +34,7 @@ A multi-tenant SaaS platform that allows users to instantly get a fully function
 
    ```
    MONGODB_URI=mongodb://127.0.0.1:27017/clintonstack
+   DATABASE_URL=postgres://your-postgres-connection-string
    JWT_SECRET=your-secret-here
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
    ```
@@ -97,6 +99,7 @@ Located in `niches/*.json`. Example:
 2. **Environment Variables**: In Vercel dashboard, set the following environment variables (copy from `.env.example`):
 
    - `MONGODB_URI`
+   - `DATABASE_URL`
    - `JWT_SECRET`
    - `CLOUDINARY_CLOUD_NAME`
    - `CLOUDINARY_API_KEY`

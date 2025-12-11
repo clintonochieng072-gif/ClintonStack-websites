@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import FloatingButtons from "./public/FloatingButtons";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -39,6 +40,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <main className="lg:ml-64 mt-16 p-4 sm:p-6 lg:p-8">{children}</main>
+
+      {/* Floating support buttons */}
+      <FloatingButtons
+        phoneNumber="+254768524480"
+        whatsappNumber="+254768524480"
+      />
     </div>
   );
 }

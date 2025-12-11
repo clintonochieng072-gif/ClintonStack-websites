@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) =>
+  fetch(url, { credentials: "include" }).then((r) => r.json());
 
 const niches = [
   {
@@ -93,12 +95,20 @@ const niches = [
 
 export default function NichesPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { data: sitesData, error } = useSWR("/api/site/me?all=true", fetcher);
   const [userSites, setUserSites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creatingSite, setCreatingSite] = useState<string | null>(null);
 
   useEffect(() => {
-    if (sitesData) {
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (sitesData && status === "authenticated") {
       const sites = sitesData.data || [];
       setUserSites(sites);
 
@@ -116,9 +126,14 @@ export default function NichesPage() {
     } else if (error) {
       setLoading(false);
     }
-  }, [sitesData, error, router]);
+  }, [sitesData, error, status, router]);
 
   const handleNicheSelect = async (nicheId: string) => {
+    if (!session) {
+      console.error("No session available");
+      return;
+    }
+
     const existingSite = userSites.find((site) => site.niche === nicheId);
 
     if (existingSite) {
@@ -126,6 +141,7 @@ export default function NichesPage() {
       router.push(`/dashboard/${nicheId}`);
     } else {
       // Create new site
+      setCreatingSite(nicheId);
       try {
         const response = await fetch("/api/site", {
           method: "POST",
@@ -138,20 +154,27 @@ export default function NichesPage() {
           const newSite = await response.json();
           router.push(`/dashboard/${nicheId}`);
         } else {
-          console.error("Failed to create site");
+          const errorText = await response.text();
+          console.error("Failed to create site:", response.status, errorText);
         }
       } catch (error) {
         console.error("Error creating site:", error);
+      } finally {
+        setCreatingSite(null);
       }
     }
   };
 
-  if (loading) {
+  if (loading || status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your sites...</p>
+          <p className="text-gray-600">
+            {status === "loading"
+              ? "Authenticating..."
+              : "Loading your sites..."}
+          </p>
         </div>
       </div>
     );
@@ -215,8 +238,14 @@ export default function NichesPage() {
                     <Button
                       className="w-full group-hover:bg-opacity-90 transition-colors"
                       variant={hasSite ? "outline" : "default"}
+                      disabled={creatingSite === niche.id}
                     >
-                      {hasSite ? (
+                      {creatingSite === niche.id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                          Creating...
+                        </>
+                      ) : hasSite ? (
                         <>
                           Continue
                           <ArrowRight className="w-4 h-4 ml-2" />

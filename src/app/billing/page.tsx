@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import SubscriptionDashboard from "@/components/SubscriptionDashboard";
 import PaymentModal from "@/components/PaymentModal";
+import ManualPaymentForm from "@/components/ManualPaymentForm";
 
 interface BillingHistory {
   id: string;
@@ -35,7 +36,7 @@ interface PaymentMethod {
 
 export default function BillingPage() {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "history" | "methods"
+    "overview" | "history" | "methods" | "manual"
   >("overview");
   const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -88,6 +89,7 @@ export default function BillingPage() {
     { id: "overview", label: "Overview", icon: CreditCard },
     { id: "history", label: "Billing History", icon: Receipt },
     { id: "methods", label: "Payment Methods", icon: Calendar },
+    { id: "manual", label: "Manual Payment", icon: CreditCard },
   ];
 
   const getStatusColor = (status: string) => {
@@ -320,6 +322,25 @@ export default function BillingPage() {
                   Add Payment Method
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "manual" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-6 h-6" />
+                Manual Payment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ManualPaymentForm
+                onSuccess={() => {
+                  // Refresh the page to show updated status
+                  window.location.reload();
+                }}
+              />
             </CardContent>
           </Card>
         )}

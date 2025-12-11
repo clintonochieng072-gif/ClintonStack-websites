@@ -22,6 +22,12 @@ export default function DashboardRedirect() {
         return;
       }
 
+      // Check onboarding for clients
+      if (user.role === "client" && !user.onboarded) {
+        router.replace("/onboarding/niches");
+        return;
+      }
+
       // Default to client dashboard
       router.replace("/dashboard/real-estate");
     }

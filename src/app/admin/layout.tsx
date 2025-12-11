@@ -17,6 +17,8 @@ import {
   FileText,
   BarChart3,
   X,
+  CreditCard,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +34,18 @@ const sidebarMenuItems = [
     href: "/admin/user-management",
     icon: Users,
     description: "Manage users & accounts",
+  },
+  {
+    name: "Payments",
+    href: "/admin/payments",
+    icon: CreditCard,
+    description: "Manual payment approvals",
+  },
+  {
+    name: "Affiliates",
+    href: "/admin/affiliate",
+    icon: UserCheck,
+    description: "Affiliate tracking & earnings",
   },
   {
     name: "Site Management",

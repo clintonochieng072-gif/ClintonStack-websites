@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { Site } from "@/lib/models/Site";
 import jwt from "jsonwebtoken";
-import User from "@/lib/models/User";
+import { usersRepo } from "@/repositories/usersRepo";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth-config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,28 +23,48 @@ function addNoCacheHeaders(response: NextResponse) {
 
 async function getUserFromRequest(request: NextRequest) {
   try {
+    // First try JWT token
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.replace("Bearer ", "");
-    if (!token) return null;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) return null;
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      if (decoded.userId) {
+        // Use PostgreSQL for user lookup
+        const user = await usersRepo.findById(decoded.userId);
 
-    await dbConnect();
-    const user = await User.findById(decoded.userId)
-      .select("email onboarded username niche role")
-      .lean();
+        if (user) {
+          return {
+            id: user.id,
+            email: user.email,
+            onboarded: user.onboarded,
+            username: user.username,
+            niche: null, // Not in current schema
+            role: user.role || "client",
+          };
+        }
+      }
+    }
 
-    if (!user) return null;
+    // If no JWT, try NextAuth session
+    const session = await auth();
+    if (session?.user?.email) {
+      // Use PostgreSQL for user lookup
+      const user = await usersRepo.findByEmail(session.user.email);
 
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      onboarded: user.onboarded === true,
-      username: user.username,
-      niche: user.niche || null,
-      role: user.role || "user",
-    };
+      if (user) {
+        return {
+          id: user.id,
+          email: user.email,
+          onboarded: user.onboarded,
+          username: user.username,
+          niche: null, // Not in current schema
+          role: user.role || "client",
+        };
+      }
+    }
+
+    return null;
   } catch (e) {
     return null;
   }
@@ -80,9 +102,51 @@ export async function POST(request: NextRequest) {
       published: true,
     });
 
+    // Mark user as onboarded in PostgreSQL
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { onboarded: true },
+    });
+
     return addNoCacheHeaders(NextResponse.json({ data: site }));
   } catch (error) {
     console.error("Error creating site:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await dbConnect();
+    const user = await getUserFromRequest(request);
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { title, description, niche, seoTitle, seoDescription } =
+      await request.json();
+
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (niche !== undefined) updateData.niche = niche;
+    if (seoTitle !== undefined) updateData.seoTitle = seoTitle;
+    if (seoDescription !== undefined)
+      updateData.seoDescription = seoDescription;
+
+    const site = await Site.findOneAndUpdate({ ownerId: user.id }, updateData, {
+      new: true,
+    });
+
+    if (!site) {
+      return NextResponse.json({ error: "Site not found" }, { status: 404 });
+    }
+
+    return addNoCacheHeaders(NextResponse.json({ data: site }));
+  } catch (error) {
+    console.error("Error updating site:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

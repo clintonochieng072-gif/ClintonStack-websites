@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { nanoid } from "nanoid";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -64,4 +65,12 @@ export async function apiPost(path: string, body: any) {
     throw new Error(`API POST ${path} failed: ${res.status} ${text}`);
   }
   return res.json();
+}
+
+export function generateClientId() {
+  return "CLIENT-" + nanoid(10).toUpperCase();
+}
+
+export function generateReferralCode() {
+  return "AFF-" + nanoid(10).toUpperCase();
 }

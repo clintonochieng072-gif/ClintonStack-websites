@@ -139,7 +139,8 @@ export default function NichesPage() {
           const newSite = await response.json();
           router.push(`/dashboard/${nicheId}`);
         } else {
-          console.error("Failed to create site");
+          const errorText = await response.text();
+          console.error("Failed to create site:", response.status, errorText);
         }
       } catch (error) {
         console.error("Error creating site:", error);

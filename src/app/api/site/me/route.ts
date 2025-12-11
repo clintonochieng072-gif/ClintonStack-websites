@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { Site } from "@/lib/models/Site";
 import jwt from "jsonwebtoken";
-import User from "@/lib/models/User";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth-config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,28 +22,64 @@ function addNoCacheHeaders(response: NextResponse) {
 
 async function getUserFromRequest(request: NextRequest) {
   try {
+    // First try JWT token
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.replace("Bearer ", "");
-    if (!token) return null;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) return null;
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      if (decoded.userId) {
+        const user = await prisma.user.findUnique({
+          where: { id: decoded.userId },
+          select: {
+            id: true,
+            email: true,
+            onboarded: true,
+            username: true,
+            role: true,
+          },
+        });
 
-    await dbConnect();
-    const user = await User.findById(decoded.userId)
-      .select("email onboarded username niche role")
-      .lean();
+        if (user) {
+          return {
+            id: user.id,
+            email: user.email,
+            onboarded: user.onboarded,
+            username: user.username,
+            niche: null, // Not in PostgreSQL schema
+            role: user.role,
+          };
+        }
+      }
+    }
 
-    if (!user) return null;
+    // If no JWT, try NextAuth session
+    const session = await auth();
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          id: true,
+          email: true,
+          onboarded: true,
+          username: true,
+          role: true,
+        },
+      });
 
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      onboarded: user.onboarded === true,
-      username: user.username,
-      niche: user.niche || null,
-      role: user.role || "user",
-    };
+      if (user) {
+        return {
+          id: user.id,
+          email: user.email,
+          onboarded: user.onboarded,
+          username: user.username,
+          niche: null, // Not in PostgreSQL schema
+          role: user.role,
+        };
+      }
+    }
+
+    return null;
   } catch (e) {
     return null;
   }

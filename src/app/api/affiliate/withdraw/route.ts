@@ -4,7 +4,6 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import WithdrawalRequest from "@/lib/models/WithdrawalRequest";
 import { logger } from "@/lib/logger";
-import { intaSendService } from "@/lib/intasend";
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,73 +77,34 @@ export async function POST(request: NextRequest) {
 
     await withdrawalRequest.save();
 
-    // Attempt immediate payout
-    const payoutResult = await intaSendService.initiatePayout({
-      amount: withdrawalAmount,
-      phoneNumber,
-      reference: `WITHDRAWAL-${withdrawalRequest._id}`,
-    });
-
-    let finalStatus: "completed" | "failed" = "failed";
-    let transactionId: string | undefined;
-    let failureReason: string | undefined;
-
-    if (payoutResult.success) {
-      finalStatus = "completed";
-      transactionId = payoutResult.data?.transaction_id;
-      // Deduct from available balance only on successful payout
-      user.availableBalance = (user.availableBalance || 0) - withdrawalAmount;
-    } else {
-      failureReason = payoutResult.message;
-      // Don't deduct balance on failure
-    }
-
-    // Update withdrawal request
-    withdrawalRequest.status = finalStatus;
-    withdrawalRequest.transactionId = transactionId;
-    withdrawalRequest.failureReason = failureReason;
-    withdrawalRequest.processedAt = new Date();
-    await withdrawalRequest.save();
+    // Withdrawal requests are now processed manually by admin
+    // Just create the request as pending
 
     // Add to withdrawal history
     if (!user.withdrawalHistory) user.withdrawalHistory = [];
     user.withdrawalHistory.push({
       withdrawalId: withdrawalRequest._id.toString(),
       amount: withdrawalAmount,
-      status: finalStatus,
+      status: "pending",
       requestedAt: new Date(),
-      processedAt: new Date(),
       phoneNumber,
     });
 
     await user.save();
 
-    logger.info("Withdrawal processed", {
+    logger.info("Withdrawal request created", {
       userId: user._id,
       withdrawalId: withdrawalRequest._id,
       amount: withdrawalAmount,
       phoneNumber,
-      status: finalStatus,
-      transactionId,
-      failureReason,
+      status: "pending",
     });
 
-    if (finalStatus === "completed") {
-      return NextResponse.json({
-        message: "Withdrawal completed successfully",
-        withdrawalId: withdrawalRequest._id,
-        transactionId,
-      });
-    } else {
-      return NextResponse.json(
-        {
-          error: "Withdrawal failed",
-          details: failureReason,
-          withdrawalId: withdrawalRequest._id,
-        },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json({
+      message:
+        "Withdrawal request submitted successfully. It will be processed manually.",
+      withdrawalId: withdrawalRequest._id,
+    });
   } catch (error) {
     console.error("Error processing withdrawal:", error);
     return NextResponse.json(

@@ -6,6 +6,9 @@ export interface ISite extends Document {
   slug: string;
   niche: string | null;
   title?: string;
+  description?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   published?: boolean;
   integrations: {
     phoneNumber?: string;
@@ -79,6 +82,9 @@ const SiteSchema = new Schema<ISite>(
     slug: { type: String, required: true, index: true, unique: true },
     niche: { type: String, default: null },
     title: { type: String },
+    description: { type: String },
+    seoTitle: { type: String },
+    seoDescription: { type: String },
     published: { type: Boolean, default: false },
     integrations: {
       phoneNumber: { type: String, default: "" },

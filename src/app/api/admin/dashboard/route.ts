@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { Site } from "@/lib/models/Site";
-import User from "@/lib/models/User";
+import { usersRepo } from "@/repositories/usersRepo";
 import { getUserFromToken } from "@/lib/auth";
 
 const isAdmin = (user: any) => user.email === "clintonochieng072@gmail.com";
@@ -21,32 +21,42 @@ export async function GET(request: NextRequest) {
       const page = parseInt(searchParams.get("page") || "1");
       const size = parseInt(searchParams.get("size") || "10");
 
-      const skip = (page - 1) * size;
+      const offset = (page - 1) * size;
 
-      const totalUsers = await User.countDocuments();
-      const users = await User.find({})
-        .select(
-          "username email has_paid is_first_login isLocked status createdAt lastLogin"
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(size)
-        .lean();
+      // Get users from PostgreSQL
+      const userStats = await usersRepo.getStats();
+      const usersResult = await usersRepo.list({
+        limit: size,
+        offset,
+      });
+
+      // Transform to match expected format
+      const users = usersResult.map((u: any) => ({
+        username: u.username,
+        email: u.email,
+        has_paid: false, // Not in current schema
+        is_first_login: true, // Not in current schema
+        isLocked: false, // Not in current schema
+        status: "active", // Not in current schema
+        createdAt: u.createdAt,
+        lastLogin: null, // Not in current schema
+      }));
 
       return NextResponse.json({
         users,
         pagination: {
           page,
           size,
-          total: totalUsers,
-          totalPages: Math.ceil(totalUsers / size),
+          total: userStats.total,
+          totalPages: Math.ceil(userStats.total / size),
         },
       });
     }
 
-    // Regular user dashboard
+    // Regular user dashboard - site data from MongoDB, user from PostgreSQL
+    await dbConnect();
     const site = await Site.findOne({ ownerId: user.id });
-    const userData = await User.findById(user.id).select("-password");
+    const userData = await usersRepo.findById(user.id);
 
     return NextResponse.json({
       user: userData,

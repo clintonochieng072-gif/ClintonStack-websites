@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
-import WithdrawalRequest from "@/lib/models/WithdrawalRequest";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,10 +16,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    await dbConnect();
-
     // Get user and verify admin role
-    const admin = await User.findById(decoded.userId);
+    const admin = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { role: true },
+    });
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,41 +31,39 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
-    // Build query
-    const query: any = {};
+    // Build where clause
+    const where: any = {};
     if (status && status !== "all") {
-      query.status = status;
+      where.status = status;
     }
 
     // Get withdrawals with pagination
-    const withdrawals = await WithdrawalRequest.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    const withdrawals = await prisma.withdrawalRequest.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        user: { select: { name: true, email: true, username: true } },
+      },
+    });
 
     // Get total count
-    const total = await WithdrawalRequest.countDocuments(query);
-
-    // Get unique user IDs
-    const userIds = [...new Set(withdrawals.map((w) => w.userId))];
-
-    // Fetch user details
-    const users = await User.find({ _id: { $in: userIds } })
-      .select("name email username")
-      .lean();
+    const total = await prisma.withdrawalRequest.count({ where });
 
     // Create user map
-    const userMap = users.reduce((map, user) => {
-      map[user._id.toString()] = user;
+    const userMap = withdrawals.reduce((map, withdrawal) => {
+      if (withdrawal.user) {
+        map[withdrawal.userId] = withdrawal.user;
+      }
       return map;
     }, {} as Record<string, any>);
 
     // Format response
     const formattedWithdrawals = withdrawals.map((withdrawal) => {
-      const user = userMap[withdrawal.userId];
+      const user = withdrawal.user;
       return {
-        id: withdrawal._id,
+        id: withdrawal.id,
         userId: withdrawal.userId,
         userName: user?.name || "Unknown",
         userEmail: user?.email || "Unknown",

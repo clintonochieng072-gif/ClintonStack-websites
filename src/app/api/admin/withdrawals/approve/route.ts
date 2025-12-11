@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import WithdrawalRequest from "@/lib/models/WithdrawalRequest";
-import { intaSendService } from "@/lib/intasend";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,65 +68,29 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "approve") {
-      // Initiate payout via IntaSend
-      const payoutResult = await intaSendService.initiatePayout({
-        amount: withdrawal.amount,
-        phoneNumber: withdrawal.phoneNumber,
-        reference: `WITHDRAWAL-${withdrawal._id}`,
-      });
+      // Mark as completed (manual payout assumed)
+      withdrawal.status = "completed";
+      withdrawal.processedAt = new Date();
+      await withdrawal.save();
 
-      if (payoutResult.success) {
-        // Update withdrawal status
-        withdrawal.status = "completed";
-        withdrawal.transactionId = payoutResult.data?.transaction_id;
-        withdrawal.processedAt = new Date();
-        await withdrawal.save();
+      // Deduct from available balance
+      affiliate.availableBalance =
+        (affiliate.availableBalance || 0) - withdrawal.amount;
 
-        // Update user's withdrawal history
-        const historyEntry = affiliate.withdrawalHistory?.find(
-          (h) => h.withdrawalId === withdrawalId
-        );
-        if (historyEntry) {
-          historyEntry.status = "completed";
-          historyEntry.processedAt = new Date();
-        }
-
-        await affiliate.save();
-
-        return NextResponse.json({
-          message: "Withdrawal approved and payout initiated successfully",
-          transactionId: payoutResult.data?.transaction_id,
-        });
-      } else {
-        // Payout failed
-        withdrawal.status = "failed";
-        withdrawal.failureReason = payoutResult.message;
-        withdrawal.processedAt = new Date();
-        await withdrawal.save();
-
-        // Refund amount to available balance
-        affiliate.availableBalance =
-          (affiliate.availableBalance || 0) + withdrawal.amount;
-
-        // Update withdrawal history
-        const historyEntry = affiliate.withdrawalHistory?.find(
-          (h) => h.withdrawalId === withdrawalId
-        );
-        if (historyEntry) {
-          historyEntry.status = "failed";
-          historyEntry.processedAt = new Date();
-        }
-
-        await affiliate.save();
-
-        return NextResponse.json(
-          {
-            error: "Payout failed",
-            details: payoutResult.message,
-          },
-          { status: 500 }
-        );
+      // Update user's withdrawal history
+      const historyEntry = affiliate.withdrawalHistory?.find(
+        (h: any) => h.withdrawalId === withdrawalId
+      );
+      if (historyEntry) {
+        historyEntry.status = "completed";
+        historyEntry.processedAt = new Date();
       }
+
+      await affiliate.save();
+
+      return NextResponse.json({
+        message: "Withdrawal approved successfully",
+      });
     } else if (action === "reject") {
       // Reject the withdrawal
       withdrawal.status = "failed";
@@ -141,7 +104,7 @@ export async function POST(request: NextRequest) {
 
       // Update withdrawal history
       const historyEntry = affiliate.withdrawalHistory?.find(
-        (h) => h.withdrawalId === withdrawalId
+        (h: any) => h.withdrawalId === withdrawalId
       );
       if (historyEntry) {
         historyEntry.status = "failed";

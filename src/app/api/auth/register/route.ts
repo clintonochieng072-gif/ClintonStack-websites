@@ -1,44 +1,40 @@
-import jwt from "jsonwebtoken";
+// src/app/api/auth/register/route.ts
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
-import Referral from "@/lib/models/Referral";
-import Product from "@/lib/models/Product";
+import jwt from "jsonwebtoken";
+import { generateClientId } from "@/lib/utils";
+import { usersRepo } from "@/repositories/usersRepo";
+import { affiliatesRepo } from "@/repositories/affiliatesRepo";
+import { referralsRepo } from "@/repositories/referralsRepo";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { name, username, email, password, role, referralCode, productSlug } =
-      await request.json();
+    const {
+      name,
+      username,
+      email,
+      password,
+      role = "client",
+      referralCode,
+      productSlug,
+    } = await req.json();
 
+    // Basic validation
     if (!name || !username || !email || !password) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "Name, username, email, and password are required" },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
-      );
-    }
+    // Check if user already exists in PostgreSQL
+    const existingUserByEmail = await usersRepo.findByEmail(email);
+    const existingUserByUsername = await usersRepo.findByUsername(username);
 
-    await dbConnect();
-
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [
-        { email: email.toLowerCase() },
-        { username: username.toLowerCase() },
-      ],
-    });
-
-    if (existingUser) {
+    if (existingUserByEmail || existingUserByUsername) {
       return NextResponse.json(
         { error: "User with this email or username already exists" },
-        { status: 409 }
+        { status: 400 }
       );
     }
 
@@ -46,114 +42,146 @@ export async function POST(request: NextRequest) {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Determine role
-    const userRole = role || "client";
-
-    // Handle referral logic
-    let referrerId = null;
-    let generatedReferralCode = null;
-    let productId = null;
-
-    if (userRole === "affiliate") {
-      // Generate unique referral code for affiliate
-      generatedReferralCode = `AFF${Date.now()}${Math.random()
-        .toString(36)
-        .substr(2, 5)
-        .toUpperCase()}`;
-    } else if (userRole === "client" && referralCode) {
-      // Find referrer by referral code
-      const referrer = await User.findOne({ referralCode, role: "affiliate" });
-      if (referrer) {
-        // Self-referral prevention
-        if (referrer.email === email.toLowerCase()) {
-          return NextResponse.json(
-            { error: "You cannot refer yourself" },
-            { status: 400 }
-          );
-        }
-
-        // Check for duplicate accounts (same email domain or similar patterns)
-        const emailDomain = email.split('@')[1];
-        const referrerEmailDomain = referrer.email.split('@')[1];
-
-        // Prevent multiple accounts from same domain
-        const existingUsersFromDomain = await User.countDocuments({
-          email: { $regex: `@${emailDomain}$`, $options: 'i' },
-          role: "client"
-        });
-
-        if (existingUsersFromDomain >= 2) {
-          return NextResponse.json(
-            { error: "Multiple accounts from the same email domain are not allowed" },
-            { status: 400 }
-          );
-        }
-
-        referrerId = referrer._id.toString();
-      }
-
-      // Find product by slug if provided
-      if (productSlug) {
-        const product = await Product.findOne({
-          slug: productSlug,
-          isActive: true,
-        });
-        if (product) {
-          productId = product._id.toString();
-        }
+    // Generate unique referral code only for affiliates
+    let uniqueReferralCode = null;
+    if (role === "affiliate") {
+      try {
+        uniqueReferralCode = await usersRepo.generateUniqueReferralCode();
+      } catch (error) {
+        console.error("Failed to generate unique referral code:", error);
+        return NextResponse.json(
+          { error: "Failed to generate unique referral code" },
+          { status: 500 }
+        );
       }
     }
 
-    // Create new user
-    const newUser = new User({
+    // Generate clientId for all users
+    const clientId = generateClientId();
+
+    // Handle referral logic if referralCode is provided
+    let referredById = null;
+    if (referralCode) {
+      const referrer = await usersRepo.findByReferralCode(
+        referralCode.toUpperCase()
+      );
+
+      // Validate referrer exists AND has affiliate role
+      if (referrer && referrer.role === "affiliate") {
+        // Prevent affiliates from referring other affiliates
+        if (role === "affiliate") {
+          return NextResponse.json(
+            { error: "Affiliates cannot refer other affiliates" },
+            { status: 400 }
+          );
+        }
+        referredById = referrer.id;
+      }
+      // If referrer not found or not an affiliate, silently ignore (no error)
+    }
+
+    // Create user in PostgreSQL
+    const pgUser = await usersRepo.create({
       name,
       username: username.toLowerCase(),
       email: email.toLowerCase(),
       passwordHash,
-      role: userRole,
-      onboarded: false,
-      emailVerified: true,
-      referralCode: generatedReferralCode,
-      referrerId,
+      role,
+      referralCode: role === "affiliate" ? uniqueReferralCode : null,
+      clientId,
+      referredById,
+      emailVerified: false,
+      onboarded: role === "affiliate",
     });
 
-    await newUser.save();
-
-    // Create referral record if referred
-    if (referrerId) {
-      await Referral.create({
-        clientId: newUser._id.toString(),
-        referrerId,
-        productId: productId || null,
-        signupDate: new Date(),
-        paymentStatus: "pending",
-        commissionEarned: 0,
+    // Create affiliate profile if role is affiliate
+    if (role === "affiliate") {
+      await affiliatesRepo.create({
+        userId: pgUser.id,
       });
     }
 
-    // Create JWT token
+    // Create referral if referred
+    if (referredById) {
+      const referrer = await usersRepo.findById(referredById);
+      if (referrer?.affiliate) {
+        await referralsRepo.create({
+          affiliateId: referrer.affiliate.id,
+          referredUserId: pgUser.id,
+        });
+      }
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
-      { userId: newUser._id.toString() },
-      process.env.JWT_SECRET!,
+      {
+        userId: pgUser.id,
+        email: pgUser.email,
+        role: pgUser.role,
+      },
+      process.env.JWT_SECRET || "fallback-secret",
       { expiresIn: "7d" }
     );
 
-    // Return user data and token
+    // Return user data and token (map PostgreSQL fields to expected format)
     const userData = {
-      id: newUser._id.toString(),
-      email: newUser.email,
-      onboarded: newUser.onboarded,
-      username: newUser.username,
-      niche: newUser.niche,
-      role: newUser.role,
+      id: pgUser.id,
+      name: pgUser.name,
+      username: pgUser.username,
+      email: pgUser.email,
+      role: pgUser.role,
+      onboarded: pgUser.onboarded,
+      emailVerified: pgUser.emailVerified,
+      referralCode: pgUser.referralCode,
+      clientId: pgUser.clientId,
+      // Legacy fields for compatibility (set defaults if not in schema)
+      category: null,
+      niche: null,
+      avatarUrl: null,
+      plan: null,
+      status: "active",
+      customDomain: null,
+      has_paid: false,
+      is_first_login: false,
+      subscriptionStatus: "trial",
+      subscriptionType: null,
+      trialEndsAt: null,
+      availableBalance: 0,
+      totalEarned: 0,
     };
 
-    return NextResponse.json({
-      user: userData,
+    const response = NextResponse.json({
+      message: "User registered successfully",
       token,
+      user: userData,
     });
-  } catch (error) {
-    console.error("Error in /api/auth/register:", error);
+
+    // Set httpOnly cookie for middleware
+    response.cookies.set("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    return response;
+  } catch (error: any) {
+    console.error("Registration error:", error);
+
+    // Handle duplicate key error specifically
+    if (error.code === 11000) {
+      if (error.message.includes("referralCode")) {
+        return NextResponse.json(
+          { error: "Referral code conflict. Please try again." },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json(
+        { error: "User with this email or username already exists" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

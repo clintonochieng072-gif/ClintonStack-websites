@@ -1,19 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useGlobalContext } from "@/context/GlobalContext";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const { login } = useGlobalContext();
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      setEmail(session.user.email);
+    }
+
+    if (!searchParams) return;
+
+    // Check for URL params
+    const emailParam = searchParams.get("email");
+    const errorParam = searchParams.get("error");
+
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    }
+  }, [session, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +64,11 @@ export default function LoginPage() {
       // Update global context
       login(data.user);
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Extract redirect path from header
+      const redirect = response.headers.get("X-Redirect") || "/dashboard";
+
+      // Redirect user
+      window.location.href = redirect;
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -98,7 +124,7 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
@@ -120,5 +146,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

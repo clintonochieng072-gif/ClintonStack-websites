@@ -17,6 +17,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { apiPut } from "@/lib/utils";
 
 export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
@@ -44,24 +45,76 @@ export default function SettingsPage() {
     confirmPassword: "",
   });
 
-  const handleSaveProfile = () => {
-    // TODO: Implement save
-    console.log("Saving profile:", profileData);
+  const handleSaveProfile = async () => {
+    try {
+      await apiPut("/api/auth/me", {
+        name: profileData.name,
+        email: profileData.email,
+        avatar: profileData.avatar,
+      });
+      console.log("Profile saved successfully");
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+    }
   };
 
-  const handleSaveWebsite = () => {
-    // TODO: Implement save
-    console.log("Saving website:", websiteData);
+  const handleSaveWebsite = async () => {
+    try {
+      await apiPut("/api/site", {
+        title: websiteData.title,
+        description: websiteData.description,
+        niche: websiteData.niche,
+        seoTitle: websiteData.seoTitle,
+        seoDescription: websiteData.seoDescription,
+      });
+      console.log("Website settings saved successfully");
+    } catch (error) {
+      console.error("Failed to save website settings:", error);
+    }
   };
 
-  const handleSaveDomain = () => {
-    // TODO: Implement save
-    console.log("Saving domain:", domainData);
+  const handleSaveDomain = async () => {
+    try {
+      await apiPut("/api/auth/domain", {
+        customDomain: domainData.customDomain,
+      });
+      console.log("Domain saved successfully");
+    } catch (error) {
+      console.error("Failed to save domain:", error);
+    }
   };
 
-  const handleSaveSecurity = () => {
-    // TODO: Implement save
-    console.log("Saving security:", securityData);
+  const handleSaveSecurity = async () => {
+    try {
+      const response = await fetch("/api/auth/password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: securityData.currentPassword,
+          newPassword: securityData.newPassword,
+          confirmPassword: securityData.confirmPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update password");
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+
+      // Clear form
+      setSecurityData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      console.error("Failed to update password:", error);
+    }
   };
 
   const FormField = ({
