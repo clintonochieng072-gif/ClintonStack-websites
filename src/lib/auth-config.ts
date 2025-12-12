@@ -217,7 +217,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.tempPassword = (user as any).tempPassword;
         // Fetch fresh has_paid
         if (user?.id) {
-          const freshUser = await usersRepo.findById(user.id);
+          const freshUser = await usersRepo.findById(user.id!);
           token.has_paid = freshUser?.has_paid || false;
           token.subscriptionStatus = freshUser?.subscriptionStatus;
         }
@@ -235,10 +235,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     async session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.role = token.role as string;
-      session.user.onboarded = token.onboarded as boolean;
-      session.user.referralCode = token.referralCode as string;
-      session.user.tempPassword = token.tempPassword as string;
+      (session.user as any).role = token.role as string;
+      (session.user as any).onboarded = token.onboarded as boolean;
+      (session.user as any).referralCode = token.referralCode as string;
+      (session.user as any).tempPassword = token.tempPassword as string;
       (session.user as any).has_paid = token.has_paid as boolean;
       (session.user as any).subscriptionStatus =
         token.subscriptionStatus as string;
