@@ -154,10 +154,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
 
             user.id = newUser.id;
-            user.role = newUser.role;
-            user.onboarded = newUser.onboarded;
-            user.referralCode = newUser.referralCode || undefined;
-            user.tempPassword = tempPassword;
+            (user as any).role = newUser.role;
+            (user as any).onboarded = newUser.onboarded;
+            (user as any).referralCode = newUser.referralCode || undefined;
+            (user as any).tempPassword = tempPassword;
           } else {
             console.log("👤 Existing user found:", existingUser.email);
 
@@ -192,10 +192,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
 
             user.id = existingUser.id;
-            user.role = existingUser.role;
-            user.onboarded = existingUser.onboarded;
-            user.referralCode = existingUser.referralCode || undefined;
-            user.tempPassword = "google";
+            (user as any).role = existingUser.role;
+            (user as any).onboarded = existingUser.onboarded;
+            (user as any).referralCode = existingUser.referralCode || undefined;
+            (user as any).tempPassword = "google";
           }
 
           return true;
