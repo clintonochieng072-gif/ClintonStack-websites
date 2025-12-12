@@ -29,31 +29,31 @@ const PublishButton = ({ siteId }: { siteId: string }) => {
   const checkingPayment = authLoading && localUserHasPaid === null;
 
   // Fetch fresh user data to check payment status
-  useEffect(() => {
-    const checkUserStatus = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
-        console.log("Fresh user data from /api/auth/me:", data);
-        if (data.user) {
-          const hasPaid =
-            data.user.has_paid ||
-            data.user.role === "admin" ||
-            data.user.email === "clintonochieng072@gmail.com";
-          console.log("Calculated hasPaid:", hasPaid, "from", {
-            has_paid: data.user.has_paid,
-            role: data.user.role,
-            email: data.user.email,
-          });
-          setLocalUserHasPaid(hasPaid);
-        } else {
-          console.log("No user data in response");
-        }
-      } catch (error) {
-        console.error("Error checking user status:", error);
+  const checkUserStatus = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      console.log("PublishButton: Fresh user data from /api/auth/me:", data);
+      if (data.user) {
+        const hasPaid =
+          data.user.has_paid ||
+          data.user.role === "admin" ||
+          data.user.email === "clintonochieng072@gmail.com";
+        console.log("PublishButton: Calculated hasPaid:", hasPaid, "from", {
+          has_paid: data.user.has_paid,
+          role: data.user.role,
+          email: data.user.email,
+        });
+        setLocalUserHasPaid(hasPaid);
+      } else {
+        console.log("PublishButton: No user data in response");
       }
-    };
+    } catch (error) {
+      console.error("PublishButton: Error checking user status:", error);
+    }
+  };
 
+  useEffect(() => {
     if (!authLoading && user) {
       checkUserStatus();
 
@@ -91,8 +91,11 @@ const PublishButton = ({ siteId }: { siteId: string }) => {
 
       if (res.ok && data.success) {
         setMessage(data.message || "Site published successfully!");
+        alert("Site published successfully!");
       } else {
-        setMessage(data.message || "Failed to publish site.");
+        const errorData = await res.json().catch(() => ({}));
+        setMessage(errorData.error || data.message || "Failed to publish site.");
+        alert(`Failed to publish: ${errorData.error || data.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error(error);
@@ -123,19 +126,29 @@ const PublishButton = ({ siteId }: { siteId: string }) => {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <Button
-          onClick={handlePublish}
-          disabled={loading}
-          variant="default"
-          className="bg-green-600 hover:bg-green-700"
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          {loading
-            ? "Publishing..."
-            : userHasPaid
-            ? "Publish Site"
-            : "Subscribe to Publish"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handlePublish}
+            disabled={loading}
+            variant="default"
+            className="bg-green-600 hover:bg-green-700 flex-1"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            {loading
+              ? "Publishing..."
+              : userHasPaid
+              ? "Publish Site"
+              : "Subscribe to Publish"}
+          </Button>
+          <Button
+            onClick={checkUserStatus}
+            variant="outline"
+            size="sm"
+            title="Refresh payment status"
+          >
+            ↻
+          </Button>
+        </div>
 
         {message && (
           <div

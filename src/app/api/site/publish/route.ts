@@ -3,7 +3,6 @@
 import { Site } from "@/lib/models/Site";
 import { auth } from "@/lib/auth-config";
 import { usersRepo } from "@/repositories/usersRepo";
-import User from "@/lib/models/User";
 import { connectDb } from "@/lib/db";
 
 export async function POST(req: Request) {
@@ -49,25 +48,11 @@ export async function POST(req: Request) {
       siteSlug: site.slug,
     });
 
-    // Find MongoDB user by email to get the correct ownerId
-    const mongoUser = await User.findOne({ email: user.email });
-    if (!mongoUser) {
-      console.log("Publish: MongoDB user not found for email", user.email);
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-      });
-    }
-
-    console.log("Publish: MongoDB user found", {
-      mongoUserId: mongoUser._id,
-      hasPaid: mongoUser.has_paid,
-    });
-
-    // Check ownership using MongoDB user ID
-    if (String(site.ownerId) !== String(mongoUser._id)) {
+    // Check ownership using PostgreSQL user ID (sites store PostgreSQL user IDs as ownerId)
+    if (String(site.ownerId) !== String(user.id)) {
       console.log("Publish: Ownership check failed", {
         siteOwnerId: site.ownerId,
-        mongoUserId: mongoUser._id,
+        pgUserId: user.id,
       });
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
@@ -77,14 +62,12 @@ export async function POST(req: Request) {
     console.log("Publish: Ownership check passed");
 
     // Check if user has been approved by admin (has_paid = true)
-    const isApproved =
-      user.has_paid || mongoUser.has_paid || mongoUser.role === "admin";
+    const isApproved = user.has_paid || user.role === "admin";
 
     if (!isApproved) {
       console.log("Publish: User has not been approved by admin", {
         has_paid: user.has_paid,
-        mongoHasPaid: mongoUser.has_paid,
-        role: mongoUser.role,
+        role: user.role,
       });
       return new Response(
         JSON.stringify({

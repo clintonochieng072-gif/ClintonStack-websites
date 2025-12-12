@@ -51,15 +51,24 @@ export default function Header({ onMenuClick }: HeaderProps) {
       try {
         const res = await fetch("/api/auth/me");
         const data = await res.json();
+        console.log("Header: Fresh user data from /api/auth/me:", data);
         if (data.user) {
           const hasPaid =
             data.user.has_paid ||
             data.user.role === "admin" ||
             data.user.email === "clintonochieng072@gmail.com";
+          console.log(
+            "Header: Calculated hasPaid:",
+            hasPaid,
+            "from has_paid:",
+            data.user.has_paid
+          );
           setLocalUserHasPaid(hasPaid);
+        } else {
+          console.log("Header: No user data in response");
         }
       } catch (error) {
-        console.error("Error checking user status:", error);
+        console.error("Header: Error checking user status:", error);
       }
     };
 
@@ -83,6 +92,25 @@ export default function Header({ onMenuClick }: HeaderProps) {
         user.email === "clintonochieng072@gmail.com"
       : false;
 
+  // Force refresh user status
+  const refreshUserStatus = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      console.log("Header: Manual refresh - user data:", data);
+      if (data.user) {
+        const hasPaid =
+          data.user.has_paid ||
+          data.user.role === "admin" ||
+          data.user.email === "clintonochieng072@gmail.com";
+        console.log("Header: Manual refresh - calculated hasPaid:", hasPaid);
+        setLocalUserHasPaid(hasPaid);
+      }
+    } catch (error) {
+      console.error("Header: Error refreshing user status:", error);
+    }
+  };
+
   const handlePublish = async () => {
     if (!site) {
       console.error("No site data available");
@@ -99,10 +127,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
           body: JSON.stringify({ siteId: site._id }),
         });
         if (response.ok) {
-          // Success - could show a success message
-          console.log("Site published successfully");
+          alert("Site published successfully!");
+          // Refresh the page to show updated status
+          window.location.reload();
         } else {
-          console.error("Failed to publish");
+          const errorData = await response.json();
+          alert(`Failed to publish: ${errorData.error || "Unknown error"}`);
         }
       } catch (error) {
         console.error("Error publishing:", error);
@@ -145,8 +175,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <div className="flex flex-col items-center">
               <Button
                 variant="outline"
-                size="sm"
-                className="px-4 py-2 text-sm"
+                className="px-8 py-4 text-lg font-medium hover:bg-gray-50 border-2"
                 onClick={handlePreview}
                 disabled={!site}
               >
@@ -159,8 +188,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <div className="flex flex-col items-center">
               <Button
                 variant="default"
-                size="sm"
-                className="px-4 py-2 text-sm"
+                className="px-8 py-4 text-lg font-medium bg-blue-600 hover:bg-blue-700"
                 onClick={handlePublish}
                 disabled={publishing || !site}
               >
@@ -176,7 +204,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="flex sm:hidden items-center space-x-2">
             <Button
               variant="outline"
-              size="sm"
+              className="px-6 py-3 text-base font-medium hover:bg-gray-50 border-2"
               onClick={handlePreview}
               disabled={!site}
             >
@@ -184,7 +212,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </Button>
             <Button
               variant="default"
-              size="sm"
+              className="px-6 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700"
               onClick={handlePublish}
               disabled={publishing || !site}
             >
@@ -195,8 +223,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title="Notifications">
-                <Bell className="w-5 h-5" />
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Notifications"
+                className="hover:bg-gray-100"
+              >
+                <Bell className="w-7 h-7" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
@@ -271,25 +304,34 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* User Avatar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title="User Menu">
-                <Avatar>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="User Menu"
+                className="hover:bg-gray-100"
+              >
+                <Avatar className="w-10 h-10">
                   <AvatarImage src="" alt={user?.email || "User"} />
                   <AvatarFallback>
-                    <User className="w-4 h-4" />
+                    <User className="w-7 h-7" />
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => router.push("/settings")}>
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push("/dashboard/affiliate/profile")}
               >
                 <UserCircle className="w-4 h-4 mr-2" />
                 Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/billing")}>
+                <Settings className="w-4 h-4 mr-2" />
+                Billing / Subscription
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/settings")}>
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
