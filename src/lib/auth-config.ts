@@ -216,9 +216,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.referralCode = (user as any).referralCode;
         token.tempPassword = (user as any).tempPassword;
         // Fetch fresh has_paid
-        const freshUser = await usersRepo.findById(user.id);
-        token.has_paid = freshUser?.has_paid || false;
-        token.subscriptionStatus = freshUser?.subscriptionStatus;
+        if (user?.id) {
+          const freshUser = await usersRepo.findById(user.id);
+          token.has_paid = freshUser?.has_paid || false;
+          token.subscriptionStatus = freshUser?.subscriptionStatus;
+        }
       }
 
       // On update or when no user
