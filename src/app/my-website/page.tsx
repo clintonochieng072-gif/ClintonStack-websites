@@ -10,16 +10,20 @@ import { ExternalLink, Globe, Edit, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useGlobal } from "@/context/GlobalContext";
 import PaymentModal from "@/components/PaymentModal";
+import { pusherClient } from "@/lib/pusher-client";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function MyWebsitePage() {
   const router = useRouter();
-  const { user } = useGlobal();
+  const { user, authLoading } = useGlobal();
   const { data: siteData, error, mutate } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [localUserHasPaid, setLocalUserHasPaid] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
     if (siteData?.data) {
@@ -27,8 +31,56 @@ export default function MyWebsitePage() {
     }
   }, [siteData]);
 
+  // Fetch fresh user data to check payment status
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        console.log("Fresh user data from /api/auth/me:", data);
+        if (data.user) {
+          const hasPaid =
+            data.user.has_paid ||
+            data.user.role === "admin" ||
+            data.user.email === "clintonochieng072@gmail.com";
+          console.log("Calculated hasPaid:", hasPaid);
+          setLocalUserHasPaid(hasPaid);
+        } else {
+          console.log("No user data in response");
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      }
+    };
+
+    if (!authLoading && user) {
+      checkUserStatus();
+
+      // Listen for payment approval events
+      const channel = pusherClient.subscribe(`user-${user.id}`);
+      channel.bind("payment-approved", () => {
+        console.log("Payment approved event received, refreshing user status");
+        checkUserStatus();
+      });
+
+      return () => {
+        channel.unbind_all();
+        pusherClient.unsubscribe(`user-${user.id}`);
+      };
+    }
+  }, [authLoading, user]);
+
+  const userHasPaid =
+    localUserHasPaid !== null
+      ? localUserHasPaid
+      : user
+      ? user.has_paid ||
+        user.role === "admin" ||
+        user.email === "clintonochieng072@gmail.com"
+      : false;
+
   const handlePublish = async () => {
-    if (user?.subscriptionStatus === "active") {
+    if (userHasPaid) {
       // Publish directly
       setPublishing(true);
       try {

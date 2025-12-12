@@ -6,20 +6,70 @@ import { Upload } from "lucide-react";
 import ManualPaymentModal from "./ManualPaymentModal";
 import { getAuthHeaders } from "@/lib/utils";
 import { useGlobal } from "@/context/GlobalContext";
+import { pusherClient } from "@/lib/pusher-client";
 
 const PublishButton = ({ siteId }: { siteId: string }) => {
   const { user, authLoading } = useGlobal();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [localUserHasPaid, setLocalUserHasPaid] = useState<boolean | null>(
+    null
+  );
 
-  const userHasPaid = user
-    ? user.has_paid ||
-      user.subscriptionStatus === "active" ||
-      user.role === "admin"
-    : false;
+  const userHasPaid =
+    localUserHasPaid !== null
+      ? localUserHasPaid
+      : user
+      ? user.has_paid ||
+        user.role === "admin" ||
+        user.email === "clintonochieng072@gmail.com"
+      : false;
 
-  const checkingPayment = authLoading;
+  const checkingPayment = authLoading && localUserHasPaid === null;
+
+  // Fetch fresh user data to check payment status
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        console.log("Fresh user data from /api/auth/me:", data);
+        if (data.user) {
+          const hasPaid =
+            data.user.has_paid ||
+            data.user.role === "admin" ||
+            data.user.email === "clintonochieng072@gmail.com";
+          console.log("Calculated hasPaid:", hasPaid, "from", {
+            has_paid: data.user.has_paid,
+            role: data.user.role,
+            email: data.user.email,
+          });
+          setLocalUserHasPaid(hasPaid);
+        } else {
+          console.log("No user data in response");
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      }
+    };
+
+    if (!authLoading && user) {
+      checkUserStatus();
+
+      // Listen for payment approval events
+      const channel = pusherClient.subscribe(`user-${user.id}`);
+      channel.bind("payment-approved", () => {
+        console.log("Payment approved event received, refreshing user status");
+        checkUserStatus();
+      });
+
+      return () => {
+        channel.unbind_all();
+        pusherClient.unsubscribe(`user-${user.id}`);
+      };
+    }
+  }, [authLoading, user]);
 
   const handlePublish = async () => {
     if (!userHasPaid) {
@@ -53,7 +103,7 @@ const PublishButton = ({ siteId }: { siteId: string }) => {
   };
 
   const handlePaymentSuccess = () => {
-    setUserHasPaid(true);
+    setLocalUserHasPaid(true);
     setShowPaymentModal(false);
     // Optionally trigger publish after payment
     // handlePublish();

@@ -35,6 +35,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [localUserHasPaid, setLocalUserHasPaid] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
     if (siteData?.data) {
@@ -42,13 +45,74 @@ export default function Header({ onMenuClick }: HeaderProps) {
     }
   }, [siteData]);
 
+  // Fetch fresh user data to check payment status
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (data.user) {
+          const hasPaid =
+            data.user.has_paid ||
+            data.user.role === "admin" ||
+            data.user.email === "clintonochieng072@gmail.com";
+          setLocalUserHasPaid(hasPaid);
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      }
+    };
+
+    if (user) {
+      checkUserStatus();
+    }
+  }, [user]);
+
   const handlePreview = () => {
-    window.open(`/preview/${site?.slug}`, "_blank");
+    if (site?.slug) {
+      window.open(`/preview/${site.slug}`, "_blank");
+    }
   };
 
+  const userHasPaid =
+    localUserHasPaid !== null
+      ? localUserHasPaid
+      : user
+      ? user.has_paid ||
+        user.role === "admin" ||
+        user.email === "clintonochieng072@gmail.com"
+      : false;
+
   const handlePublish = async () => {
-    // Always show manual payment modal for now
-    setShowPaymentModal(true);
+    if (!site) {
+      console.error("No site data available");
+      return;
+    }
+
+    if (userHasPaid) {
+      // Publish directly
+      setPublishing(true);
+      try {
+        const response = await fetch("/api/site/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ siteId: site._id }),
+        });
+        if (response.ok) {
+          // Success - could show a success message
+          console.log("Site published successfully");
+        } else {
+          console.error("Failed to publish");
+        }
+      } catch (error) {
+        console.error("Error publishing:", error);
+      } finally {
+        setPublishing(false);
+      }
+    } else {
+      // Show payment modal
+      setShowPaymentModal(true);
+    }
   };
 
   const handleLogout = () => {
@@ -84,6 +148,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 size="sm"
                 className="px-4 py-2 text-sm"
                 onClick={handlePreview}
+                disabled={!site}
               >
                 Preview
               </Button>
@@ -97,7 +162,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 size="sm"
                 className="px-4 py-2 text-sm"
                 onClick={handlePublish}
-                disabled={publishing}
+                disabled={publishing || !site}
               >
                 {publishing ? "Publishing..." : "Publish"}
               </Button>
@@ -109,14 +174,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           {/* Mobile HeaderActions */}
           <div className="flex sm:hidden items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={handlePreview}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreview}
+              disabled={!site}
+            >
               Preview
             </Button>
             <Button
               variant="default"
               size="sm"
               onClick={handlePublish}
-              disabled={publishing}
+              disabled={publishing || !site}
             >
               {publishing ? "..." : "Publish"}
             </Button>
