@@ -1,7 +1,7 @@
 // src/app/api/site/publish/route.ts
 
 import { Site } from "@/lib/models/Site";
-import { auth } from "@/lib/auth-config";
+import { auth } from "@/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 import { connectDb } from "@/lib/db";
 

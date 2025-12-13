@@ -5,7 +5,10 @@
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
-      "runtime": "@vercel/node@18"
+      "runtime": "nodejs18.x"
+    },
+    "src/pages/api/**/*.js": {
+      "runtime": "nodejs18.x"
     }
   }
 }
