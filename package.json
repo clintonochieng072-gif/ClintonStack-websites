@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@auth/core": "^0.41.0",
-    "@auth/nextjs": "^0.0.0-380f8d56",
     "@auth/prisma-adapter": "^2.6.0",
     "@babel/runtime": "^7.28.4",
     "@prisma/adapter-pg": "^7.1.0",
