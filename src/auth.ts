@@ -1,11 +1,13 @@
-import Auth from "next-auth";
+import { NextAuth } from "@auth/core";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const { handlers, auth } = Auth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   adapter: PrismaAdapter(prisma),
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
+  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -23,7 +25,6 @@ export const { handlers, auth } = Auth({
       return token;
     },
     async session({ session, token }) {
-      // Add user id to session
       if (token?.id) {
         session.user.id = token.id as string;
       }
@@ -31,5 +32,3 @@ export const { handlers, auth } = Auth({
     },
   },
 });
-
-export const { GET, POST } = handlers;
