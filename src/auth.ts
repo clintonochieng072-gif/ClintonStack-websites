@@ -23,6 +23,3 @@ export const { handlers, auth } = NextAuth({
 });
 
 export const { GET, POST } = handlers;
-
-// Export auth as default for compatibility
-export default auth;
