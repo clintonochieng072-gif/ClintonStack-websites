@@ -1,7 +1,7 @@
 // src/app/api/site/publish/route.ts
 
 import { Site } from "@/lib/models/Site";
-import { auth } from "@/auth";
+import { auth } from "../../auth/[...nextauth]/route";
 import { usersRepo } from "@/repositories/usersRepo";
 import { connectDb } from "@/lib/db";
 
