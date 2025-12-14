@@ -4,7 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import { Site } from "@/lib/models/Site";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-import { auth } from "../../../../auth";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
