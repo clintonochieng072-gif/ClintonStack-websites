@@ -597,6 +597,9 @@ $RECYCLE.BIN/
 # Exception for auth utility file
 !src/lib/auth.ts
 
+# Exception for auth config file
+!src/auth.ts
+
 # Exception for auth routes and pages
 !src/app/auth/
 !src/app/api/auth/
