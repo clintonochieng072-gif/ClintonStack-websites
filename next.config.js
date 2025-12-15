@@ -36,7 +36,7 @@ const nextConfig = {
                 {
                   key: "Content-Security-Policy",
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.pusher.com https://*.pusherapp.com wss://*.pusher.com https://accounts.google.com https://www.googleapis.com https://clinton-stack-websites.vercel.app;",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss: https://accounts.google.com https://www.googleapis.com;",
                 },
                 {
                   key: "Strict-Transport-Security",

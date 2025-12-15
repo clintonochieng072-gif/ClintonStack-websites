@@ -49,20 +49,12 @@ export const authOptions = {
       }
       return true;
     },
-    async jwt({ token, user }: any) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.onboarded = user.onboarded;
-      }
+    async jwt({ token, user }) {
+      if (user) token.user = user;
       return token;
     },
-    async session({ session, token }: any) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.onboarded = token.onboarded as boolean;
-      }
+    async session({ session, token }) {
+      session.user = token.user as any;
       return session;
     },
   },
