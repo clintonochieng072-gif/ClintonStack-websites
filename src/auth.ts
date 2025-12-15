@@ -49,11 +49,11 @@ export const authOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) token.user = user;
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       session.user = token.user as any;
       return session;
     },
