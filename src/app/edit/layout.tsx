@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getAuthHeaders } from "@/lib/utils";
+import { SiteProvider } from "@/lib/siteContext";
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -11,21 +12,6 @@ const fetcher = (url: string) =>
     cache: "no-store",
     next: { revalidate: 0 },
   }).then((r) => r.json());
-
-// Site Context for centralized data fetching
-const SiteContext = createContext<{
-  site: any;
-  loading: boolean;
-  error: any;
-} | null>(null);
-
-export function useSite() {
-  const context = useContext(SiteContext);
-  if (!context) {
-    throw new Error("useSite must be used within a SiteProvider");
-  }
-  return context;
-}
 
 export default function EditLayout({
   children,
@@ -48,7 +34,7 @@ export default function EditLayout({
   }, [siteData, error]);
 
   return (
-    <SiteContext.Provider
+    <SiteProvider
       value={{
         site: siteData?.data || null,
         loading,
@@ -56,6 +42,6 @@ export default function EditLayout({
       }}
     >
       <DashboardLayout>{children}</DashboardLayout>
-    </SiteContext.Provider>
+    </SiteProvider>
   );
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useSite } from "../layout";
+import { useSite } from "@/lib/siteContext";
 import { getAuthHeaders } from "@/lib/utils";
 import { mutate } from "swr";
 

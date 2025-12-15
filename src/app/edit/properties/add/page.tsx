@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import ImageUpload from "@/components/ImageUpload";
-import { useSite } from "../../layout";
+import { useSite } from "@/lib/siteContext";
 import useSWR, { mutate } from "swr";
 import { motion } from "framer-motion";
 import { getAuthHeaders } from "@/lib/utils";
