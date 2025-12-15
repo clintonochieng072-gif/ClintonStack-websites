@@ -1,34 +1,73 @@
-import { NextAuth } from "@auth/core";
-import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth/next";
+import GoogleProvider from "next-auth/providers/google";
+import { usersRepo } from "@/repositories/usersRepo";
+import { generateClientId } from "@/lib/utils";
+import bcrypt from "bcryptjs";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  adapter: PrismaAdapter(prisma),
-  secret: process.env.AUTH_SECRET,
-  session: { strategy: "jwt" },
+export const authOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
-    Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  pages: {
-    error: "/auth/error",
-  },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account }: any) {
+      if (account?.provider === "google") {
+        try {
+          // Check if user exists
+          let existingUser = await usersRepo.findByEmail(user.email!);
+
+          if (!existingUser) {
+            // Create new user for Google sign-in
+            const hashedGoogle = await bcrypt.hash("google", 12);
+            const clientId = generateClientId();
+            existingUser = await usersRepo.create({
+              name: user.name!,
+              email: user.email!,
+              username: user.email!.split("@")[0], // Use email prefix as username
+              passwordHash: hashedGoogle,
+              role: "client",
+              clientId,
+              onboarded: false,
+              emailVerified: true, // Google accounts are pre-verified
+            });
+          }
+
+          // Update user ID for NextAuth
+          user.id = existingUser.id.toString();
+          user.role = existingUser.role;
+          user.onboarded = existingUser.onboarded;
+
+          return true;
+        } catch (error) {
+          console.error("Google sign-in error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
+        token.role = user.role;
+        token.onboarded = user.onboarded;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (token?.id) {
+    async session({ session, token }: any) {
+      if (token) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.onboarded = token.onboarded as boolean;
       }
       return session;
     },
   },
-});
+};
+
+export const auth = () => getServerSession(authOptions);
+
+export default NextAuth(authOptions);
