@@ -3,8 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useGlobalContext } from "@/context/GlobalContext";
+import { useSession, signIn } from "next-auth/react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +15,6 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const { login } = useGlobalContext();
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -44,31 +42,18 @@ function LoginForm() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+      if (result?.error) {
+        throw new Error(result.error);
       }
 
-      // Store token in localStorage
-      localStorage.setItem("auth_token", data.token);
-
-      // Update global context
-      login(data.user);
-
-      // Extract redirect path from header
-      const redirect = response.headers.get("X-Redirect") || "/dashboard";
-
       // Redirect user
-      window.location.href = redirect;
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
     } finally {

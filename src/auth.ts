@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import type { NextRequest } from "next/server";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { usersRepo } from "@/repositories/usersRepo";
 import { generateClientId } from "@/lib/utils";
 import bcrypt from "bcryptjs";
@@ -13,7 +14,37 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await usersRepo.findByEmail(credentials.email);
+        if (!user || !user.passwordHash) return null;
+
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.passwordHash
+        );
+        if (!isValid) return null;
+
+        return {
+          id: user.id.toString(),
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          onboarded: user.onboarded,
+        };
+      },
+    }),
   ],
+  session: {
+    strategy: "jwt" as const,
+  },
   callbacks: {
     async signIn({ user, account }: any) {
       if (account?.provider === "google") {
@@ -51,17 +82,27 @@ export const authOptions = {
       return true;
     },
     async jwt({ token, user }: any) {
-      if (user) token.user = user;
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.onboarded = user.onboarded;
+      }
       return token;
     },
     async session({ session, token }: any) {
-      session.user = token.user as any;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.onboarded = token.onboarded as boolean;
+      }
       return session;
     },
   },
 };
 
 export const auth = (req?: NextRequest) =>
-  req ? getServerSession(req as any, null as any, authOptions) : getServerSession(authOptions);
+  req
+    ? getServerSession(req as any, null as any, authOptions)
+    : getServerSession(authOptions);
 
 export default NextAuth(authOptions);

@@ -38,16 +38,7 @@ export default function GlobalProvider({
 
   const loadUser = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
       const res = await fetch("/api/auth/me", {
-        headers,
         credentials: "include",
       });
       const json = await res.json();
@@ -105,21 +96,12 @@ export default function GlobalProvider({
   const login = (u: User) => setUser(u);
   const logout = async () => {
     setUser(null);
-    // Clear auth token and onboarding data
-    localStorage.removeItem("auth_token");
+    // Clear onboarding data
     localStorage.removeItem("onboarding_category");
     localStorage.removeItem("onboarding_niche");
     localStorage.removeItem("onboarding_template");
-    // Call logout API to clear httpOnly cookie
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } catch (error) {
-      console.error("Logout API error:", error);
-    }
-    // Sign out from NextAuth if there's a session
-    if (session) {
-      await signOut({ callbackUrl: "/" });
-    }
+    // Sign out from NextAuth
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
