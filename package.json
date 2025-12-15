@@ -17,8 +17,6 @@
     "release-pending-earnings": "tsx scripts/release-pending-earnings.ts"
   },
   "dependencies": {
-    "@auth/core": "^0.41.0",
-    "@auth/prisma-adapter": "^2.6.0",
     "@babel/runtime": "^7.28.4",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
