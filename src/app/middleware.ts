@@ -15,7 +15,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const token = await getToken({ req });
-  const user = token?.user;
+  const user = token?.user as any;
 
   const isAuthRoute =
     pathname.startsWith("/auth/login") ||
