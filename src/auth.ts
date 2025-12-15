@@ -60,6 +60,6 @@ export const authOptions = {
   },
 };
 
-export const auth = () => getServerSession(authOptions);
+export const auth = (options?: any) => getServerSession(authOptions, options);
 
 export default NextAuth(authOptions);
