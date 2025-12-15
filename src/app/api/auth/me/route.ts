@@ -5,7 +5,7 @@ import { usersRepo } from "@/repositories/usersRepo";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth({ req });
+    const session = await auth(req);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

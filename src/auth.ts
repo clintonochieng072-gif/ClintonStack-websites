@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
+import type { NextRequest } from "next/server";
 import GoogleProvider from "next-auth/providers/google";
 import { usersRepo } from "@/repositories/usersRepo";
 import { generateClientId } from "@/lib/utils";
@@ -60,6 +61,7 @@ export const authOptions = {
   },
 };
 
-export const auth = (options?: any) => getServerSession(authOptions, options);
+export const auth = (req?: NextRequest) =>
+  req ? getServerSession(req as any, null as any, authOptions) : getServerSession(authOptions);
 
 export default NextAuth(authOptions);
