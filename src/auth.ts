@@ -22,24 +22,42 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        console.log("authorize called for", credentials?.email);
+        if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials");
+          return null;
+        }
 
-        const user = await usersRepo.findByEmail(credentials.email);
-        if (!user || !user.passwordHash) return null;
+        try {
+          const user = await usersRepo.findByEmail(credentials.email);
+          console.log("User found:", !!user);
+          if (!user || !user.passwordHash) {
+            console.log("User not found or no password hash");
+            return null;
+          }
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-        if (!isValid) return null;
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          );
+          console.log("Password valid:", isValid);
+          if (!isValid) {
+            console.log("Invalid password");
+            return null;
+          }
 
-        return {
-          id: user.id.toString(),
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          onboarded: user.onboarded,
-        };
+          console.log("authorize success");
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            onboarded: user.onboarded,
+          };
+        } catch (error) {
+          console.error("authorize error:", error);
+          return null;
+        }
       },
     }),
   ],
@@ -49,12 +67,19 @@ export const authOptions = {
   },
   callbacks: {
     async signIn({ user, account }: any) {
+      console.log("signIn callback called", {
+        provider: account?.provider,
+        email: user?.email,
+      });
       if (account?.provider === "google") {
         try {
+          console.log("Processing Google sign-in for", user.email);
           // Check if user exists
           let existingUser = await usersRepo.findByEmail(user.email!);
+          console.log("Existing user found:", !!existingUser);
 
           if (!existingUser) {
+            console.log("Creating new user for Google sign-in");
             // Create new user for Google sign-in
             const hashedGoogle = await bcrypt.hash("google", 12);
             const clientId = generateClientId();
@@ -68,12 +93,14 @@ export const authOptions = {
               onboarded: false,
               emailVerified: true, // Google accounts are pre-verified
             });
+            console.log("New user created:", existingUser.id);
           }
 
           // Update user ID for NextAuth
           user.id = existingUser.id.toString();
           user.role = existingUser.role;
           user.onboarded = existingUser.onboarded;
+          console.log("signIn success for Google");
 
           return true;
         } catch (error) {
@@ -81,23 +108,31 @@ export const authOptions = {
           return false;
         }
       }
+      console.log("signIn success (non-Google)");
       return true;
     },
     async jwt({ token, user }: any) {
+      console.log("jwt callback", { hasUser: !!user, tokenId: token?.id });
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.onboarded = user.onboarded;
         token.email = user.email;
+        console.log("jwt updated with user data");
       }
       return token;
     },
     async session({ session, token }: any) {
+      console.log("session callback", {
+        hasToken: !!token,
+        tokenId: token?.id,
+      });
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.onboarded = token.onboarded as boolean;
         session.user.email = token.email as string;
+        console.log("session updated");
       }
       return session;
     },
