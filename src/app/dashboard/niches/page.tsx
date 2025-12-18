@@ -98,6 +98,8 @@ export default function NichesPage() {
   const { data: sitesData, error } = useSWR("/api/site/me?all=true", fetcher);
   const [userSites, setUserSites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedNiche, setSelectedNiche] = useState<string>("");
 
   useEffect(() => {
     if (sitesData) {
@@ -137,7 +139,15 @@ export default function NichesPage() {
 
         if (response.ok) {
           const newSite = await response.json();
-          router.push(`/dashboard/${nicheId}`);
+
+          // Show success message
+          setSelectedNiche(nicheId);
+          setShowSuccess(true);
+
+          // Redirect after showing success message
+          setTimeout(() => {
+            router.push(`/dashboard/${nicheId}`);
+          }, 2000); // 2 second delay to show the message
         } else {
           const errorText = await response.text();
           console.error("Failed to create site:", response.status, errorText);
@@ -236,6 +246,66 @@ export default function NichesPage() {
             );
           })}
         </div>
+
+        {/* Success Message Overlay */}
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center"
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Website Created Successfully! 🎉
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Your {niches.find(n => n.id === selectedNiche)?.name} website has been created and is ready to customize.
+              </p>
+              <div className="flex items-center justify-center text-blue-600">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Redirecting to dashboard...
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         {userSites.length > 0 && (
           <motion.div
