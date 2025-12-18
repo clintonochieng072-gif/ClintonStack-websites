@@ -104,6 +104,4 @@ export const authOptions = {
   },
 };
 
-export const auth = () => getServerSession(authOptions);
-
 export default NextAuth(authOptions);
