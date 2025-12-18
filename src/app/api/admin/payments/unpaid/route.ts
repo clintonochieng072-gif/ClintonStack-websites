@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { referralsRepo } from "@/repositories/referralsRepo";
+import { affiliatesRepo } from "@/repositories/affiliatesRepo";
+import { pusherServer } from "@/lib/pusher";
 
 export const dynamic = "force-dynamic";
 
@@ -72,11 +75,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId } = await request.json();
+    const { userId, amount, planType = "lifetime" } = await request.json();
 
-    if (!userId) {
+    if (!userId || !amount) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "User ID and amount are required" },
         { status: 400 }
       );
     }
@@ -91,6 +94,67 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Create payment record
+    const payment = await prisma.payment.create({
+      data: {
+        userId,
+        amount,
+        currency: "KES",
+        status: "success",
+        paymentMethod: "manual",
+        planType,
+      },
+    });
+
+    // Check if user was referred and calculate commission
+    const referral = await prisma.referral.findFirst({
+      where: { referredUserId: userId },
+      include: { affiliate: true },
+    });
+
+    if (referral) {
+      // Calculate 15% commission, truncated to whole number
+      const commissionAmount = Math.floor(amount * 0.15);
+
+      // Get current affiliate data for pusher
+      const affiliate = await affiliatesRepo.findById(referral.affiliateId);
+
+      // Create commission record
+      await prisma.commission.create({
+        data: {
+          affiliateId: referral.affiliateId,
+          paymentId: payment.id,
+          commissionAmount,
+          status: "paid", // Immediately mark as paid since payment is approved
+        },
+      });
+
+      // Update affiliate balance
+      await prisma.affiliate.update({
+        where: { id: referral.affiliateId },
+        data: {
+          totalEarned: { increment: commissionAmount },
+          availableBalance: { increment: commissionAmount },
+        },
+      });
+
+      // Update referral status to converted
+      await referralsRepo.convertReferral(referral.id);
+
+      // Trigger real-time update for the affiliate
+      if (affiliate) {
+        await pusherServer.trigger(
+          `affiliate-${referral.affiliateId}`,
+          "commission-earned",
+          {
+            commissionAmount,
+            totalEarned: affiliate.totalEarned + commissionAmount,
+            availableBalance: affiliate.availableBalance + commissionAmount,
+          }
+        );
+      }
+    }
+
     // Update user to paid
     await prisma.user.update({
       where: { id: userId },
@@ -101,7 +165,11 @@ export async function POST(request: NextRequest) {
     await prisma.auditLog.create({
       data: {
         action: "manual_payment_approval",
-        details: { userId },
+        details: {
+          userId,
+          amount,
+          commissionAmount: referral ? Math.floor(amount * 0.15) : 0,
+        },
         targetId: userId,
         userId: session.user.id,
       },

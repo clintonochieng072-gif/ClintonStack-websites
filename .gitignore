@@ -117,7 +117,7 @@ next-env.d.ts
 *.key
 *.crt
 *.pem
-!certs/aiven-ca.pem
+!certs/*.pem
 *.p12
 *.pfx
 *.cer
@@ -346,8 +346,6 @@ robots.txt
 # Private keys and certificates
 private/
 keys/
-certs/
-!certs/aiven-ca.pem
 ssl/
 
 # API specifications with secrets

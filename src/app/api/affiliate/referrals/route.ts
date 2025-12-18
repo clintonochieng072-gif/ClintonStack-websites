@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
-import Referral from "@/lib/models/Referral";
+import { usersRepo } from "@/repositories/usersRepo";
+import { affiliatesRepo } from "@/repositories/affiliatesRepo";
+import { referralsRepo } from "@/repositories/referralsRepo";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,36 +19,48 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    await dbConnect();
-
-    // Get user
-    const user = await User.findById(decoded.userId);
+    // Get user from PostgreSQL
+    const user = await usersRepo.findById(decoded.userId);
     if (!user || user.role !== "affiliate") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get referrals with client and product details
-    const referrals = await Referral.find({ referrerId: user._id })
-      .populate("clientId", "name email")
-      .populate("productId", "name slug")
-      .sort({ signupDate: -1 });
+    // Get affiliate profile
+    const affiliate = await affiliatesRepo.findByUserId(user.id);
+    if (!affiliate) {
+      return NextResponse.json(
+        { error: "Affiliate profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get referrals with client details and commissions
+    const referrals = await referralsRepo.listByAffiliate(affiliate.id);
 
     // Format the response
-    const formattedReferrals = referrals.map((referral) => {
-      const client = referral.clientId as any;
-      const product = referral.productId as any;
-      return {
-        _id: referral._id,
-        clientId: client._id || client,
-        clientName: client.name || "Unknown",
-        clientEmail: client.email || "N/A",
-        productId: product._id || product,
-        productName: product.name || "General",
-        signupDate: referral.signupDate,
-        paymentStatus: referral.paymentStatus,
-        commissionEarned: referral.commissionEarned,
-      };
-    });
+    const formattedReferrals = await Promise.all(
+      referrals.map(async (referral) => {
+        // Get commission for this referral's user
+        const commission = await prisma.commission.findFirst({
+          where: {
+            affiliateId: affiliate.id,
+            payment: {
+              userId: referral.referredUserId,
+            },
+          },
+        });
+
+        return {
+          _id: referral.id,
+          clientId: referral.referredUser.id,
+          clientName: referral.referredUser.name,
+          clientEmail: referral.referredUser.email,
+          signupDate: referral.createdAt,
+          paymentStatus: commission ? "paid" : "pending",
+          commissionEarned: commission?.commissionAmount || 0,
+        };
+      })
+    );
 
     return NextResponse.json(formattedReferrals);
   } catch (error) {

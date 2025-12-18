@@ -43,7 +43,7 @@ model User {
 model Affiliate {
   id             String          @id @default(uuid())
   userId         String          @unique
-  commissionRate Float           @default(0.1)
+  commissionRate Float           @default(0.15)
   payoutMethod   String?
   status         AffiliateStatus @default(active)
   availableBalance Float          @default(0)

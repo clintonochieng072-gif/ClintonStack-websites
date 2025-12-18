@@ -19,6 +19,11 @@ export async function POST(req: Request) {
       productSlug,
     } = await req.json();
 
+    // Get affiliate ref from cookie
+    const cookies = req.headers.get("cookie") || "";
+    const affiliateRefMatch = cookies.match(/affiliate_ref=([^;]+)/);
+    const affiliateRef = affiliateRefMatch ? affiliateRefMatch[1] : null;
+
     // Basic validation
     if (!name || !username || !email || !password) {
       return NextResponse.json(
@@ -59,15 +64,13 @@ export async function POST(req: Request) {
     // Generate clientId for all users
     const clientId = generateClientId();
 
-    // Handle referral logic if referralCode is provided
-    let referredById = null;
-    if (referralCode) {
-      const referrer = await usersRepo.findByReferralCode(
-        referralCode.toUpperCase()
-      );
+    // Handle referral logic if affiliateRef is provided
+    let affiliateId = null;
+    if (affiliateRef) {
+      const affiliate = await affiliatesRepo.findById(affiliateRef);
 
-      // Validate referrer exists AND has affiliate role
-      if (referrer && referrer.role === "affiliate") {
+      // Validate affiliate exists
+      if (affiliate) {
         // Prevent affiliates from referring other affiliates
         if (role === "affiliate") {
           return NextResponse.json(
@@ -75,9 +78,9 @@ export async function POST(req: Request) {
             { status: 400 }
           );
         }
-        referredById = referrer.id;
+        affiliateId = affiliate.id;
       }
-      // If referrer not found or not an affiliate, silently ignore (no error)
+      // If affiliate not found, silently ignore (no error)
     }
 
     // Create user in PostgreSQL
@@ -89,7 +92,7 @@ export async function POST(req: Request) {
       role,
       referralCode: role === "affiliate" ? uniqueReferralCode : null,
       clientId,
-      referredById,
+      referredById: null, // Not using this anymore
       emailVerified: false,
       onboarded: role === "affiliate",
     });
@@ -101,15 +104,13 @@ export async function POST(req: Request) {
       });
     }
 
-    // Create referral if referred
-    if (referredById) {
-      const referrer = await usersRepo.findById(referredById);
-      if (referrer?.affiliate) {
-        await referralsRepo.create({
-          affiliateId: referrer.affiliate.id,
-          referredUserId: pgUser.id,
-        });
-      }
+    // Create referral if affiliate ref provided
+    if (affiliateId) {
+      await referralsRepo.create({
+        affiliateId,
+        referredUserId: pgUser.id,
+        status: "active",
+      });
     }
 
     // Generate JWT token

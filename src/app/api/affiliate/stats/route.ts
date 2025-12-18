@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
     const productStats: any[] = [];
 
     return NextResponse.json({
-      totalReferrals: referralStats.total,
-      pendingPayments: referralStats.active, // Active referrals could be considered pending
+      totalReferrals: referralStats.total, // Clicks
+      convertedReferrals: referralStats.converted, // Signups
       totalEarnings: affiliateStats?.totalCommissions || 0,
-      availableBalance: affiliateStats?.pendingCommissions || 0, // Pending commissions as available balance
-      referralCode: user.referralCode,
+      availableBalance: affiliate.availableBalance,
+      affiliateId: affiliate.id,
       productStats,
     });
   } catch (error) {

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
+import { pusherClient } from "@/lib/pusher-client";
 
 interface Referral {
   _id: string;
@@ -41,10 +42,10 @@ interface Product {
 
 interface AffiliateStats {
   totalReferrals: number;
-  pendingPayments: number;
+  convertedReferrals: number;
   totalEarnings: number;
-  withdrawableBalance: number;
-  referralCode: string;
+  availableBalance: number;
+  affiliateId: string;
   productStats?: {
     productId: string;
     productName: string;
@@ -87,6 +88,28 @@ export default function AffiliateDashboard() {
   useEffect(() => {
     if (user && user.role === "affiliate") {
       fetchAffiliateData();
+
+      // Subscribe to real-time updates
+      const channel = pusherClient.subscribe(`affiliate-${user.id}`);
+      channel.bind("commission-earned", (data: any) => {
+        console.log("Commission earned:", data);
+        // Update stats in real-time
+        setStats((prevStats) => {
+          if (!prevStats) return prevStats;
+          return {
+            ...prevStats,
+            totalEarnings: prevStats.totalEarnings + data.commissionAmount,
+            availableBalance: prevStats.availableBalance + data.commissionAmount,
+            convertedReferrals: prevStats.convertedReferrals + 1, // Assuming this triggers on conversion
+          };
+        });
+        // Refresh data to get accurate counts
+        fetchAffiliateData();
+      });
+
+      return () => {
+        pusherClient.unsubscribe(`affiliate-${user.id}`);
+      };
     } else if (user && user.role !== "affiliate") {
       // Redirect non-affiliates
       window.location.href = "/dashboard";
@@ -132,10 +155,10 @@ export default function AffiliateDashboard() {
   };
 
   const copyReferralLink = async () => {
-    if (stats?.referralCode) {
+    if (stats?.affiliateId) {
       setCopyLoading(true);
       try {
-        const referralUrl = `${window.location.origin}/client-signup?ref=${stats.referralCode}`;
+        const referralUrl = `${window.location.origin}/auth/register?ref=${stats.affiliateId}`;
         await navigator.clipboard.writeText(referralUrl);
         alert("Referral link copied to clipboard!");
       } catch (error) {
@@ -291,13 +314,13 @@ export default function AffiliateDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600 mb-1">
-                  Total Referrals
+                  Total Clicks
                 </p>
                 <p className="text-3xl font-bold text-blue-900">
                   {stats?.totalReferrals || 0}
                 </p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <ExternalLink className="w-8 h-8 text-blue-600" />
             </div>
           </div>
 
@@ -305,13 +328,13 @@ export default function AffiliateDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-600 mb-1">
-                  Available Balance
+                  Successful Signups
                 </p>
                 <p className="text-3xl font-bold text-green-900">
-                  KES {balance?.availableBalance || 0}
+                  {stats?.convertedReferrals || 0}
                 </p>
               </div>
-              <Wallet className="w-8 h-8 text-green-600" />
+              <Users className="w-8 h-8 text-green-600" />
             </div>
           </div>
 
@@ -319,10 +342,10 @@ export default function AffiliateDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-600 mb-1">
-                  Total Earned
+                  Total Commissions
                 </p>
                 <p className="text-3xl font-bold text-purple-900">
-                  KES {balance?.totalEarned || 0}
+                  KES {stats?.totalEarnings || 0}
                 </p>
               </div>
               <Package className="w-8 h-8 text-purple-600" />
@@ -333,20 +356,13 @@ export default function AffiliateDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-600 mb-1">
-                  Success Rate
+                  Available Balance
                 </p>
                 <p className="text-3xl font-bold text-orange-900">
-                  {stats?.totalReferrals
-                    ? Math.round(
-                        ((stats.totalReferrals - (stats.pendingPayments || 0)) /
-                          stats.totalReferrals) *
-                          100
-                      )
-                    : 0}
-                  %
+                  KES {stats?.availableBalance || 0}
                 </p>
               </div>
-              <ExternalLink className="w-8 h-8 text-orange-600" />
+              <Wallet className="w-8 h-8 text-orange-600" />
             </div>
           </div>
         </div>
