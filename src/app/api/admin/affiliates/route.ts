@@ -20,10 +20,6 @@ export async function GET(request: NextRequest) {
     const affiliates = await prisma.affiliate.findMany({
       include: {
         user: {
-          select: {
-            name: true,
-            email: true,
-          },
           include: {
             withdrawalRequests: {
               select: {
