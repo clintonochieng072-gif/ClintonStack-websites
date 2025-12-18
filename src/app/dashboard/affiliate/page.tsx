@@ -3,7 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Menu, Copy, ExternalLink, Wallet, Package, Users, TrendingUp, Clock } from "lucide-react";
+import {
+  LogOut,
+  Menu,
+  Copy,
+  ExternalLink,
+  Wallet,
+  Package,
+  Users,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
@@ -150,7 +160,7 @@ export default function AffiliateDashboard() {
   };
 
   const handleWithdrawal = async () => {
-    if (!balance?.availableBalance || balance.availableBalance < 200) return;
+    if (!balance?.availableBalance || balance.availableBalance < 300) return;
     if (!phoneNumber.trim()) {
       alert("Please enter your M-Pesa phone number");
       return;
@@ -280,8 +290,12 @@ export default function AffiliateDashboard() {
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600 mb-1">Total Referrals</p>
-                <p className="text-3xl font-bold text-blue-900">{stats?.totalReferrals || 0}</p>
+                <p className="text-sm font-medium text-blue-600 mb-1">
+                  Total Referrals
+                </p>
+                <p className="text-3xl font-bold text-blue-900">
+                  {stats?.totalReferrals || 0}
+                </p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
             </div>
@@ -290,8 +304,12 @@ export default function AffiliateDashboard() {
           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600 mb-1">Available Balance</p>
-                <p className="text-3xl font-bold text-green-900">KES {balance?.availableBalance || 0}</p>
+                <p className="text-sm font-medium text-green-600 mb-1">
+                  Available Balance
+                </p>
+                <p className="text-3xl font-bold text-green-900">
+                  KES {balance?.availableBalance || 0}
+                </p>
               </div>
               <Wallet className="w-8 h-8 text-green-600" />
             </div>
@@ -300,8 +318,12 @@ export default function AffiliateDashboard() {
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600 mb-1">Total Earned</p>
-                <p className="text-3xl font-bold text-purple-900">KES {balance?.totalEarned || 0}</p>
+                <p className="text-sm font-medium text-purple-600 mb-1">
+                  Total Earned
+                </p>
+                <p className="text-3xl font-bold text-purple-900">
+                  KES {balance?.totalEarned || 0}
+                </p>
               </div>
               <Package className="w-8 h-8 text-purple-600" />
             </div>
@@ -310,11 +332,18 @@ export default function AffiliateDashboard() {
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600 mb-1">Success Rate</p>
+                <p className="text-sm font-medium text-orange-600 mb-1">
+                  Success Rate
+                </p>
                 <p className="text-3xl font-bold text-orange-900">
                   {stats?.totalReferrals
-                    ? Math.round(((stats.totalReferrals - (stats.pendingPayments || 0)) / stats.totalReferrals) * 100)
-                    : 0}%
+                    ? Math.round(
+                        ((stats.totalReferrals - (stats.pendingPayments || 0)) /
+                          stats.totalReferrals) *
+                          100
+                      )
+                    : 0}
+                  %
                 </p>
               </div>
               <ExternalLink className="w-8 h-8 text-orange-600" />
@@ -324,7 +353,9 @@ export default function AffiliateDashboard() {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={copyReferralLink}
@@ -342,7 +373,9 @@ export default function AffiliateDashboard() {
               className="flex items-center justify-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors"
             >
               <Package className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-green-900">Promote Products</span>
+              <span className="text-sm font-medium text-green-900">
+                Promote Products
+              </span>
             </Link>
 
             <Link
@@ -350,7 +383,9 @@ export default function AffiliateDashboard() {
               className="flex items-center justify-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors"
             >
               <Wallet className="w-5 h-5 text-purple-600" />
-              <span className="text-sm font-medium text-purple-900">Withdraw Funds</span>
+              <span className="text-sm font-medium text-purple-900">
+                Withdraw Funds
+              </span>
             </Link>
 
             <Link
@@ -358,19 +393,26 @@ export default function AffiliateDashboard() {
               className="flex items-center justify-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg border border-orange-200 transition-colors"
             >
               <Users className="w-5 h-5 text-orange-600" />
-              <span className="text-sm font-medium text-orange-900">View Referrals</span>
+              <span className="text-sm font-medium text-orange-900">
+                View Referrals
+              </span>
             </Link>
           </div>
         </div>
 
         {/* Recent Activity */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Recent Activity
+          </h2>
 
           {referrals.length > 0 ? (
             <div className="space-y-4">
               {referrals.slice(0, 5).map((referral) => (
-                <div key={referral._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div
+                  key={referral._id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                       <Users className="w-5 h-5 text-blue-600" />
@@ -380,7 +422,8 @@ export default function AffiliateDashboard() {
                         New referral: {referral.clientName || "Unknown"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {new Date(referral.signupDate).toLocaleDateString()} • {referral.productName || "General"}
+                        {new Date(referral.signupDate).toLocaleDateString()} •{" "}
+                        {referral.productName || "General"}
                       </p>
                     </div>
                   </div>
@@ -388,11 +431,13 @@ export default function AffiliateDashboard() {
                     <p className="text-sm font-medium text-green-600">
                       +KES {referral.commissionEarned || 0}
                     </p>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      referral.paymentStatus === "paid"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        referral.paymentStatus === "paid"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       {referral.paymentStatus}
                     </span>
                   </div>
@@ -411,7 +456,9 @@ export default function AffiliateDashboard() {
           ) : (
             <div className="text-center py-8">
               <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No activity yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No activity yet
+              </h3>
               <p className="text-gray-500 mb-4">
                 Start promoting products to see your referral activity here.
               </p>

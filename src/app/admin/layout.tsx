@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -30,46 +30,52 @@ const sidebarMenuItems = [
     description: "Overview & analytics",
   },
   {
-    name: "User Management",
-    href: "/admin/user-management",
+    name: "All Users",
+    href: "/admin/users",
     icon: Users,
-    description: "Manage users & accounts",
+    description: "Manage all users",
   },
   {
-    name: "Payments",
+    name: "All Affiliates",
+    href: "/admin/affiliates",
+    icon: UserCheck,
+    description: "Manage all affiliates",
+  },
+  {
+    name: "All Clients",
+    href: "/admin/clients",
+    icon: Users,
+    description: "Manage all clients",
+  },
+  {
+    name: "Pending Withdrawals",
+    href: "/admin/withdrawals",
+    icon: CreditCard,
+    description: "Approve affiliate withdrawals",
+  },
+  {
+    name: "Pending Payments",
     href: "/admin/payments",
     icon: CreditCard,
-    description: "Manual payment approvals",
+    description: "Approve manual payments",
   },
   {
-    name: "Affiliates",
-    href: "/admin/affiliate",
-    icon: UserCheck,
-    description: "Affiliate tracking & earnings",
+    name: "Notifications",
+    href: "/admin/notifications",
+    icon: Bell,
+    description: "System notifications",
   },
   {
-    name: "Site Management",
-    href: "/admin/site-management",
-    icon: Globe,
-    description: "All websites & templates",
+    name: "Audit Logs",
+    href: "/admin/audit-logs",
+    icon: FileText,
+    description: "Action logs & history",
   },
   {
     name: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
     description: "Platform statistics",
-  },
-  {
-    name: "Content Moderation",
-    href: "/admin/moderation",
-    icon: Shield,
-    description: "Review & moderate content",
-  },
-  {
-    name: "Reports",
-    href: "/admin/reports",
-    icon: FileText,
-    description: "Generate reports",
   },
   {
     name: "Settings",
@@ -86,6 +92,26 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch("/api/admin/notifications");
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] grid grid-cols-1 lg:grid-cols-[250px_1fr]">
@@ -233,12 +259,50 @@ export default function AdminLayout({
             </div>
 
             <div className="flex items-center gap-4 relative">
-              <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                <Bell size={20} />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  3
-                </span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 rounded-lg hover:bg-gray-100 relative"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold">Notifications</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
+                          No notifications
+                        </div>
+                      ) : (
+                        notifications.slice(0, 10).map((notification: any) => (
+                          <div
+                            key={notification.id}
+                            className="p-4 border-b hover:bg-gray-50"
+                          >
+                            <div className="font-medium">
+                              {notification.message}
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleString()}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <button className="p-1 rounded-full overflow-hidden border shadow-sm w-9 h-9 flex items-center justify-center hover:shadow-md transition-shadow">
                 <User size={20} />

@@ -38,6 +38,7 @@ export type WithdrawalRequestMinAggregateOutputType = {
   id: string | null
   userId: string | null
   phoneNumber: string | null
+  mpesaName: string | null
   amount: number | null
   status: $Enums.WithdrawalStatus | null
   transactionId: string | null
@@ -50,6 +51,7 @@ export type WithdrawalRequestMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   phoneNumber: string | null
+  mpesaName: string | null
   amount: number | null
   status: $Enums.WithdrawalStatus | null
   transactionId: string | null
@@ -62,6 +64,7 @@ export type WithdrawalRequestCountAggregateOutputType = {
   id: number
   userId: number
   phoneNumber: number
+  mpesaName: number
   amount: number
   status: number
   transactionId: number
@@ -84,6 +87,7 @@ export type WithdrawalRequestMinAggregateInputType = {
   id?: true
   userId?: true
   phoneNumber?: true
+  mpesaName?: true
   amount?: true
   status?: true
   transactionId?: true
@@ -96,6 +100,7 @@ export type WithdrawalRequestMaxAggregateInputType = {
   id?: true
   userId?: true
   phoneNumber?: true
+  mpesaName?: true
   amount?: true
   status?: true
   transactionId?: true
@@ -108,6 +113,7 @@ export type WithdrawalRequestCountAggregateInputType = {
   id?: true
   userId?: true
   phoneNumber?: true
+  mpesaName?: true
   amount?: true
   status?: true
   transactionId?: true
@@ -207,6 +213,7 @@ export type WithdrawalRequestGroupByOutputType = {
   id: string
   userId: string
   phoneNumber: string
+  mpesaName: string | null
   amount: number
   status: $Enums.WithdrawalStatus
   transactionId: string | null
@@ -242,6 +249,7 @@ export type WithdrawalRequestWhereInput = {
   id?: Prisma.StringFilter<"WithdrawalRequest"> | string
   userId?: Prisma.StringFilter<"WithdrawalRequest"> | string
   phoneNumber?: Prisma.StringFilter<"WithdrawalRequest"> | string
+  mpesaName?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   amount?: Prisma.FloatFilter<"WithdrawalRequest"> | number
   status?: Prisma.EnumWithdrawalStatusFilter<"WithdrawalRequest"> | $Enums.WithdrawalStatus
   transactionId?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
@@ -255,6 +263,7 @@ export type WithdrawalRequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
+  mpesaName?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,6 +280,7 @@ export type WithdrawalRequestWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.WithdrawalRequestWhereInput | Prisma.WithdrawalRequestWhereInput[]
   userId?: Prisma.StringFilter<"WithdrawalRequest"> | string
   phoneNumber?: Prisma.StringFilter<"WithdrawalRequest"> | string
+  mpesaName?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   amount?: Prisma.FloatFilter<"WithdrawalRequest"> | number
   status?: Prisma.EnumWithdrawalStatusFilter<"WithdrawalRequest"> | $Enums.WithdrawalStatus
   transactionId?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
@@ -284,6 +294,7 @@ export type WithdrawalRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
+  mpesaName?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   transactionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,6 +315,7 @@ export type WithdrawalRequestScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"WithdrawalRequest"> | string
   userId?: Prisma.StringWithAggregatesFilter<"WithdrawalRequest"> | string
   phoneNumber?: Prisma.StringWithAggregatesFilter<"WithdrawalRequest"> | string
+  mpesaName?: Prisma.StringNullableWithAggregatesFilter<"WithdrawalRequest"> | string | null
   amount?: Prisma.FloatWithAggregatesFilter<"WithdrawalRequest"> | number
   status?: Prisma.EnumWithdrawalStatusWithAggregatesFilter<"WithdrawalRequest"> | $Enums.WithdrawalStatus
   transactionId?: Prisma.StringNullableWithAggregatesFilter<"WithdrawalRequest"> | string | null
@@ -315,6 +327,7 @@ export type WithdrawalRequestScalarWhereWithAggregatesInput = {
 export type WithdrawalRequestCreateInput = {
   id?: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -328,6 +341,7 @@ export type WithdrawalRequestUncheckedCreateInput = {
   id?: string
   userId: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -339,6 +353,7 @@ export type WithdrawalRequestUncheckedCreateInput = {
 export type WithdrawalRequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -352,6 +367,7 @@ export type WithdrawalRequestUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -364,6 +380,7 @@ export type WithdrawalRequestCreateManyInput = {
   id?: string
   userId: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -375,6 +392,7 @@ export type WithdrawalRequestCreateManyInput = {
 export type WithdrawalRequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -387,6 +405,7 @@ export type WithdrawalRequestUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -409,6 +428,7 @@ export type WithdrawalRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
+  mpesaName?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -425,6 +445,7 @@ export type WithdrawalRequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
+  mpesaName?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -437,6 +458,7 @@ export type WithdrawalRequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
+  mpesaName?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   transactionId?: Prisma.SortOrder
@@ -498,6 +520,7 @@ export type EnumWithdrawalStatusFieldUpdateOperationsInput = {
 export type WithdrawalRequestCreateWithoutUserInput = {
   id?: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -509,6 +532,7 @@ export type WithdrawalRequestCreateWithoutUserInput = {
 export type WithdrawalRequestUncheckedCreateWithoutUserInput = {
   id?: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -550,6 +574,7 @@ export type WithdrawalRequestScalarWhereInput = {
   id?: Prisma.StringFilter<"WithdrawalRequest"> | string
   userId?: Prisma.StringFilter<"WithdrawalRequest"> | string
   phoneNumber?: Prisma.StringFilter<"WithdrawalRequest"> | string
+  mpesaName?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   amount?: Prisma.FloatFilter<"WithdrawalRequest"> | number
   status?: Prisma.EnumWithdrawalStatusFilter<"WithdrawalRequest"> | $Enums.WithdrawalStatus
   transactionId?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
@@ -561,6 +586,7 @@ export type WithdrawalRequestScalarWhereInput = {
 export type WithdrawalRequestCreateManyUserInput = {
   id?: string
   phoneNumber: string
+  mpesaName?: string | null
   amount: number
   status?: $Enums.WithdrawalStatus
   transactionId?: string | null
@@ -572,6 +598,7 @@ export type WithdrawalRequestCreateManyUserInput = {
 export type WithdrawalRequestUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -583,6 +610,7 @@ export type WithdrawalRequestUpdateWithoutUserInput = {
 export type WithdrawalRequestUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -594,6 +622,7 @@ export type WithdrawalRequestUncheckedUpdateWithoutUserInput = {
 export type WithdrawalRequestUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -608,6 +637,7 @@ export type WithdrawalRequestSelect<ExtArgs extends runtime.Types.Extensions.Int
   id?: boolean
   userId?: boolean
   phoneNumber?: boolean
+  mpesaName?: boolean
   amount?: boolean
   status?: boolean
   transactionId?: boolean
@@ -621,6 +651,7 @@ export type WithdrawalRequestSelectCreateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   userId?: boolean
   phoneNumber?: boolean
+  mpesaName?: boolean
   amount?: boolean
   status?: boolean
   transactionId?: boolean
@@ -634,6 +665,7 @@ export type WithdrawalRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   userId?: boolean
   phoneNumber?: boolean
+  mpesaName?: boolean
   amount?: boolean
   status?: boolean
   transactionId?: boolean
@@ -647,6 +679,7 @@ export type WithdrawalRequestSelectScalar = {
   id?: boolean
   userId?: boolean
   phoneNumber?: boolean
+  mpesaName?: boolean
   amount?: boolean
   status?: boolean
   transactionId?: boolean
@@ -655,7 +688,7 @@ export type WithdrawalRequestSelectScalar = {
   createdAt?: boolean
 }
 
-export type WithdrawalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "phoneNumber" | "amount" | "status" | "transactionId" | "failureReason" | "processedAt" | "createdAt", ExtArgs["result"]["withdrawalRequest"]>
+export type WithdrawalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "phoneNumber" | "mpesaName" | "amount" | "status" | "transactionId" | "failureReason" | "processedAt" | "createdAt", ExtArgs["result"]["withdrawalRequest"]>
 export type WithdrawalRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -675,6 +708,7 @@ export type $WithdrawalRequestPayload<ExtArgs extends runtime.Types.Extensions.I
     id: string
     userId: string
     phoneNumber: string
+    mpesaName: string | null
     amount: number
     status: $Enums.WithdrawalStatus
     transactionId: string | null
@@ -1108,6 +1142,7 @@ export interface WithdrawalRequestFieldRefs {
   readonly id: Prisma.FieldRef<"WithdrawalRequest", 'String'>
   readonly userId: Prisma.FieldRef<"WithdrawalRequest", 'String'>
   readonly phoneNumber: Prisma.FieldRef<"WithdrawalRequest", 'String'>
+  readonly mpesaName: Prisma.FieldRef<"WithdrawalRequest", 'String'>
   readonly amount: Prisma.FieldRef<"WithdrawalRequest", 'Float'>
   readonly status: Prisma.FieldRef<"WithdrawalRequest", 'WithdrawalStatus'>
   readonly transactionId: Prisma.FieldRef<"WithdrawalRequest", 'String'>

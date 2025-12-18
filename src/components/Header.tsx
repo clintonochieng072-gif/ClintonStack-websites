@@ -32,6 +32,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
     "/api/notifications",
     fetcher
   );
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await fetch("/api/notifications", {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ notificationIds: [notificationId] }),
+      });
+      mutateNotifications(); // Refresh notifications
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -248,7 +261,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <div className="max-h-80 overflow-y-auto">
                 {notificationsData?.notifications?.length > 0 ? (
                   notificationsData.notifications.map((notification: any) => (
-                    <DropdownMenuItem key={notification._id} className="p-4">
+                    <DropdownMenuItem
+                      key={notification._id}
+                      className="p-4"
+                      onClick={() =>
+                        !notification.read && markAsRead(notification._id)
+                      }
+                    >
                       <div className="flex flex-col space-y-1 w-full">
                         <div className="flex items-start justify-between">
                           <p

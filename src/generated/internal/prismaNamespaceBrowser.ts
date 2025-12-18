@@ -61,7 +61,9 @@ export const ModelName = {
   WithdrawalRequest: 'WithdrawalRequest',
   Account: 'Account',
   Session: 'Session',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  Notification: 'Notification',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -108,6 +110,10 @@ export const AffiliateScalarFieldEnum = {
   commissionRate: 'commissionRate',
   payoutMethod: 'payoutMethod',
   status: 'status',
+  availableBalance: 'availableBalance',
+  totalEarned: 'totalEarned',
+  pendingBalance: 'pendingBalance',
+  mpesaName: 'mpesaName',
   createdAt: 'createdAt'
 } as const
 
@@ -131,6 +137,7 @@ export const PaymentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   amount: 'amount',
+  currency: 'currency',
   status: 'status',
   paymentMethod: 'paymentMethod',
   transactionId: 'transactionId',
@@ -193,6 +200,7 @@ export const WithdrawalRequestScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   phoneNumber: 'phoneNumber',
+  mpesaName: 'mpesaName',
   amount: 'amount',
   status: 'status',
   transactionId: 'transactionId',
@@ -241,12 +249,52 @@ export const VerificationTokenScalarFieldEnum = {
 export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  message: 'message',
+  data: 'data',
+  isRead: 'isRead',
+  createdAt: 'createdAt',
+  userId: 'userId'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  details: 'details',
+  userId: 'userId',
+  targetId: 'targetId',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull'
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: 'JsonNull'
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -263,4 +311,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

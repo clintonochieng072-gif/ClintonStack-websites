@@ -1,15 +1,11 @@
 import { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import dbConnect from "./mongodb";
-import User from "./models/User";
+import { prisma } from "./prisma";
 
 const ADMIN_EMAIL = "clintonochieng072@gmail.com";
 
 export async function verifyAdmin(request: NextRequest) {
   try {
-    // Connect to database
-    await dbConnect();
-
     // Get token from Authorization header
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -22,7 +18,9 @@ export async function verifyAdmin(request: NextRequest) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
     // Check if user exists and is admin
-    const user = await User.findById(decoded.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
     if (!user) {
       return { isValid: false, error: "User not found" };
     }
@@ -38,7 +36,7 @@ export async function verifyAdmin(request: NextRequest) {
     return {
       isValid: true,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,

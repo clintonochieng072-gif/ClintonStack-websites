@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
-import WithdrawalRequest from "@/lib/models/WithdrawalRequest";
-import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,32 +16,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    await dbConnect();
+    // Get user with affiliate
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: { affiliate: true },
+    });
 
-    // Get user
-    const user = await User.findById(decoded.userId);
-    if (!user || user.role !== "affiliate") {
+    if (!user || user.role !== "affiliate" || !user.affiliate) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { amount, phoneNumber } = await request.json();
+    const { amount, phoneNumber, mpesaName } = await request.json();
 
-    if (!amount || !phoneNumber) {
+    if (!amount || !phoneNumber || !mpesaName) {
       return NextResponse.json(
-        { error: "Amount and phone number are required" },
+        { error: "Amount, phone number, and MPESA name are required" },
         { status: 400 }
       );
     }
 
     const withdrawalAmount = parseFloat(amount);
-    if (isNaN(withdrawalAmount) || withdrawalAmount < 200) {
+    if (isNaN(withdrawalAmount) || withdrawalAmount < 300) {
       return NextResponse.json(
-        { error: "Minimum withdrawal amount is KES 200" },
+        { error: "Minimum withdrawal amount is KES 300" },
         { status: 400 }
       );
     }
 
-    if (withdrawalAmount > (user.availableBalance || 0)) {
+    if (withdrawalAmount > user.affiliate.availableBalance) {
       return NextResponse.json(
         { error: "Insufficient available balance" },
         { status: 400 }
@@ -55,9 +54,11 @@ export async function POST(request: NextRequest) {
     const oneDayAgo = new Date();
     oneDayAgo.setHours(oneDayAgo.getHours() - 24);
 
-    const recentWithdrawal = await WithdrawalRequest.findOne({
-      userId: user._id,
-      createdAt: { $gte: oneDayAgo },
+    const recentWithdrawal = await prisma.withdrawalRequest.findFirst({
+      where: {
+        userId: user.id,
+        createdAt: { gte: oneDayAgo },
+      },
     });
 
     if (recentWithdrawal) {
@@ -67,43 +68,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create withdrawal request as processing
-    const withdrawalRequest = new WithdrawalRequest({
-      userId: user._id,
-      amount: withdrawalAmount,
-      phoneNumber,
-      status: "pending",
+    // Create withdrawal request
+    const withdrawalRequest = await prisma.withdrawalRequest.create({
+      data: {
+        userId: user.id,
+        amount: withdrawalAmount,
+        phoneNumber,
+        mpesaName,
+        status: "pending",
+      },
     });
 
-    await withdrawalRequest.save();
-
-    // Withdrawal requests are now processed manually by admin
-    // Just create the request as pending
-
-    // Add to withdrawal history
-    if (!user.withdrawalHistory) user.withdrawalHistory = [];
-    user.withdrawalHistory.push({
-      withdrawalId: withdrawalRequest._id.toString(),
-      amount: withdrawalAmount,
-      status: "pending",
-      requestedAt: new Date(),
-      phoneNumber,
-    });
-
-    await user.save();
-
-    logger.info("Withdrawal request created", {
-      userId: user._id,
-      withdrawalId: withdrawalRequest._id,
-      amount: withdrawalAmount,
-      phoneNumber,
-      status: "pending",
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        action: "withdrawal_request_created",
+        details: {
+          withdrawalId: withdrawalRequest.id,
+          amount: withdrawalAmount,
+          phoneNumber,
+          mpesaName,
+        },
+        targetId: withdrawalRequest.id,
+        userId: user.id,
+      },
     });
 
     return NextResponse.json({
       message:
         "Withdrawal request submitted successfully. It will be processed manually.",
-      withdrawalId: withdrawalRequest._id,
+      withdrawalId: withdrawalRequest.id,
     });
   } catch (error) {
     console.error("Error processing withdrawal:", error);

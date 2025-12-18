@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getAuthHeaders } from "@/lib/utils";
+import { useGlobalContext } from "@/context/GlobalContext";
+import AdminMiniPanel from "@/components/AdminMiniPanel";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -27,6 +29,7 @@ export default function NicheDashboardPage() {
   const params = useParams();
   const router = useRouter();
   const niche = (params as { niche: string }).niche;
+  const { user } = useGlobalContext();
 
   const { data: siteData, error } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
@@ -132,6 +135,8 @@ export default function NicheDashboardPage() {
 
   return (
     <DashboardLayout>
+      {(user?.role === "admin" ||
+        user?.email === "clintonochieng072@gmail.com") && <AdminMiniPanel />}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

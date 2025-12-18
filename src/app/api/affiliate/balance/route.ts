@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -19,24 +18,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    await dbConnect();
+    // Get user with affiliate data
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: {
+        affiliate: true,
+        withdrawalRequests: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
 
-    // Get user
-    const user = await User.findById(decoded.userId);
-    if (!user || user.role !== "affiliate") {
+    if (!user || user.role !== "affiliate" || !user.affiliate) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get available balance (real money only)
-    const availableBalance = user.availableBalance || 0;
+    // Get balances from affiliate
+    const availableBalance = user.affiliate.availableBalance;
+    const totalEarned = user.affiliate.totalEarned;
 
-    // Get total earned
-    const totalEarned = user.totalEarned || 0;
+    // Format withdrawal history
+    const withdrawalHistory = user.withdrawalRequests.map((req) => ({
+      withdrawalId: req.id,
+      amount: req.amount,
+      status: req.status,
+      requestedAt: req.createdAt,
+      processedAt: req.processedAt,
+      phoneNumber: req.phoneNumber,
+    }));
 
     return NextResponse.json({
       availableBalance,
       totalEarned,
-      withdrawalHistory: user.withdrawalHistory || [],
+      withdrawalHistory,
     });
   } catch (error) {
     console.error("Error fetching affiliate balance:", error);

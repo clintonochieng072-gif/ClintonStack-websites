@@ -211,13 +211,27 @@ export class PaymentsRepository {
           const commissionAmount =
             payment.amount * referral.affiliate.commissionRate;
 
-          // Create commission
+          // Create commission with paid status (immediately available)
           await tx.commission.create({
             data: {
               affiliateId: referral.affiliate.id,
               paymentId: payment.id,
               commissionAmount,
-              status: "pending",
+              status: "paid",
+              paidAt: new Date(),
+            },
+          });
+
+          // Update affiliate balances
+          await tx.affiliate.update({
+            where: { id: referral.affiliate.id },
+            data: {
+              availableBalance: {
+                increment: commissionAmount,
+              },
+              totalEarned: {
+                increment: commissionAmount,
+              },
             },
           });
 
