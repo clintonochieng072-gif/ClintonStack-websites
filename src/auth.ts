@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 
 export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -44,7 +45,7 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt" as const,
-    maxAge: 60, // 1 minute in seconds
+    maxAge: 60 * 60 * 24, // 24 hours
   },
   callbacks: {
     async signIn({ user, account }: any) {
