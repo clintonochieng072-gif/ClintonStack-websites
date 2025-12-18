@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Bell,
   Search,
@@ -19,6 +20,7 @@ import {
   X,
   CreditCard,
   UserCheck,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -91,13 +93,34 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showNotifications || showUserMenu) {
+        const target = event.target as Element;
+        if (
+          !target.closest(".notification-dropdown") &&
+          !target.closest(".user-menu")
+        ) {
+          setShowNotifications(false);
+          setShowUserMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showNotifications, showUserMenu]);
 
   const fetchNotifications = async () => {
     try {
@@ -112,6 +135,16 @@ export default function AdminLayout({
   };
 
   const unreadCount = notifications.filter((n: any) => !n.isRead).length;
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ callbackUrl: "/auth/login" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: redirect to login
+      router.push("/auth/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] grid grid-cols-1 lg:grid-cols-[250px_1fr]">
@@ -273,7 +306,7 @@ export default function AdminLayout({
                 </button>
 
                 {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+                  <div className="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
                     <div className="p-4 border-b">
                       <h3 className="font-semibold">Notifications</h3>
                     </div>
@@ -304,9 +337,33 @@ export default function AdminLayout({
                 )}
               </div>
 
-              <button className="p-1 rounded-full overflow-hidden border shadow-sm w-9 h-9 flex items-center justify-center hover:shadow-md transition-shadow">
-                <User size={20} />
-              </button>
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setShowNotifications(false);
+                    setShowUserMenu(!showUserMenu);
+                  }}
+                  className="p-1 rounded-full overflow-hidden border shadow-sm w-9 h-9 flex items-center justify-center hover:shadow-md transition-shadow"
+                >
+                  <User size={20} />
+                </button>
+
+                {/* User Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="user-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
