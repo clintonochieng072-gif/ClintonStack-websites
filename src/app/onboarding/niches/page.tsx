@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useGlobalContext } from "@/context/GlobalContext";
 import {
   Home,
   Car,
@@ -100,6 +101,7 @@ export default function NichesPage() {
   const [userSites, setUserSites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creatingSite, setCreatingSite] = useState<string | null>(null);
+  const { refreshUser } = useGlobalContext();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -152,6 +154,7 @@ export default function NichesPage() {
 
         if (response.ok) {
           const newSite = await response.json();
+          await refreshUser();
           router.push(`/dashboard/${nicheId}`);
         } else {
           const errorText = await response.text();

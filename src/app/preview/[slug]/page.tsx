@@ -22,6 +22,7 @@ export default function PreviewSite() {
     const fetchSite = async () => {
       const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
         headers: getAuthHeaders(),
+        credentials: "include",
       });
       if (res.ok) {
         const json = await res.json();
@@ -47,6 +48,7 @@ export default function PreviewSite() {
       // Refetch site data instantly without page refresh
       const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
         headers: getAuthHeaders(),
+        credentials: "include",
       });
       if (res.ok) {
         const json = await res.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { prisma } from "@/lib/prisma";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -15,7 +16,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const token = await getToken({ req });
-  const user = token?.user as any;
+  const userId = (token as any)?.id as string;
 
   const isAuthRoute =
     pathname.startsWith("/auth/login") ||
@@ -27,25 +28,57 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/admin");
 
-  if (isAuthRoute && user?.id) {
+  if (isAuthRoute && userId) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (isProtected && !user?.id) {
+  if (isProtected && !userId) {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  if (user?.id) {
-    if (user.role === "affiliate") {
-      if (!pathname.startsWith("/dashboard/affiliate")) {
-        return NextResponse.redirect(new URL("/dashboard/affiliate", req.url));
-      }
-    }
+  if (userId) {
+    try {
+      // Query PostgreSQL directly for latest role and onboarded status
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          role: true,
+          onboarded: true,
+        },
+      });
 
-    if (user.role !== "affiliate" && !user.onboarded) {
-      if (!pathname.startsWith("/onboarding/niches")) {
-        return NextResponse.redirect(new URL("/onboarding/niches", req.url));
+      if (!user) {
+        // User not found in PostgreSQL, redirect to login
+        return NextResponse.redirect(new URL("/auth/login", req.url));
       }
+
+      if (user.role === "affiliate") {
+        if (!pathname.startsWith("/dashboard/affiliate")) {
+          return NextResponse.redirect(
+            new URL("/dashboard/affiliate", req.url)
+          );
+        }
+      }
+
+      if (user.role !== "affiliate" && !user.onboarded) {
+        if (!pathname.startsWith("/onboarding/niches")) {
+          return NextResponse.redirect(new URL("/onboarding/niches", req.url));
+        }
+      }
+
+      // For onboarded clients, redirect to /dashboard if not already there
+      if (user.role !== "affiliate" && user.onboarded) {
+        if (
+          !pathname.startsWith("/dashboard") ||
+          pathname.startsWith("/dashboard/affiliate")
+        ) {
+          return NextResponse.redirect(new URL("/dashboard", req.url));
+        }
+      }
+    } catch (error) {
+      console.error("Middleware PostgreSQL query failed:", error);
+      // If PostgreSQL fails, allow access to prevent blocking, but log error
+      // This ensures MongoDB failures don't block, and PostgreSQL failures are handled gracefully
     }
   }
 

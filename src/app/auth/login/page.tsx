@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, getSession } from "next-auth/react";
 
 export const dynamic = "force-dynamic";
 
@@ -52,8 +52,15 @@ function LoginForm() {
         throw new Error(result.error);
       }
 
+      // Get updated session to check user role
+      const session = await getSession();
+      const redirectPath =
+        session?.user?.role === "affiliate"
+          ? "/dashboard/affiliate"
+          : "/dashboard";
+
       // Redirect user
-      router.push("/dashboard");
+      router.push(redirectPath);
     } catch (err: any) {
       setError(err.message);
     } finally {

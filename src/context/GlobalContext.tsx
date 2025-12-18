@@ -23,6 +23,7 @@ type Context = {
   authLoading: boolean;
   login: (user: User) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const GlobalContext = createContext<Context | undefined>(undefined);
@@ -104,8 +105,23 @@ export default function GlobalProvider({
     await signOut({ callbackUrl: "/" });
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (json?.user && json.user.id) setUser(json.user);
+      else setUser(null);
+    } catch (err) {
+      setUser(null);
+    }
+  };
+
   return (
-    <GlobalContext.Provider value={{ user, authLoading, login, logout }}>
+    <GlobalContext.Provider
+      value={{ user, authLoading, login, logout, refreshUser }}
+    >
       {children}
     </GlobalContext.Provider>
   );

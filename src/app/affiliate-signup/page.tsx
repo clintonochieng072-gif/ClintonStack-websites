@@ -31,8 +31,7 @@ export default function AffiliateSignupPage() {
     setLoading(true);
     try {
       await signIn("google", {
-        callbackUrl: "/auth/redirect",
-        state: JSON.stringify({ role: "affiliate" }),
+        callbackUrl: "/auth/redirect?role=affiliate",
       });
     } catch (error) {
       console.error("Google sign in error:", error);

@@ -32,6 +32,9 @@ export default function NicheDashboardPage() {
   const [site, setSite] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
+  // Only allow real-estate niche to have a dashboard
+  const allowedNiches = ["real-estate"];
+
   useEffect(() => {
     if (siteData?.data) {
       setSite(siteData.data);
@@ -48,6 +51,47 @@ export default function NicheDashboardPage() {
       }
     }
   }, [siteData, niche, router]);
+
+  // Show "Coming Soon" for niches that don't have dashboards yet
+  if (!allowedNiches.includes(niche)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {niche.charAt(0).toUpperCase() + niche.slice(1).replace("-", " ")}{" "}
+              Dashboard
+            </h1>
+            <p className="text-gray-600 mb-6">
+              This dashboard is currently under development. We're working hard
+              to bring you the best experience!
+            </p>
+            <button
+              onClick={() => router.push("/dashboard/niches")}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Back to Niches
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const copyToClipboard = async () => {
     const publicURL = site ? `${window.location.origin}/site/${site.slug}` : "";

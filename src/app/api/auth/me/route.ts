@@ -2,9 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = await auth(req);
+    const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
