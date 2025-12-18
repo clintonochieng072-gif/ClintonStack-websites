@@ -87,6 +87,7 @@ export const authOptions = {
         token.id = user.id;
         token.role = user.role;
         token.onboarded = user.onboarded;
+        token.email = user.email;
       }
       return token;
     },
@@ -95,6 +96,7 @@ export const authOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.onboarded = token.onboarded as boolean;
+        session.user.email = token.email as string;
       }
       return session;
     },
