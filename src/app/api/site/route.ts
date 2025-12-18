@@ -5,7 +5,8 @@ import { Site } from "@/lib/models/Site";
 import jwt from "jsonwebtoken";
 import { usersRepo } from "@/repositories/usersRepo";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -47,7 +48,7 @@ async function getUserFromRequest(request: NextRequest) {
     }
 
     // If no JWT, try NextAuth session
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (session?.user?.email) {
       // Use PostgreSQL for user lookup
       const user = await usersRepo.findByEmail(session.user.email);

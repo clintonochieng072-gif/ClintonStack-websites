@@ -1,7 +1,8 @@
 // src/app/api/site/publish/route.ts
 
 import { Site } from "@/lib/models/Site";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 import { connectDb } from "@/lib/db";
 
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
     await connectDb();
 
     // Authenticate user using NextAuth
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       console.log("Publish: No session or email");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
