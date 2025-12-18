@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { verifyAdmin } from "@/lib/adminAuth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.isValid) {
-      return NextResponse.json({ error: adminCheck.error }, { status: 401 });
+    // Verify admin session
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || session.user.email !== "clintonochieng072@gmail.com") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get client statistics

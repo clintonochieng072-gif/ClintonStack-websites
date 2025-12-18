@@ -3,11 +3,17 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     // Verify admin session
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.email !== "clintonochieng072@gmail.com") {
+    if (
+      !session ||
+      !session.user ||
+      session.user.email !== "clintonochieng072@gmail.com"
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
