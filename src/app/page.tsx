@@ -52,18 +52,12 @@ export default function Home() {
           <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Simple website builder for your business
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="flex justify-center mb-6 sm:mb-8">
             <Link
               href="/client-signup"
               className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
             >
               Build Your Website
-            </Link>
-            <Link
-              href="/affiliate-program"
-              className="px-6 sm:px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
-            >
-              Become an Affiliate
             </Link>
           </div>
           <div className="flex justify-center">
@@ -112,20 +106,14 @@ export default function Home() {
           </h2>
           <p className="text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
             Join thousands of businesses creating stunning websites with
-            ClintonStack, or earn commissions as an affiliate.
+            ClintonStack.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+          <div className="flex justify-center">
             <Link
               href="/client-signup"
               className="px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white text-base sm:text-lg rounded-lg hover:bg-blue-700 transition-colors text-center"
             >
               Start Building Today
-            </Link>
-            <Link
-              href="/affiliate-program"
-              className="px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white text-base sm:text-lg rounded-lg hover:bg-green-700 transition-colors text-center"
-            >
-              Earn as Affiliate
             </Link>
           </div>
         </section>

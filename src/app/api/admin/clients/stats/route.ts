@@ -25,11 +25,26 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const activeClients = await prisma.user.count({
+      where: {
+        role: "client",
+        subscription: {
+          status: {
+            in: ["active", "lifetime"],
+          },
+        },
+      },
+    });
+
+    const inactiveClients = totalClients - activeClients;
+
     const unpaidClients = totalClients - paidClients;
 
     return NextResponse.json({
       totalClients,
       paidClients,
+      activeClients,
+      inactiveClients,
       unpaidClients,
     });
   } catch (error) {

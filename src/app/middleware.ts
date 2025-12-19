@@ -55,27 +55,65 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login", req.url));
       }
 
+      // Role-based access control
       if (user.role === "affiliate") {
-        if (!pathname.startsWith("/dashboard/affiliate")) {
+        // Affiliates can only access affiliate routes and public pages
+        const allowedAffiliatePaths = [
+          "/dashboard/affiliate",
+          "/auth",
+          "/api",
+          "/_next",
+          "/favicon.ico",
+          "/", // landing page
+          "/affiliate-program",
+          "/affiliate-signup",
+        ];
+
+        const isAllowed = allowedAffiliatePaths.some((path) =>
+          pathname.startsWith(path)
+        );
+
+        if (!isAllowed) {
           return NextResponse.redirect(
             new URL("/dashboard/affiliate", req.url)
           );
         }
-      }
 
-      if (user.role !== "affiliate" && !user.onboarded) {
-        if (!pathname.startsWith("/onboarding/niches")) {
-          return NextResponse.redirect(new URL("/onboarding/niches", req.url));
-        }
-      }
-
-      // For onboarded clients, redirect to /dashboard if not already there
-      if (user.role !== "affiliate" && user.onboarded) {
+        // Force redirect to affiliate dashboard if not already there
         if (
-          !pathname.startsWith("/dashboard") ||
-          pathname.startsWith("/dashboard/affiliate")
+          !pathname.startsWith("/dashboard/affiliate") &&
+          !pathname.startsWith("/auth") &&
+          !pathname.startsWith("/api")
+        ) {
+          return NextResponse.redirect(
+            new URL("/dashboard/affiliate", req.url)
+          );
+        }
+      } else {
+        // Clients cannot access affiliate routes
+        if (
+          pathname.startsWith("/dashboard/affiliate") ||
+          pathname.startsWith("/affiliate-signup")
         ) {
           return NextResponse.redirect(new URL("/dashboard", req.url));
+        }
+
+        if (!user.onboarded) {
+          if (!pathname.startsWith("/onboarding/niches")) {
+            return NextResponse.redirect(
+              new URL("/onboarding/niches", req.url)
+            );
+          }
+        }
+
+        // For onboarded clients, redirect to /dashboard if not already there
+        if (user.onboarded) {
+          if (
+            !pathname.startsWith("/dashboard") ||
+            pathname.startsWith("/dashboard/affiliate")
+          ) {
+            return NextResponse.redirect(new URL("/dashboard", req.url));
+          }
         }
       }
     } catch (error) {

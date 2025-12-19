@@ -23,6 +23,8 @@ interface AffiliateStats {
 interface ClientStats {
   totalClients: number;
   paidClients: number;
+  activeClients: number;
+  inactiveClients: number;
   unpaidClients: number;
 }
 
@@ -136,8 +138,8 @@ export default function AdminDashboard() {
         />
         <DashboardCard
           icon={<UsersIcon />}
-          title="Total Clients"
-          value={clientStats?.totalClients?.toString() || "0"}
+          title="Active Clients"
+          value={clientStats?.activeClients?.toString() || "0"}
         />
         <DashboardCard
           icon={<BarChartIcon />}
@@ -298,15 +300,15 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-green-50 p-4 rounded-lg">
               <div className="text-2xl font-bold text-green-600">
-                {clientStats?.paidClients || 0}
+                {clientStats?.activeClients || 0}
               </div>
-              <div className="text-sm text-green-800">Paid Clients</div>
+              <div className="text-sm text-green-800">Active Clients</div>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {clientStats?.unpaidClients || 0}
+                {clientStats?.inactiveClients || 0}
               </div>
-              <div className="text-sm text-yellow-800">Unpaid Clients</div>
+              <div className="text-sm text-yellow-800">Inactive Clients</div>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">
