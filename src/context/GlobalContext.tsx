@@ -7,14 +7,19 @@ import { pusherClient } from "@/lib/pusher-client";
 type User = {
   id?: string;
   email?: string;
-  onboarded?: boolean;
-  niche?: string;
+  name?: string;
+  username?: string;
   role?: string;
-  hasSites?: boolean;
-  firstSiteNiche?: string | null;
+  onboarded?: boolean;
+  emailVerified?: boolean;
+  referralCode?: string;
+  clientId?: string;
+  has_paid?: boolean;
   subscriptionStatus?: string;
   subscriptionType?: string | null;
-  has_paid?: boolean;
+  niche?: string;
+  hasSites?: boolean;
+  firstSiteNiche?: string | null;
   // add other safe fields you want client-side
 };
 
@@ -37,42 +42,32 @@ export default function GlobalProvider({
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const { data: session, status, update } = useSession();
 
-  const loadUser = async () => {
-    try {
-      const res = await fetch("/api/auth/me", {
-        credentials: "include",
-      });
-      const json = await res.json();
-      // Expect { user: null } or { user: {...} }
-      if (json?.user && json.user.id) setUser(json.user);
-      else setUser(null);
-    } catch (err) {
-      setUser(null);
-    }
-  };
-
   // Handle NextAuth session
   useEffect(() => {
     if (status === "loading") return;
 
     if (session?.user) {
-      // NextAuth user - fetch fresh data from API
-      let mounted = true;
-      loadUser().finally(() => {
-        if (mounted) setAuthLoading(false);
+      // Use session data directly
+      const userData = session.user as any;
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        username: userData.username,
+        role: userData.role,
+        onboarded: userData.onboarded,
+        emailVerified: userData.emailVerified,
+        referralCode: userData.referralCode,
+        clientId: userData.clientId,
+        has_paid: userData.has_paid,
+        subscriptionStatus: userData.subscriptionStatus,
+        subscriptionType: userData.subscriptionType,
       });
-      return () => {
-        mounted = false;
-      };
+      setAuthLoading(false);
     } else {
-      // Fall back to custom JWT system
-      let mounted = true;
-      loadUser().finally(() => {
-        if (mounted) setAuthLoading(false);
-      });
-      return () => {
-        mounted = false;
-      };
+      // No session
+      setUser(null);
+      setAuthLoading(false);
     }
   }, [session, status]);
 
@@ -82,8 +77,6 @@ export default function GlobalProvider({
 
     const channel = pusherClient.subscribe(`user-${user.id}`);
     channel.bind("payment-approved", () => {
-      // Refresh user data
-      loadUser();
       // Refresh session
       update();
     });
@@ -106,16 +99,8 @@ export default function GlobalProvider({
   };
 
   const refreshUser = async () => {
-    try {
-      const res = await fetch("/api/auth/me", {
-        credentials: "include",
-      });
-      const json = await res.json();
-      if (json?.user && json.user.id) setUser(json.user);
-      else setUser(null);
-    } catch (err) {
-      setUser(null);
-    }
+    // Refresh session to get updated user data
+    await update();
   };
 
   return (

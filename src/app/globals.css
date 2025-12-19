@@ -70,6 +70,12 @@
 
 * {
   border-color: hsl(var(--border));
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {

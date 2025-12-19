@@ -53,6 +53,13 @@ export const authOptions = {
             name: user.name,
             role: user.role,
             onboarded: user.onboarded,
+            username: user.username,
+            emailVerified: user.emailVerified,
+            referralCode: user.referralCode,
+            clientId: user.clientId,
+            has_paid: user.has_paid || false,
+            subscriptionStatus: user.subscriptionStatus || "trial",
+            subscriptionType: user.subscriptionType || null,
           };
         } catch (error) {
           console.error("authorize error:", error);
@@ -96,10 +103,18 @@ export const authOptions = {
             console.log("New user created:", existingUser.id);
           }
 
-          // Update user ID for NextAuth
+          // Update user object with full data for NextAuth
           user.id = existingUser.id.toString();
           user.role = existingUser.role;
           user.onboarded = existingUser.onboarded;
+          user.name = existingUser.name;
+          user.username = existingUser.username;
+          user.emailVerified = existingUser.emailVerified;
+          user.referralCode = existingUser.referralCode;
+          user.clientId = existingUser.clientId;
+          user.has_paid = existingUser.has_paid || false;
+          user.subscriptionStatus = existingUser.subscriptionStatus || "trial";
+          user.subscriptionType = existingUser.subscriptionType || null;
           console.log("signIn success for Google");
 
           return true;
@@ -114,11 +129,24 @@ export const authOptions = {
     async jwt({ token, user }: any) {
       console.log("jwt callback", { hasUser: !!user, tokenId: token?.id });
       if (user) {
+        // For new logins, user is passed from authorize or signIn
         token.id = user.id;
         token.role = user.role;
         token.onboarded = user.onboarded;
         token.email = user.email;
+        token.name = user.name;
+        token.username = user.username;
+        token.emailVerified = user.emailVerified;
+        token.referralCode = user.referralCode;
+        token.clientId = user.clientId;
+        token.has_paid = user.has_paid || false;
+        token.subscriptionStatus = user.subscriptionStatus || "trial";
+        token.subscriptionType = user.subscriptionType || null;
         console.log("jwt updated with user data");
+      } else if (token.id) {
+        // For subsequent requests, ensure data persists
+        // Fetch fresh data if needed, but for now keep existing
+        console.log("jwt callback with existing token");
       }
       return token;
     },
@@ -132,6 +160,14 @@ export const authOptions = {
         session.user.role = token.role as string;
         session.user.onboarded = token.onboarded as boolean;
         session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.username = token.username as string;
+        session.user.emailVerified = token.emailVerified as boolean;
+        session.user.referralCode = token.referralCode as string;
+        session.user.clientId = token.clientId as string;
+        session.user.has_paid = token.has_paid as boolean;
+        session.user.subscriptionStatus = token.subscriptionStatus as string;
+        session.user.subscriptionType = token.subscriptionType as string;
         console.log("session updated");
       }
       return session;

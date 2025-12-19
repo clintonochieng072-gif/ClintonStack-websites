@@ -204,9 +204,15 @@ export async function generateMetadata({
   const { slug } = await params;
   const sp = await searchParams;
   const isPreview = sp.preview === "true";
-  const site = isPreview
-    ? await getPreviewSite(slug)
-    : await getPublicSiteDirect(slug);
+
+  // For preview, don't generate metadata since it's authenticated
+  if (isPreview) {
+    return {
+      title: "Preview",
+    };
+  }
+
+  const site = await getPublicSiteDirect(slug);
 
   if (!site) {
     return {
@@ -237,14 +243,10 @@ export async function generateMetadata({
 
 export default async function PublicSite({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
-  const sp = await searchParams;
-  // Public site always shows published data, never draft/preview
   const site = await getPublicSiteDirect(slug);
 
   if (!site) {

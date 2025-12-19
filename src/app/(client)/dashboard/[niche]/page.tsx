@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,36 +104,30 @@ export default function NicheDashboardPage() {
 
   if (error) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">
-              Error Loading Dashboard
-            </h1>
-            <p className="text-gray-600">Please try again later.</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading Dashboard
+          </h1>
+          <p className="text-gray-600">Please try again later.</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (!site) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Loading...
-            </h1>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading...</h1>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
+    <>
       {(user?.role === "admin" ||
         user?.email === "clintonochieng072@gmail.com") && <AdminMiniPanel />}
       <motion.div
@@ -168,6 +161,12 @@ export default function NicheDashboardPage() {
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Property
+                </Button>
+                <Button variant="outline" asChild>
+                  <a href={`/preview/${site.slug}`} target="_blank">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Preview Draft
+                  </a>
                 </Button>
                 <Button variant="outline" asChild>
                   <a href={`/site/${site.slug}`} target="_blank">
@@ -301,6 +300,6 @@ export default function NicheDashboardPage() {
           </CardContent>
         </Card>
       </motion.div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -20,13 +20,18 @@ export default function PreviewSite() {
     if (!slug) return;
 
     const fetchSite = async () => {
-      const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
-        headers: getAuthHeaders(),
-        credentials: "include",
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setSite(json.data);
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setSite(json.data);
+        } else {
+          console.error("Preview API error:", res.status, res.statusText);
+        }
+      } catch (error) {
+        console.error("Failed to fetch preview:", error);
       }
       setLoading(false);
     };
@@ -46,13 +51,16 @@ export default function PreviewSite() {
 
     channel.bind("site-updated", async () => {
       // Refetch site data instantly without page refresh
-      const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
-        headers: getAuthHeaders(),
-        credentials: "include",
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setSite(json.data);
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/site/preview/${slug}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setSite(json.data);
+        }
+      } catch (error) {
+        console.error("Failed to refetch preview:", error);
       }
     });
 

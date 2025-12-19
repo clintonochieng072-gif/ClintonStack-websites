@@ -2,10 +2,12 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { Site } from "@/lib/models/Site";
-import { getUserFromToken } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
+import { usersRepo } from "@/repositories/usersRepo";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const runtime = "nodejs";
 
 function normalizeSite(blocks: any[]) {
   if (!Array.isArray(blocks)) return [];
@@ -97,15 +99,34 @@ function normalizeSite(blocks: any[]) {
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: { slug: string } }
 ) {
-  await connectDb();
-  const { slug } = await params;
-  const user = await getUserFromToken();
-  if (!user)
+  const { slug } = params;
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  const site = await Site.findOne({ slug, ownerId: user.id });
+  const user = await usersRepo.findByEmail(session.user.email);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await connectDb();
+  } catch (error) {
+    console.error("DB connection failed:", error);
+    return NextResponse.json({ error: "DB connection failed" }, { status: 500 });
+  }
+
+  let site;
+  try {
+    site = await Site.findOne({ slug, ownerId: user.id });
+  } catch (error) {
+    console.error("DB query failed:", error);
+    return NextResponse.json({ error: "DB query failed" }, { status: 500 });
+  }
+
   if (!site) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   console.log("Preview API - Raw site from DB:", {

@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
-import { PrismaClient } from "./src/generated/client.js";
+import { PrismaClient } from "./src/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 

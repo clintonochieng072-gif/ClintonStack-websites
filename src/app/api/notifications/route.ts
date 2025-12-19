@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongodb";
 import { Notification } from "@/lib/models/Notification";
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return new Response(null, { status: 204 });
     }
 
     await dbConnect();
 
-    const notifications = await Notification.find({ userId: decoded.userId })
+    const notifications = await Notification.find({ userId: session.user.id })
       .sort({ createdAt: -1 })
       .limit(20)
       .lean();
 
     const unreadCount = await Notification.countDocuments({
-      userId: decoded.userId,
+      userId: session.user.id,
       read: false,
     });
 
@@ -50,15 +45,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return new Response(null, { status: 204 });
     }
 
     const { notificationIds } = await request.json();
@@ -66,7 +55,7 @@ export async function PUT(request: NextRequest) {
     await dbConnect();
 
     await Notification.updateMany(
-      { _id: { $in: notificationIds }, userId: decoded.userId },
+      { _id: { $in: notificationIds }, userId: session.user.id },
       { read: true }
     );
 

@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGlobal } from "@/context/GlobalContext";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getAuthHeaders, apiPost } from "@/lib/utils";
@@ -26,10 +27,11 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useGlobal();
+  const { status } = useSession();
   const router = useRouter();
-  const { data: siteData } = useSWR("/api/site/me", fetcher);
+  const { data: siteData } = useSWR(user ? "/api/site/me" : null, fetcher);
   const { data: notificationsData, mutate: mutateNotifications } = useSWR(
-    "/api/notifications",
+    status === "authenticated" ? "/api/notifications" : null,
     fetcher
   );
 
@@ -58,35 +60,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
     }
   }, [siteData]);
 
-  // Fetch fresh user data to check payment status
+  // Use user data from context to check payment status
   useEffect(() => {
-    const checkUserStatus = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
-        console.log("Header: Fresh user data from /api/auth/me:", data);
-        if (data.user) {
-          const hasPaid =
-            data.user.has_paid ||
-            data.user.role === "admin" ||
-            data.user.email === "clintonochieng072@gmail.com";
-          console.log(
-            "Header: Calculated hasPaid:",
-            hasPaid,
-            "from has_paid:",
-            data.user.has_paid
-          );
-          setLocalUserHasPaid(hasPaid);
-        } else {
-          console.log("Header: No user data in response");
-        }
-      } catch (error) {
-        console.error("Header: Error checking user status:", error);
-      }
-    };
-
     if (user) {
-      checkUserStatus();
+      const hasPaid =
+        user.has_paid ||
+        user.role === "admin" ||
+        user.email === "clintonochieng072@gmail.com";
+      setLocalUserHasPaid(hasPaid);
+    } else {
+      setLocalUserHasPaid(null);
     }
   }, [user]);
 
@@ -105,24 +88,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         user.email === "clintonochieng072@gmail.com"
       : false;
 
-  // Force refresh user status
-  const refreshUserStatus = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      console.log("Header: Manual refresh - user data:", data);
-      if (data.user) {
-        const hasPaid =
-          data.user.has_paid ||
-          data.user.role === "admin" ||
-          data.user.email === "clintonochieng072@gmail.com";
-        console.log("Header: Manual refresh - calculated hasPaid:", hasPaid);
-        setLocalUserHasPaid(hasPaid);
-      }
-    } catch (error) {
-      console.error("Header: Error refreshing user status:", error);
-    }
-  };
+  // User status is managed by GlobalContext
 
   const handlePublish = async () => {
     if (!site) {
@@ -211,26 +177,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 Make changes live
               </span>
             </div>
-          </div>
-
-          {/* Mobile HeaderActions */}
-          <div className="flex sm:hidden items-center space-x-2">
-            <Button
-              variant="outline"
-              className="px-6 py-3 text-base font-medium hover:bg-gray-50 border-2"
-              onClick={handlePreview}
-              disabled={!site}
-            >
-              Preview
-            </Button>
-            <Button
-              variant="default"
-              className="px-6 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700"
-              onClick={handlePublish}
-              disabled={publishing || !site}
-            >
-              {publishing ? "..." : "Publish"}
-            </Button>
           </div>
 
           {/* Notifications */}

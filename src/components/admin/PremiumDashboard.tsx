@@ -120,49 +120,6 @@ export default function PremiumDashboard({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-6 py-3 bg-white shadow-sm sticky top-0 z-30">
-        <div className="flex items-center gap-4">
-          <div className="text-2xl font-extrabold text-sky-600">
-            ClintonStack
-          </div>
-          <div className="hidden md:block">
-            <Input
-              placeholder="Search sites, users, templates..."
-              className="w-[420px]"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2"
-            onClick={handlePreview}
-          >
-            <Eye size={16} /> Preview
-          </Button>
-
-          <Button
-            className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white"
-            onClick={handlePublish}
-          >
-            Publish
-          </Button>
-
-          <button className="p-2 rounded-md hover:bg-slate-100">
-            <Bell size={18} />
-          </button>
-
-          <div className="flex items-center gap-2">
-            <Avatar>
-              <AvatarImage src="/avatar.jpg" alt="User avatar" />
-              <AvatarFallback>CS</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
-
       <main className="p-6 lg:p-10">
         <div className="grid grid-cols-12 gap-6">
           {/* Sidebar */}
