@@ -56,6 +56,10 @@ export async function middleware(req: NextRequest) {
       }
 
       // Role-based access control
+      if (pathname.startsWith("/admin") && user.role !== "admin") {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
+
       if (user.role === "affiliate") {
         // Affiliates can only access affiliate routes and public pages
         const allowedAffiliatePaths = [

@@ -1,11 +1,11 @@
 // src/app/page.tsx - ClintonStack Landing Page
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalContext } from "@/context/GlobalContext";
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, authLoading } = useGlobalContext();
@@ -132,5 +132,13 @@ export default function Home() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

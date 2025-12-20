@@ -7,6 +7,8 @@ import { usersRepo } from "@/repositories/usersRepo";
 import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { referralsRepo } from "@/repositories/referralsRepo";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const {

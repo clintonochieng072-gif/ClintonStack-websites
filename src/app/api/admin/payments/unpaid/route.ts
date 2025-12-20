@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -6,7 +7,6 @@ import { referralsRepo } from "@/repositories/referralsRepo";
 import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { pusherServer } from "@/lib/pusher";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {

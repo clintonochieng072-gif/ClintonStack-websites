@@ -4,6 +4,8 @@ import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongodb";
 import Product from "@/lib/models/Product";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     // Verify user authentication using NextAuth session

@@ -1,24 +1,20 @@
-import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin authentication
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
+    // Verify admin session
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     // Get user and verify admin role
     const admin = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: session.user.id },
       select: { role: true },
     });
     if (!admin || admin.role !== "admin") {
@@ -102,16 +98,6 @@ export async function POST(request: NextRequest) {
           status: "failed",
           failureReason: "Rejected by admin",
           processedAt: new Date(),
-        },
-      });
-
-      // Refund amount to available balance
-      await prisma.affiliate.update({
-        where: { userId: user.id },
-        data: {
-          availableBalance: {
-            increment: withdrawal.amount,
-          },
         },
       });
 

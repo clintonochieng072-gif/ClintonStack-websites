@@ -6,6 +6,8 @@ import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { referralsRepo } from "@/repositories/referralsRepo";
 import { getBaseUrl } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     // Verify user authentication using NextAuth session

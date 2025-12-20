@@ -8,6 +8,7 @@ interface Affiliate {
   user: {
     name: string;
     email: string;
+    referralCode: string;
     withdrawalRequests: {
       id: string;
       amount: number;
@@ -134,6 +135,9 @@ export default function AdminAffiliatesPage() {
                   Affiliate
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Referral Code
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Balance
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -157,7 +161,7 @@ export default function AdminAffiliatesPage() {
               {filteredAndSortedAffiliates.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={8}
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No affiliates found
@@ -165,9 +169,10 @@ export default function AdminAffiliatesPage() {
                 </tr>
               ) : (
                 filteredAndSortedAffiliates.map((affiliate) => {
-                  const pendingWithdrawals = affiliate.user.withdrawalRequests.filter(
-                    (w: any) => w.status === "pending"
-                  );
+                  const pendingWithdrawals =
+                    affiliate.user.withdrawalRequests.filter(
+                      (w: any) => w.status === "pending"
+                    );
                   const latestWithdrawal = affiliate.user.withdrawalRequests[0]; // Most recent
 
                   return (
@@ -180,6 +185,11 @@ export default function AdminAffiliatesPage() {
                           <div className="text-sm text-gray-500">
                             {affiliate.user.email}
                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {affiliate.user.referralCode}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -210,11 +220,13 @@ export default function AdminAffiliatesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          affiliate.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            affiliate.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
                           {affiliate.status}
                         </span>
                       </td>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { connectDb } from "@/lib/db";
 import { getUserFromToken } from "@/lib/auth";
 import User from "@/lib/models/User";

@@ -4,6 +4,8 @@ import { usersRepo } from "@/repositories/usersRepo";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();

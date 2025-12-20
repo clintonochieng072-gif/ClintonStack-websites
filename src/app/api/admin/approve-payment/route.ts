@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { getUserFromToken } from "@/lib/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 import { Notification } from "@/lib/models/Notification";

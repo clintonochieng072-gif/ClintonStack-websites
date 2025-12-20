@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  Bell,
   Search,
   Menu,
   User,
@@ -61,12 +60,7 @@ const sidebarMenuItems = [
     icon: CreditCard,
     description: "Approve manual payments",
   },
-  {
-    name: "Notifications",
-    href: "/admin/notifications",
-    icon: Bell,
-    description: "System notifications",
-  },
+
   {
     name: "Audit Logs",
     href: "/admin/audit-logs",
@@ -95,24 +89,14 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showNotifications || showUserMenu) {
+      if (showUserMenu) {
         const target = event.target as Element;
-        if (
-          !target.closest(".notification-dropdown") &&
-          !target.closest(".user-menu")
-        ) {
-          setShowNotifications(false);
+        if (!target.closest(".user-menu")) {
           setShowUserMenu(false);
         }
       }
@@ -120,21 +104,7 @@ export default function AdminLayout({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showNotifications, showUserMenu]);
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await fetch("/api/admin/notifications");
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.notifications);
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
-
-  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
+  }, [showUserMenu]);
 
   const handleLogout = async () => {
     try {
@@ -197,67 +167,68 @@ export default function AdminLayout({
 
       {/* Mobile Sidebar Drawer */}
       {sidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50 lg:hidden">
-            <div className="flex flex-col h-full">
-              {/* Close button */}
-              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="p-1 rounded-lg hover:bg-gray-100"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+        <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50 lg:hidden">
+          <div className="flex flex-col h-full">
+            {/* Close button */}
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded-lg hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-              {/* Menu */}
-              <nav className="flex-1 p-4">
-                <div className="space-y-1">
-                  {sidebarMenuItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = pathname === item.href;
-                    return (
-                      <Link key={item.name} href={item.href}>
-                        <div
-                          className={cn(
-                            "px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-center rounded-lg",
-                            isActive && "bg-blue-50 border-r-2 border-blue-500"
-                          )}
-                        >
-                          <Icon className="w-5 h-5 mr-3 text-gray-600" />
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {item.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {item.description}
-                            </div>
+            {/* Menu */}
+            <nav className="flex-1 p-4">
+              <div className="space-y-1">
+                {sidebarMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <div
+                        className={cn(
+                          "px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-center rounded-lg",
+                          isActive && "bg-blue-50 border-r-2 border-blue-500"
+                        )}
+                      >
+                        <Icon className="w-5 h-5 mr-3 text-gray-600" />
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {item.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {item.description}
                           </div>
                         </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </nav>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-gray-200">
-                <p className="text-xs text-gray-500">
-                  © 2024 ClintonStack Admin
-                </p>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500">© 2024 ClintonStack Admin</p>
             </div>
-          </aside>
-        </>
+          </div>
+        </aside>
       )}
 
       {/* Main Content Area */}
-      <div className="flex flex-col min-h-screen z-10">
+      <div
+        className={cn(
+          "flex flex-col min-h-screen z-10 transition-transform duration-300",
+          sidebarOpen && "lg:translate-x-0 translate-x-64"
+        )}
+      >
         {/* -------------------------------------- */}
         {/* TOP NAVBAR */}
         {/* -------------------------------------- */}
@@ -292,58 +263,10 @@ export default function AdminLayout({
             </div>
 
             <div className="flex items-center gap-4 relative">
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2 rounded-lg hover:bg-gray-100 relative"
-                >
-                  <Bell size={20} />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
-                    <div className="p-4 border-b">
-                      <h3 className="font-semibold">Notifications</h3>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          No notifications
-                        </div>
-                      ) : (
-                        notifications.slice(0, 10).map((notification: any) => (
-                          <div
-                            key={notification.id}
-                            className="p-4 border-b hover:bg-gray-50"
-                          >
-                            <div className="font-medium">
-                              {notification.message}
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              {new Date(
-                                notification.createdAt
-                              ).toLocaleString()}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* User Menu */}
               <div className="relative">
                 <button
-                  onClick={() => {
-                    setShowNotifications(false);
-                    setShowUserMenu(!showUserMenu);
-                  }}
+                  onClick={() => setShowUserMenu(!showUserMenu)}
                   className="p-1 rounded-full overflow-hidden border shadow-sm w-9 h-9 flex items-center justify-center hover:shadow-md transition-shadow"
                 >
                   <User size={20} />
