@@ -7,6 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getBaseUrl() {
+  // Use NEXTAUTH_URL if defined
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+
   // Check if we're on the client side
   if (typeof window !== "undefined") {
     return window.location.origin;
@@ -15,11 +20,6 @@ export function getBaseUrl() {
   // Server-side: Check if we're in production on Vercel
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // Check for explicit environment variable
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL;
   }
 
   // Default to localhost for development

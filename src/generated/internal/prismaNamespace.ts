@@ -1449,6 +1449,7 @@ export const AffiliateScalarFieldEnum = {
   totalEarned: 'totalEarned',
   pendingBalance: 'pendingBalance',
   mpesaName: 'mpesaName',
+  mpesaPhone: 'mpesaPhone',
   createdAt: 'createdAt'
 } as const
 

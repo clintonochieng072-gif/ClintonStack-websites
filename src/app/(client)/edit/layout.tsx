@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import DashboardLayout from "@/components/DashboardLayout";
 import { getAuthHeaders } from "@/lib/utils";
 import { SiteProvider } from "@/lib/siteContext";
 
@@ -41,7 +40,7 @@ export default function EditLayout({
         error,
       }}
     >
-      <DashboardLayout>{children}</DashboardLayout>
+      {children}
     </SiteProvider>
   );
 }

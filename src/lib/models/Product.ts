@@ -13,6 +13,7 @@ export interface IProduct extends Document {
     currency: string;
   }[];
   isActive: boolean; // Whether affiliates can promote this product
+  sortOrder?: number; // Order for displaying products
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,6 +73,10 @@ const ProductSchema = new mongoose.Schema<IProduct>({
   isActive: {
     type: Boolean,
     default: true,
+  },
+  sortOrder: {
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,

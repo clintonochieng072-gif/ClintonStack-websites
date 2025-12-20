@@ -130,20 +130,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 lg:left-64 right-0 z-50 bg-white border-b">
+    <header className="sticky top-0 z-50 bg-white border-b">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-        {/* Mobile menu button */}
-        <div className="flex items-center lg:hidden">
-          {onMenuClick && (
-            <button
-              onClick={onMenuClick}
-              className="p-2 rounded-lg hover:bg-gray-100 mr-4"
-            >
-              <Menu size={20} />
-            </button>
-          )}
-        </div>
-
         {/* Left side - can add breadcrumbs or title */}
         <div className="flex-1"></div>
 

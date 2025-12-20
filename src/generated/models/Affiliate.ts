@@ -50,6 +50,7 @@ export type AffiliateMinAggregateOutputType = {
   totalEarned: number | null
   pendingBalance: number | null
   mpesaName: string | null
+  mpesaPhone: string | null
   createdAt: Date | null
 }
 
@@ -63,6 +64,7 @@ export type AffiliateMaxAggregateOutputType = {
   totalEarned: number | null
   pendingBalance: number | null
   mpesaName: string | null
+  mpesaPhone: string | null
   createdAt: Date | null
 }
 
@@ -76,6 +78,7 @@ export type AffiliateCountAggregateOutputType = {
   totalEarned: number
   pendingBalance: number
   mpesaName: number
+  mpesaPhone: number
   createdAt: number
   _all: number
 }
@@ -105,6 +108,7 @@ export type AffiliateMinAggregateInputType = {
   totalEarned?: true
   pendingBalance?: true
   mpesaName?: true
+  mpesaPhone?: true
   createdAt?: true
 }
 
@@ -118,6 +122,7 @@ export type AffiliateMaxAggregateInputType = {
   totalEarned?: true
   pendingBalance?: true
   mpesaName?: true
+  mpesaPhone?: true
   createdAt?: true
 }
 
@@ -131,6 +136,7 @@ export type AffiliateCountAggregateInputType = {
   totalEarned?: true
   pendingBalance?: true
   mpesaName?: true
+  mpesaPhone?: true
   createdAt?: true
   _all?: true
 }
@@ -231,6 +237,7 @@ export type AffiliateGroupByOutputType = {
   totalEarned: number
   pendingBalance: number
   mpesaName: string | null
+  mpesaPhone: string | null
   createdAt: Date
   _count: AffiliateCountAggregateOutputType | null
   _avg: AffiliateAvgAggregateOutputType | null
@@ -267,6 +274,7 @@ export type AffiliateWhereInput = {
   totalEarned?: Prisma.FloatFilter<"Affiliate"> | number
   pendingBalance?: Prisma.FloatFilter<"Affiliate"> | number
   mpesaName?: Prisma.StringNullableFilter<"Affiliate"> | string | null
+  mpesaPhone?: Prisma.StringNullableFilter<"Affiliate"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Affiliate"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   commissions?: Prisma.CommissionListRelationFilter
@@ -283,6 +291,7 @@ export type AffiliateOrderByWithRelationInput = {
   totalEarned?: Prisma.SortOrder
   pendingBalance?: Prisma.SortOrder
   mpesaName?: Prisma.SortOrderInput | Prisma.SortOrder
+  mpesaPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   commissions?: Prisma.CommissionOrderByRelationAggregateInput
@@ -302,6 +311,7 @@ export type AffiliateWhereUniqueInput = Prisma.AtLeast<{
   totalEarned?: Prisma.FloatFilter<"Affiliate"> | number
   pendingBalance?: Prisma.FloatFilter<"Affiliate"> | number
   mpesaName?: Prisma.StringNullableFilter<"Affiliate"> | string | null
+  mpesaPhone?: Prisma.StringNullableFilter<"Affiliate"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Affiliate"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   commissions?: Prisma.CommissionListRelationFilter
@@ -318,6 +328,7 @@ export type AffiliateOrderByWithAggregationInput = {
   totalEarned?: Prisma.SortOrder
   pendingBalance?: Prisma.SortOrder
   mpesaName?: Prisma.SortOrderInput | Prisma.SortOrder
+  mpesaPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AffiliateCountOrderByAggregateInput
   _avg?: Prisma.AffiliateAvgOrderByAggregateInput
@@ -339,6 +350,7 @@ export type AffiliateScalarWhereWithAggregatesInput = {
   totalEarned?: Prisma.FloatWithAggregatesFilter<"Affiliate"> | number
   pendingBalance?: Prisma.FloatWithAggregatesFilter<"Affiliate"> | number
   mpesaName?: Prisma.StringNullableWithAggregatesFilter<"Affiliate"> | string | null
+  mpesaPhone?: Prisma.StringNullableWithAggregatesFilter<"Affiliate"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Affiliate"> | Date | string
 }
 
@@ -351,6 +363,7 @@ export type AffiliateCreateInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAffiliateInput
   commissions?: Prisma.CommissionCreateNestedManyWithoutAffiliateInput
@@ -367,6 +380,7 @@ export type AffiliateUncheckedCreateInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   commissions?: Prisma.CommissionUncheckedCreateNestedManyWithoutAffiliateInput
   referrals?: Prisma.ReferralUncheckedCreateNestedManyWithoutAffiliateInput
@@ -381,6 +395,7 @@ export type AffiliateUpdateInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAffiliateNestedInput
   commissions?: Prisma.CommissionUpdateManyWithoutAffiliateNestedInput
@@ -397,6 +412,7 @@ export type AffiliateUncheckedUpdateInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commissions?: Prisma.CommissionUncheckedUpdateManyWithoutAffiliateNestedInput
   referrals?: Prisma.ReferralUncheckedUpdateManyWithoutAffiliateNestedInput
@@ -412,6 +428,7 @@ export type AffiliateCreateManyInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
 }
 
@@ -424,6 +441,7 @@ export type AffiliateUpdateManyMutationInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -437,6 +455,7 @@ export type AffiliateUncheckedUpdateManyInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -455,6 +474,7 @@ export type AffiliateCountOrderByAggregateInput = {
   totalEarned?: Prisma.SortOrder
   pendingBalance?: Prisma.SortOrder
   mpesaName?: Prisma.SortOrder
+  mpesaPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -475,6 +495,7 @@ export type AffiliateMaxOrderByAggregateInput = {
   totalEarned?: Prisma.SortOrder
   pendingBalance?: Prisma.SortOrder
   mpesaName?: Prisma.SortOrder
+  mpesaPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -488,6 +509,7 @@ export type AffiliateMinOrderByAggregateInput = {
   totalEarned?: Prisma.SortOrder
   pendingBalance?: Prisma.SortOrder
   mpesaName?: Prisma.SortOrder
+  mpesaPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -584,6 +606,7 @@ export type AffiliateCreateWithoutUserInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   commissions?: Prisma.CommissionCreateNestedManyWithoutAffiliateInput
   referrals?: Prisma.ReferralCreateNestedManyWithoutAffiliateInput
@@ -598,6 +621,7 @@ export type AffiliateUncheckedCreateWithoutUserInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   commissions?: Prisma.CommissionUncheckedCreateNestedManyWithoutAffiliateInput
   referrals?: Prisma.ReferralUncheckedCreateNestedManyWithoutAffiliateInput
@@ -628,6 +652,7 @@ export type AffiliateUpdateWithoutUserInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commissions?: Prisma.CommissionUpdateManyWithoutAffiliateNestedInput
   referrals?: Prisma.ReferralUpdateManyWithoutAffiliateNestedInput
@@ -642,6 +667,7 @@ export type AffiliateUncheckedUpdateWithoutUserInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commissions?: Prisma.CommissionUncheckedUpdateManyWithoutAffiliateNestedInput
   referrals?: Prisma.ReferralUncheckedUpdateManyWithoutAffiliateNestedInput
@@ -656,6 +682,7 @@ export type AffiliateCreateWithoutReferralsInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAffiliateInput
   commissions?: Prisma.CommissionCreateNestedManyWithoutAffiliateInput
@@ -671,6 +698,7 @@ export type AffiliateUncheckedCreateWithoutReferralsInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   commissions?: Prisma.CommissionUncheckedCreateNestedManyWithoutAffiliateInput
 }
@@ -700,6 +728,7 @@ export type AffiliateUpdateWithoutReferralsInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAffiliateNestedInput
   commissions?: Prisma.CommissionUpdateManyWithoutAffiliateNestedInput
@@ -715,6 +744,7 @@ export type AffiliateUncheckedUpdateWithoutReferralsInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commissions?: Prisma.CommissionUncheckedUpdateManyWithoutAffiliateNestedInput
 }
@@ -728,6 +758,7 @@ export type AffiliateCreateWithoutCommissionsInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAffiliateInput
   referrals?: Prisma.ReferralCreateNestedManyWithoutAffiliateInput
@@ -743,6 +774,7 @@ export type AffiliateUncheckedCreateWithoutCommissionsInput = {
   totalEarned?: number
   pendingBalance?: number
   mpesaName?: string | null
+  mpesaPhone?: string | null
   createdAt?: Date | string
   referrals?: Prisma.ReferralUncheckedCreateNestedManyWithoutAffiliateInput
 }
@@ -772,6 +804,7 @@ export type AffiliateUpdateWithoutCommissionsInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAffiliateNestedInput
   referrals?: Prisma.ReferralUpdateManyWithoutAffiliateNestedInput
@@ -787,6 +820,7 @@ export type AffiliateUncheckedUpdateWithoutCommissionsInput = {
   totalEarned?: Prisma.FloatFieldUpdateOperationsInput | number
   pendingBalance?: Prisma.FloatFieldUpdateOperationsInput | number
   mpesaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mpesaPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   referrals?: Prisma.ReferralUncheckedUpdateManyWithoutAffiliateNestedInput
 }
@@ -841,6 +875,7 @@ export type AffiliateSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   totalEarned?: boolean
   pendingBalance?: boolean
   mpesaName?: boolean
+  mpesaPhone?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   commissions?: boolean | Prisma.Affiliate$commissionsArgs<ExtArgs>
@@ -858,6 +893,7 @@ export type AffiliateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   totalEarned?: boolean
   pendingBalance?: boolean
   mpesaName?: boolean
+  mpesaPhone?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["affiliate"]>
@@ -872,6 +908,7 @@ export type AffiliateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   totalEarned?: boolean
   pendingBalance?: boolean
   mpesaName?: boolean
+  mpesaPhone?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["affiliate"]>
@@ -886,10 +923,11 @@ export type AffiliateSelectScalar = {
   totalEarned?: boolean
   pendingBalance?: boolean
   mpesaName?: boolean
+  mpesaPhone?: boolean
   createdAt?: boolean
 }
 
-export type AffiliateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "commissionRate" | "payoutMethod" | "status" | "availableBalance" | "totalEarned" | "pendingBalance" | "mpesaName" | "createdAt", ExtArgs["result"]["affiliate"]>
+export type AffiliateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "commissionRate" | "payoutMethod" | "status" | "availableBalance" | "totalEarned" | "pendingBalance" | "mpesaName" | "mpesaPhone" | "createdAt", ExtArgs["result"]["affiliate"]>
 export type AffiliateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   commissions?: boolean | Prisma.Affiliate$commissionsArgs<ExtArgs>
@@ -920,6 +958,7 @@ export type $AffiliatePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     totalEarned: number
     pendingBalance: number
     mpesaName: string | null
+    mpesaPhone: string | null
     createdAt: Date
   }, ExtArgs["result"]["affiliate"]>
   composites: {}
@@ -1356,6 +1395,7 @@ export interface AffiliateFieldRefs {
   readonly totalEarned: Prisma.FieldRef<"Affiliate", 'Float'>
   readonly pendingBalance: Prisma.FieldRef<"Affiliate", 'Float'>
   readonly mpesaName: Prisma.FieldRef<"Affiliate", 'String'>
+  readonly mpesaPhone: Prisma.FieldRef<"Affiliate", 'String'>
   readonly createdAt: Prisma.FieldRef<"Affiliate", 'DateTime'>
 }
     

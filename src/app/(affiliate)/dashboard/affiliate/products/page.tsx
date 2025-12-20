@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu, Package, Copy, ExternalLink } from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { getAuthHeaders } from "@/lib/utils";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface Product {
@@ -40,9 +41,10 @@ export default function AffiliateProductsPage() {
 
   const fetchData = async () => {
     try {
+      const headers = getAuthHeaders();
       const [productsRes, statsRes] = await Promise.all([
-        fetch("/api/affiliate/products"),
-        fetch("/api/affiliate/stats"),
+        fetch("/api/affiliate/products", { headers }),
+        fetch("/api/affiliate/stats", { headers }),
       ]);
 
       if (productsRes.ok) {
@@ -66,7 +68,7 @@ export default function AffiliateProductsPage() {
 
     setCopyLoading(productSlug);
     try {
-      const referralUrl = `${window.location.origin}/client-signup?ref=${stats.referralCode}&product=${productSlug}`;
+      const referralUrl = `${window.location.origin}/?ref=${stats.referralCode}`;
       await navigator.clipboard.writeText(referralUrl);
       alert(`Referral link for ${productName} copied to clipboard!`);
     } catch (error) {
@@ -93,7 +95,7 @@ export default function AffiliateProductsPage() {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -168,12 +170,16 @@ export default function AffiliateProductsPage() {
                   >
                     <Copy className="w-4 h-4" />
                     <span className="text-sm font-medium">
-                      {copyLoading === product.slug ? "Copying..." : "Copy Link"}
+                      {copyLoading === product.slug
+                        ? "Copying..."
+                        : "Copy Link"}
                     </span>
                   </button>
 
                   <Link
-                    href={`/client-signup?ref=${stats?.referralCode || ""}&product=${product.slug}`}
+                    href={`/?ref=${
+                      stats?.referralCode || ""
+                    }`}
                     target="_blank"
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
                   >

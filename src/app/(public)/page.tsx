@@ -2,21 +2,28 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalContext } from "@/context/GlobalContext";
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, authLoading } = useGlobalContext();
 
   useEffect(() => {
     if (authLoading) return;
 
+    // Handle referral tracking
+    const ref = searchParams?.get("ref");
+    if (ref) {
+      document.cookie = `affiliate_ref=${ref}; path=/; max-age=86400`; // 24 hours
+    }
+
     if (user) {
       // Redirect authenticated users to dashboard (which will handle role-based routing)
       router.replace("/dashboard");
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router, searchParams]);
 
   if (authLoading) {
     return (
@@ -77,21 +84,27 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Simple & Easy</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                Simple & Easy
+              </h3>
               <p className="text-gray-600 text-sm sm:text-base">
                 Create professional websites in minutes. No coding or design
                 skills required.
               </p>
             </div>
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Business Focused</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                Business Focused
+              </h3>
               <p className="text-gray-600 text-sm sm:text-base">
                 Tailored for different business types with industry-specific
                 features.
               </p>
             </div>
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md sm:col-span-2 lg:col-span-1">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Instant Publishing</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                Instant Publishing
+              </h3>
               <p className="text-gray-600 text-sm sm:text-base">
                 Publish your website instantly and share it with the world.
               </p>

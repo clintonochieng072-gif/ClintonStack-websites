@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Search, Filter, Users, TrendingUp, DollarSign } from "lucide-react";
+import {
+  Menu,
+  Search,
+  Filter,
+  Users,
+  TrendingUp,
+  DollarSign,
+} from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { getAuthHeaders } from "@/lib/utils";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface Referral {
@@ -33,7 +41,9 @@ export default function AffiliateReferralsPage() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending">(
+    "all"
+  );
 
   useEffect(() => {
     if (user && user.role === "affiliate") {
@@ -49,7 +59,9 @@ export default function AffiliateReferralsPage() {
 
   const fetchReferrals = async () => {
     try {
-      const response = await fetch("/api/affiliate/referrals");
+      const response = await fetch("/api/affiliate/referrals", {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const referralsData = await response.json();
         setReferrals(referralsData);
@@ -68,15 +80,21 @@ export default function AffiliateReferralsPage() {
     if (searchTerm) {
       filtered = filtered.filter(
         (referral) =>
-          referral.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          referral.clientEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          referral.clientName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          referral.clientEmail
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           referral.productName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Apply status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter((referral) => referral.paymentStatus === statusFilter);
+      filtered = filtered.filter(
+        (referral) => referral.paymentStatus === statusFilter
+      );
     }
 
     setFilteredReferrals(filtered);
@@ -84,10 +102,13 @@ export default function AffiliateReferralsPage() {
 
   const stats: ReferralStats = {
     totalReferrals: referrals.length,
-    paidReferrals: referrals.filter(r => r.paymentStatus === "paid").length,
-    totalEarnings: referrals.reduce((sum, r) => sum + (r.commissionEarned || 0), 0),
+    paidReferrals: referrals.filter((r) => r.paymentStatus === "paid").length,
+    totalEarnings: referrals.reduce(
+      (sum, r) => sum + (r.commissionEarned || 0),
+      0
+    ),
     pendingEarnings: referrals
-      .filter(r => r.paymentStatus === "pending")
+      .filter((r) => r.paymentStatus === "pending")
       .reduce((sum, r) => sum + (r.commissionEarned || 0), 0),
   };
 
@@ -107,7 +128,7 @@ export default function AffiliateReferralsPage() {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -155,8 +176,12 @@ export default function AffiliateReferralsPage() {
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 sm:p-6 border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600 mb-1">Total Referrals</p>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-900">{stats.totalReferrals}</p>
+                <p className="text-sm font-medium text-blue-600 mb-1">
+                  Total Referrals
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-900">
+                  {stats.totalReferrals}
+                </p>
               </div>
               <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
@@ -165,8 +190,12 @@ export default function AffiliateReferralsPage() {
           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 sm:p-6 border border-green-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600 mb-1">Paid Referrals</p>
-                <p className="text-2xl sm:text-3xl font-bold text-green-900">{stats.paidReferrals}</p>
+                <p className="text-sm font-medium text-green-600 mb-1">
+                  Paid Referrals
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-900">
+                  {stats.paidReferrals}
+                </p>
               </div>
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
@@ -175,8 +204,12 @@ export default function AffiliateReferralsPage() {
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 border border-purple-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600 mb-1">Total Earnings</p>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-900">KES {stats.totalEarnings}</p>
+                <p className="text-sm font-medium text-purple-600 mb-1">
+                  Total Earnings
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-900">
+                  KES {stats.totalEarnings}
+                </p>
               </div>
               <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             </div>
@@ -185,8 +218,12 @@ export default function AffiliateReferralsPage() {
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 sm:p-6 border border-orange-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600 mb-1">Pending Earnings</p>
-                <p className="text-2xl sm:text-3xl font-bold text-orange-900">KES {stats.pendingEarnings}</p>
+                <p className="text-sm font-medium text-orange-600 mb-1">
+                  Pending Earnings
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-orange-900">
+                  KES {stats.pendingEarnings}
+                </p>
               </div>
               <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
             </div>
@@ -213,7 +250,9 @@ export default function AffiliateReferralsPage() {
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as "all" | "paid" | "pending")}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as "all" | "paid" | "pending")
+                }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>

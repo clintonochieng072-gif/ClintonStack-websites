@@ -1,26 +1,21 @@
-import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify user authentication
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
+    // Verify user authentication using NextAuth session
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     // Get user with affiliate data
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: session.user.id },
       include: {
         affiliate: true,
         withdrawalRequests: {

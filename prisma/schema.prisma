@@ -50,6 +50,7 @@ model Affiliate {
   totalEarned     Float          @default(0)
   pendingBalance  Float          @default(0)
   mpesaName       String?
+  mpesaPhone     String?
   createdAt      DateTime        @default(now())
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   commissions    Commission[]

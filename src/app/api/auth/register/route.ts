@@ -67,18 +67,21 @@ export async function POST(req: Request) {
     // Handle referral logic if affiliateRef is provided
     let affiliateId = null;
     if (affiliateRef) {
-      const affiliate = await affiliatesRepo.findById(affiliateRef);
+      const affiliateUser = await usersRepo.findByReferralCode(affiliateRef);
+      if (affiliateUser) {
+        const affiliate = await affiliatesRepo.findByUserId(affiliateUser.id);
 
-      // Validate affiliate exists
-      if (affiliate) {
-        // Prevent affiliates from referring other affiliates
-        if (role === "affiliate") {
-          return NextResponse.json(
-            { error: "Affiliates cannot refer other affiliates" },
-            { status: 400 }
-          );
+        // Validate affiliate exists
+        if (affiliate) {
+          // Prevent affiliates from referring other affiliates
+          if (role === "affiliate") {
+            return NextResponse.json(
+              { error: "Affiliates cannot refer other affiliates" },
+              { status: 400 }
+            );
+          }
+          affiliateId = affiliate.id;
         }
-        affiliateId = affiliate.id;
       }
       // If affiliate not found, silently ignore (no error)
     }

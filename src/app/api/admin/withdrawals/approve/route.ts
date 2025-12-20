@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import User from "@/lib/models/User";
-import WithdrawalRequest from "@/lib/models/WithdrawalRequest";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,10 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    await dbConnect();
-
     // Get user and verify admin role
-    const admin = await User.findById(decoded.userId);
+    const admin = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { role: true },
+    });
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -43,7 +42,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Find the withdrawal request
-    const withdrawal = await WithdrawalRequest.findById(withdrawalId);
+    const withdrawal = await prisma.withdrawalRequest.findUnique({
+      where: { id: withdrawalId },
+    });
     if (!withdrawal) {
       return NextResponse.json(
         { error: "Withdrawal request not found" },
@@ -58,9 +59,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the affiliate user
-    const affiliate = await User.findById(withdrawal.userId);
-    if (!affiliate) {
+    // Get the affiliate user and affiliate data
+    const user = await prisma.user.findUnique({
+      where: { id: withdrawal.userId },
+      include: { affiliate: true },
+    });
+    if (!user || !user.affiliate) {
       return NextResponse.json(
         { error: "Affiliate not found" },
         { status: 404 }
@@ -68,50 +72,48 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "approve") {
-      // Mark as completed (manual payout assumed)
-      withdrawal.status = "completed";
-      withdrawal.processedAt = new Date();
-      await withdrawal.save();
+      // Update withdrawal status
+      await prisma.withdrawalRequest.update({
+        where: { id: withdrawalId },
+        data: {
+          status: "completed",
+          processedAt: new Date(),
+        },
+      });
 
       // Deduct from available balance
-      affiliate.availableBalance =
-        (affiliate.availableBalance || 0) - withdrawal.amount;
-
-      // Update user's withdrawal history
-      const historyEntry = affiliate.withdrawalHistory?.find(
-        (h: any) => h.withdrawalId === withdrawalId
-      );
-      if (historyEntry) {
-        historyEntry.status = "completed";
-        historyEntry.processedAt = new Date();
-      }
-
-      await affiliate.save();
+      await prisma.affiliate.update({
+        where: { userId: user.id },
+        data: {
+          availableBalance: {
+            decrement: withdrawal.amount,
+          },
+        },
+      });
 
       return NextResponse.json({
         message: "Withdrawal approved successfully",
       });
     } else if (action === "reject") {
-      // Reject the withdrawal
-      withdrawal.status = "failed";
-      withdrawal.failureReason = "Rejected by admin";
-      withdrawal.processedAt = new Date();
-      await withdrawal.save();
+      // Update withdrawal status
+      await prisma.withdrawalRequest.update({
+        where: { id: withdrawalId },
+        data: {
+          status: "failed",
+          failureReason: "Rejected by admin",
+          processedAt: new Date(),
+        },
+      });
 
       // Refund amount to available balance
-      affiliate.availableBalance =
-        (affiliate.availableBalance || 0) + withdrawal.amount;
-
-      // Update withdrawal history
-      const historyEntry = affiliate.withdrawalHistory?.find(
-        (h: any) => h.withdrawalId === withdrawalId
-      );
-      if (historyEntry) {
-        historyEntry.status = "failed";
-        historyEntry.processedAt = new Date();
-      }
-
-      await affiliate.save();
+      await prisma.affiliate.update({
+        where: { userId: user.id },
+        data: {
+          availableBalance: {
+            increment: withdrawal.amount,
+          },
+        },
+      });
 
       return NextResponse.json({
         message: "Withdrawal request rejected",

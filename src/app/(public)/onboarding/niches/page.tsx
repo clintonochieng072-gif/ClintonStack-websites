@@ -106,8 +106,15 @@ export default function NichesPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
+      return;
     }
-  }, [status, router]);
+
+    // Redirect affiliates to their dashboard
+    if (status === "authenticated" && session?.user?.role === "affiliate") {
+      router.push("/dashboard/affiliate");
+      return;
+    }
+  }, [status, session, router]);
 
   useEffect(() => {
     if (sitesData && status === "authenticated") {

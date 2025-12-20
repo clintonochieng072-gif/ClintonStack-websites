@@ -2,8 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, User, Mail, Key, Shield, Save } from "lucide-react";
+import {
+  Menu,
+  User,
+  Mail,
+  Key,
+  Shield,
+  Save,
+  Copy,
+  ExternalLink,
+} from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { getAuthHeaders, getBaseUrl } from "@/lib/utils";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface AffiliateStats {
@@ -20,8 +30,10 @@ export default function AffiliateProfilePage() {
 
   // Form states
   const [formData, setFormData] = useState({
-    name: "",
+    name: user?.name || "",
     email: user?.email || "",
+    mpesaName: "",
+    mpesaPhone: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -37,13 +49,28 @@ export default function AffiliateProfilePage() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/affiliate/stats");
-      if (response.ok) {
-        const statsData = await response.json();
+      const headers = getAuthHeaders();
+      const [statsRes, affiliateRes] = await Promise.all([
+        fetch("/api/affiliate/stats", { headers }),
+        fetch("/api/affiliate/profile", { headers }),
+      ]);
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
         setStats(statsData);
       }
+
+      if (affiliateRes.ok) {
+        const affiliateData = await affiliateRes.json();
+        setFormData((prev) => ({
+          ...prev,
+          name: affiliateData.name || prev.name,
+          mpesaName: affiliateData.mpesaName || "",
+          mpesaPhone: affiliateData.mpesaPhone || "",
+        }));
+      }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
@@ -52,9 +79,26 @@ export default function AffiliateProfilePage() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      // Here you would implement the profile update API call
-      // For now, just show a success message
-      alert("Profile updated successfully!");
+      const response = await fetch("/api/affiliate/profile", {
+        method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          mpesaName: formData.mpesaName,
+          mpesaPhone: formData.mpesaPhone,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Profile updated successfully!");
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to update profile");
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile");
@@ -92,6 +136,21 @@ export default function AffiliateProfilePage() {
     }
   };
 
+  const handleCopyReferralLink = async () => {
+    if (!stats?.referralCode) return;
+
+    const baseUrl = getBaseUrl();
+    const referralLink = `${baseUrl}/?ref=${stats.referralCode}`;
+
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      alert("Referral link copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy referral link:", error);
+      alert("Failed to copy referral link");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -108,7 +167,7 @@ export default function AffiliateProfilePage() {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -191,6 +250,50 @@ export default function AffiliateProfilePage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  M-Pesa Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.mpesaName}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      mpesaName: e.target.value,
+                    }))
+                  }
+                  placeholder="John Doe"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Name registered with M-Pesa
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  M-Pesa Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.mpesaPhone}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      mpesaPhone: e.target.value,
+                    }))
+                  }
+                  placeholder="0712345678 or +254712345678"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Safaricom M-Pesa number for payouts
+                </p>
+              </div>
+            </div>
+
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Referral Code
@@ -204,6 +307,42 @@ export default function AffiliateProfilePage() {
                 />
                 <span className="text-sm text-gray-500">Read-only</span>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Referral Link
+              </label>
+              <div className="flex items-center space-x-3">
+                <input
+                  type="text"
+                  value={stats?.referralCode ? `${getBaseUrl()}/?ref=${stats.referralCode}` : ""}
+                  readOnly
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
+                />
+                <button
+                  onClick={handleCopyReferralLink}
+                  disabled={!stats?.referralCode}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </button>
+                {stats?.referralCode && (
+                  <a
+                    href={`${getBaseUrl()}/?ref=${stats.referralCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 cursor-pointer transition-colors duration-200"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open
+                  </a>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Share this link to earn commissions when people sign up
+              </p>
             </div>
 
             <div className="mt-6 flex justify-end">

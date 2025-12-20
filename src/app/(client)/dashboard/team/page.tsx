@@ -270,7 +270,82 @@ export default function TeamPage() {
           <CardTitle>Team Members</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {teamMembers.map((member) => (
+              <div
+                key={member._id}
+                className="rounded-lg border p-4 shadow-sm bg-white"
+              >
+                <div className="flex justify-between items-start">
+                  <span className="font-semibold">{member.name}</span>
+                  <Badge className={getStatusColor(member.status)}>
+                    {getStatusIcon(member.status)}
+                    <span className="ml-1 capitalize">{member.status}</span>
+                  </Badge>
+                </div>
+
+                <div className="mt-2 text-sm space-y-1">
+                  <p>
+                    <strong>Email:</strong> {member.email}
+                  </p>
+                  <p>
+                    <strong>Role:</strong>{" "}
+                    <Badge className={getRoleColor(member.role)}>
+                      {getRoleIcon(member.role)}{" "}
+                      <span className="ml-1 capitalize">{member.role}</span>
+                    </Badge>
+                  </p>
+                  <p>
+                    <strong>Joined:</strong>{" "}
+                    {member.joinedAt
+                      ? new Date(member.joinedAt).toLocaleDateString()
+                      : "Not joined"}
+                  </p>
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <select
+                    value={member.role}
+                    onChange={(e) =>
+                      updateTeamMember(member._id, {
+                        role: e.target.value as any,
+                      })
+                    }
+                    className="text-xs px-2 py-1 border border-gray-300 rounded"
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="editor">Editor</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => removeTeamMember(member._id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {teamMembers.length === 0 && (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">No team members yet</p>
+                <Button
+                  onClick={() => setShowInviteForm(true)}
+                  className="mt-4"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Invite Your First Team Member
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">

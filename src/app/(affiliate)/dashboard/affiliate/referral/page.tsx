@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, Copy, Share2, QrCode, ExternalLink } from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { getAuthHeaders } from "@/lib/utils";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface AffiliateStats {
   referralCode: string;
+  baseUrl: string;
 }
 
 export default function AffiliateReferralPage() {
@@ -28,7 +30,9 @@ export default function AffiliateReferralPage() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/affiliate/stats");
+      const response = await fetch("/api/affiliate/stats", {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const statsData = await response.json();
         setStats(statsData);
@@ -41,11 +45,12 @@ export default function AffiliateReferralPage() {
   };
 
   const copyReferralLink = async () => {
-    if (!stats?.referralCode) return;
+    if (!stats?.referralCode || !stats?.baseUrl || !stats.referralCode.trim())
+      return;
 
     setCopyLoading(true);
     try {
-      const referralUrl = `${window.location.origin}/client-signup?ref=${stats.referralCode}`;
+      const referralUrl = `${stats.baseUrl}/?ref=${stats.referralCode}`;
       await navigator.clipboard.writeText(referralUrl);
       alert("Referral link copied to clipboard!");
     } catch (error) {
@@ -57,9 +62,9 @@ export default function AffiliateReferralPage() {
   };
 
   const shareReferralLink = async () => {
-    if (!stats?.referralCode) return;
+    if (!stats?.referralCode || !stats?.baseUrl || !stats.referralCode.trim()) return;
 
-    const referralUrl = `${window.location.origin}/client-signup?ref=${stats.referralCode}`;
+    const referralUrl = `${stats.baseUrl}/?ref=${stats.referralCode}`;
 
     if (navigator.share) {
       try {
@@ -87,16 +92,17 @@ export default function AffiliateReferralPage() {
     );
   }
 
-  const referralUrl = stats?.referralCode
-    ? `${window.location.origin}/client-signup?ref=${stats.referralCode}`
-    : "";
+  const referralUrl =
+    stats?.referralCode && stats?.baseUrl && stats.referralCode.trim()
+      ? `${stats.baseUrl}/?ref=${stats.referralCode}`
+      : "";
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -212,7 +218,9 @@ export default function AffiliateReferralPage() {
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-blue-600 font-bold text-lg">1</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Share Your Link</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  Share Your Link
+                </h4>
                 <p className="text-sm text-gray-600">
                   Send your referral link to potential customers
                 </p>
@@ -222,7 +230,9 @@ export default function AffiliateReferralPage() {
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-green-600 font-bold text-lg">2</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">They Sign Up</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  They Sign Up
+                </h4>
                 <p className="text-sm text-gray-600">
                   When they create an account using your link
                 </p>

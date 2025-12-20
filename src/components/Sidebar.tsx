@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/dashboard/real-estate",
     icon: LayoutDashboard,
     description: "Quick analytics + overall status",
   },
@@ -107,7 +107,7 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
               const Icon = item.icon;
               const isActive = isHydrated && pathname === item.href;
               return (
-                <Link key={item.name} href={item.href}>
+                <Link key={item.name} href={item.href} onClick={onClose}>
                   <div
                     className={cn(
                       "px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-center rounded-lg",

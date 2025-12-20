@@ -8,89 +8,6 @@ dotenv.config({ path: ".env.local" });
 const products = [
   // ADD YOUR NEW SAAS PRODUCTS HERE
   {
-    name: "ClintonStack Basic",
-    description:
-      "Professional website builder for individuals and small businesses",
-    slug: "clintonstack-basic",
-    commissionRate: 500, // Affiliate commission in KES per referral
-    features: [
-      "Drag & drop website builder",
-      "Mobile responsive templates",
-      "Basic SEO tools",
-      "Contact forms",
-      "Social media integration",
-    ],
-    pricing: [
-      {
-        type: "monthly",
-        amount: 2500,
-        currency: "KES",
-      },
-      {
-        type: "lifetime",
-        amount: 15000,
-        currency: "KES",
-      },
-    ],
-    isActive: true, // Set to false to hide from affiliates
-  },
-  {
-    name: "ClintonStack Pro",
-    description:
-      "Advanced website builder with premium features for growing businesses",
-    slug: "clintonstack-pro",
-    commissionRate: 750,
-    features: [
-      "All Basic features",
-      "Advanced analytics",
-      "E-commerce integration",
-      "Custom domain",
-      "Priority support",
-      "Advanced SEO tools",
-    ],
-    pricing: [
-      {
-        type: "monthly",
-        amount: 5000,
-        currency: "KES",
-      },
-      {
-        type: "lifetime",
-        amount: 30000,
-        currency: "KES",
-      },
-    ],
-    isActive: true,
-  },
-  {
-    name: "ClintonStack Enterprise",
-    description:
-      "Complete business solution with advanced features and white-label options",
-    slug: "clintonstack-enterprise",
-    commissionRate: 1000,
-    features: [
-      "All Pro features",
-      "White-label options",
-      "API access",
-      "Custom integrations",
-      "Dedicated account manager",
-      "Advanced security features",
-    ],
-    pricing: [
-      {
-        type: "monthly",
-        amount: 10000,
-        currency: "KES",
-      },
-      {
-        type: "lifetime",
-        amount: 75000,
-        currency: "KES",
-      },
-    ],
-    isActive: true,
-  },
-  {
     name: "ClintonStack Real Estate",
     description:
       "Professional real estate website builder with property listings, search, and lead management",
@@ -121,6 +38,97 @@ const products = [
       },
     ],
     isActive: true,
+    status: "active",
+    sortOrder: 1,
+  },
+  {
+    name: "ClintonStack Basic",
+    description:
+      "Professional website builder for individuals and small businesses",
+    slug: "clintonstack-basic",
+    commissionRate: 500, // Affiliate commission in KES per referral
+    features: [
+      "Drag & drop website builder",
+      "Mobile responsive templates",
+      "Basic SEO tools",
+      "Contact forms",
+      "Social media integration",
+    ],
+    pricing: [
+      {
+        type: "monthly",
+        amount: 2500,
+        currency: "KES",
+      },
+      {
+        type: "lifetime",
+        amount: 15000,
+        currency: "KES",
+      },
+    ],
+    isActive: true, // Set to false to hide from affiliates
+    status: "active",
+    sortOrder: 2,
+  },
+  {
+    name: "ClintonStack Pro",
+    description:
+      "Advanced website builder with premium features for growing businesses",
+    slug: "clintonstack-pro",
+    commissionRate: 750,
+    features: [
+      "All Basic features",
+      "Advanced analytics",
+      "E-commerce integration",
+      "Custom domain",
+      "Priority support",
+      "Advanced SEO tools",
+    ],
+    pricing: [
+      {
+        type: "monthly",
+        amount: 5000,
+        currency: "KES",
+      },
+      {
+        type: "lifetime",
+        amount: 30000,
+        currency: "KES",
+      },
+    ],
+    isActive: true,
+    status: "active",
+    sortOrder: 3,
+  },
+  {
+    name: "ClintonStack Enterprise",
+    description:
+      "Complete business solution with advanced features and white-label options",
+    slug: "clintonstack-enterprise",
+    commissionRate: 1000,
+    features: [
+      "All Pro features",
+      "White-label options",
+      "API access",
+      "Custom integrations",
+      "Dedicated account manager",
+      "Advanced security features",
+    ],
+    pricing: [
+      {
+        type: "monthly",
+        amount: 10000,
+        currency: "KES",
+      },
+      {
+        type: "lifetime",
+        amount: 75000,
+        currency: "KES",
+      },
+    ],
+    isActive: true,
+    status: "active",
+    sortOrder: 4,
   },
 ];
 

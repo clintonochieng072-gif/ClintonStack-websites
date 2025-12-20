@@ -11,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { getAuthHeaders } from "@/lib/utils";
 import AffiliateSidebar from "@/components/AffiliateSidebar";
 
 interface AffiliateBalance {
@@ -35,6 +36,7 @@ export default function AffiliateWithdrawPage() {
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [mpesaName, setMpesaName] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
 
   useEffect(() => {
     if (user && user.role === "affiliate") {
@@ -46,7 +48,9 @@ export default function AffiliateWithdrawPage() {
 
   const fetchBalance = async () => {
     try {
-      const response = await fetch("/api/affiliate/balance");
+      const response = await fetch("/api/affiliate/balance", {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const balanceData = await response.json();
         setBalance(balanceData);
@@ -59,7 +63,15 @@ export default function AffiliateWithdrawPage() {
   };
 
   const handleWithdrawal = async () => {
-    if (!balance?.availableBalance || balance.availableBalance < 300) return;
+    const amount = parseFloat(withdrawAmount);
+    if (!amount || amount < 300) {
+      alert("Please enter a valid withdrawal amount (minimum KES 300)");
+      return;
+    }
+    if (amount > (balance?.availableBalance || 0)) {
+      alert("Withdrawal amount cannot exceed available balance");
+      return;
+    }
     if (!phoneNumber.trim()) {
       alert("Please enter your M-Pesa phone number");
       return;
@@ -83,10 +95,11 @@ export default function AffiliateWithdrawPage() {
       const response = await fetch("/api/affiliate/withdraw", {
         method: "POST",
         headers: {
+          ...getAuthHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: balance.availableBalance,
+          amount: amount,
           phoneNumber: phoneNumber.trim(),
           mpesaName: mpesaName.trim(),
         }),
@@ -96,6 +109,7 @@ export default function AffiliateWithdrawPage() {
         alert("Withdrawal request submitted successfully!");
         setPhoneNumber(""); // Clear fields
         setMpesaName("");
+        setWithdrawAmount("");
         // Refresh data
         fetchBalance();
       } else {
@@ -126,7 +140,7 @@ export default function AffiliateWithdrawPage() {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -228,12 +242,16 @@ export default function AffiliateWithdrawPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Withdrawal Amount
                   </label>
-                  <div className="text-2xl font-bold text-gray-900 p-3 bg-gray-50 rounded-lg border">
-                    KES {balance?.availableBalance || 0}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Full available balance will be withdrawn
-                  </p>
+                  <input
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    placeholder={`Max: KES ${balance?.availableBalance || 0}`}
+                    min="300"
+                    max={balance?.availableBalance || 0}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Minimum: KES 300</p>
                 </div>
 
                 <div>
@@ -293,9 +311,7 @@ export default function AffiliateWithdrawPage() {
                     disabled={withdrawLoading}
                     className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200 font-medium"
                   >
-                    {withdrawLoading
-                      ? "Processing..."
-                      : `Withdraw KES ${balance?.availableBalance}`}
+                    {withdrawLoading ? "Processing..." : "Withdraw"}
                   </button>
                 ) : (
                   <div className="text-center">

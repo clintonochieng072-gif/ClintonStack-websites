@@ -33,6 +33,7 @@ export default function NicheDashboardPage() {
   const { data: siteData, error } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [forceRender, setForceRender] = useState(false);
 
   // Only allow real-estate niche to have a dashboard
   const allowedNiches = ["real-estate"];
@@ -42,6 +43,15 @@ export default function NicheDashboardPage() {
       setSite(siteData.data);
     }
   }, [siteData]);
+
+  // Mobile loading timeout guard
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setForceRender(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check if user has access to this niche
   useEffect(() => {
@@ -115,7 +125,7 @@ export default function NicheDashboardPage() {
     );
   }
 
-  if (!site) {
+  if (!site && !forceRender) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -161,18 +171,6 @@ export default function NicheDashboardPage() {
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Property
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href={`/preview/${site.slug}`} target="_blank">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Preview Draft
-                  </a>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href={`/site/${site.slug}`} target="_blank">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View Public Site
-                  </a>
                 </Button>
               </div>
 

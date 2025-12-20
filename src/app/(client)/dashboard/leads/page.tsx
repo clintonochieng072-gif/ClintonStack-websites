@@ -324,7 +324,63 @@ export default function LeadsPage() {
           <CardTitle>Leads ({filteredLeads.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {filteredLeads.map((lead) => (
+              <div
+                key={lead._id}
+                className="rounded-lg border p-4 shadow-sm bg-white"
+              >
+                <div className="flex justify-between items-start">
+                  <span className="font-semibold">{lead.name}</span>
+                  <Badge className={getStatusColor(lead.status)}>
+                    {getStatusIcon(lead.status)}
+                    <span className="ml-1 capitalize">{lead.status}</span>
+                  </Badge>
+                </div>
+
+                <div className="mt-2 text-sm space-y-1">
+                  <p><strong>Email:</strong> {lead.email}</p>
+                  {lead.phone && <p><strong>Phone:</strong> {lead.phone}</p>}
+                  <p><strong>Source:</strong> {lead.source.replace("_", " ")}</p>
+                  <p><strong>Date:</strong> {new Date(lead.createdAt).toLocaleDateString()}</p>
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedLead(lead)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <select
+                    value={lead.status}
+                    onChange={(e) =>
+                      updateLeadStatus(lead._id, e.target.value)
+                    }
+                    className="text-xs px-2 py-1 border border-gray-300 rounded"
+                  >
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="converted">Converted</option>
+                    <option value="lost">Lost</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+
+            {filteredLeads.length === 0 && (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">No leads found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">

@@ -3,25 +3,19 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
-import FloatingButtons from "./public/FloatingButtons";
+import Sidebar from "@/components/Sidebar";
+import FloatingButtons from "@/components/public/FloatingButtons";
 
-interface DashboardLayoutProps {
+export default function DashboardLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar />
-      </div>
-
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -30,15 +24,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Sidebar */}
       {sidebarOpen && (
-        <div className="fixed left-0 top-16 h-full w-64 bg-white border-r border-gray-200 z-50 lg:hidden">
+        <div className="fixed left-0 top-16 h-full w-64 bg-white border-r border-gray-200 z-50">
           <Sidebar mobile onClose={() => setSidebarOpen(false)} />
         </div>
       )}
-
-      {/* Header */}
-      <Header />
 
       {/* Persistent Hamburger */}
       <div className="fixed left-0 top-16 z-60 bg-white border-r border-gray-200">
@@ -51,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <main className="lg:ml-64 mt-16 p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="mt-16 p-4 sm:p-6 lg:p-8">{children}</main>
 
       {/* Floating support buttons - Admin only on real-estate dashboard */}
       {pathname === "/dashboard/real-estate" && (

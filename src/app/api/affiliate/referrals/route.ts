@@ -1,5 +1,6 @@
-import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { referralsRepo } from "@/repositories/referralsRepo";
@@ -7,20 +8,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify user authentication
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
+    // Verify user authentication using NextAuth session
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
     // Get user from PostgreSQL
-    const user = await usersRepo.findById(decoded.userId);
+    const user = await usersRepo.findById(session.user.id);
     if (!user || user.role !== "affiliate") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
