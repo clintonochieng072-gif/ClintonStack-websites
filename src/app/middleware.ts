@@ -116,7 +116,7 @@ export async function middleware(req: NextRequest) {
         if (user.onboarded) {
           try {
             await dbConnect();
-            const site = await Site.findOne({ ownerId: userId }, { niche: 1 }).lean();
+            const site = await Site.findOne({ ownerId: userId }, { niche: 1 }).lean() as { niche?: string } | null;
             if (site?.niche) {
               const nicheDashboard = `/dashboard/${site.niche}`;
               if (!pathname.startsWith(nicheDashboard) && !pathname.startsWith("/dashboard/niches")) {
