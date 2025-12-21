@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import FloatingButtons from "./public/FloatingButtons";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -51,15 +50,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <main className="lg:ml-64 mt-2 md:mt-4 p-4 sm:p-6 lg:p-8">{children}</main>
-
-      {/* Floating support buttons - Admin only on real-estate dashboard */}
-      {pathname === "/dashboard/real-estate" && (
-        <FloatingButtons
-          phoneNumber="+254768524480"
-          whatsappNumber="+254768524480"
-        />
-      )}
+      <main className="lg:ml-64 mt-2 md:mt-4 p-4 sm:p-6 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

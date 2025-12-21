@@ -146,78 +146,24 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* Right side */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Mobile HeaderActions - Show buttons directly for better visibility */}
-          <div className="md:hidden flex items-center space-x-1">
+          <div className="md:hidden flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handlePreview}
               disabled={!site}
-              className="px-2 py-2"
-              title="Preview"
+              className="px-3 py-2 text-sm font-medium"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
+              Preview
             </Button>
             <Button
               variant="default"
               size="sm"
               onClick={handlePublish}
               disabled={publishing || !site}
-              className="px-2 py-2 bg-blue-600 hover:bg-blue-700"
-              title={publishing ? "Publishing..." : "Publish"}
+              className="px-3 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700"
             >
-              {publishing ? (
-                <svg
-                  className="w-4 h-4 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              ) : (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-              )}
+              {publishing ? "Publishing..." : "Publish"}
             </Button>
           </div>
 

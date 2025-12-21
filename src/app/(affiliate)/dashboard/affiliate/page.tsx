@@ -9,6 +9,8 @@ import Product from "@/lib/models/Product";
 import AffiliateDashboardClient from "@/components/AffiliateDashboardClient";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function AffiliateDashboard() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
@@ -40,45 +42,50 @@ export default async function AffiliateDashboard() {
   }
 
   // Fetch all data server-side
-  const [referralStats, affiliateStats, referrals, products, balanceData] = await Promise.all([
-    referralsRepo.getStats(affiliate.id),
-    affiliatesRepo.getStats(affiliate.id),
-    referralsRepo.listByAffiliate(affiliate.id),
-    (async () => {
-      await dbConnect();
-      return Product.find({
-        isActive: true,
-        status: "active",
-        name: "ClintonStack Real Estate",
-      })
-        .select("name description slug commissionRate features pricing sortOrder")
-        .sort({ sortOrder: 1, name: 1 });
-    })(),
-    (async () => {
-      const userWithAffiliate = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        include: {
-          affiliate: true,
-          withdrawalRequests: {
-            orderBy: { createdAt: "desc" },
+  const [referralStats, affiliateStats, referrals, products, balanceData] =
+    await Promise.all([
+      referralsRepo.getStats(affiliate.id),
+      affiliatesRepo.getStats(affiliate.id),
+      referralsRepo.listByAffiliate(affiliate.id),
+      (async () => {
+        await dbConnect();
+        return Product.find({
+          isActive: true,
+          status: "active",
+          name: "ClintonStack Real Estate",
+        })
+          .select(
+            "name description slug commissionRate features pricing sortOrder"
+          )
+          .sort({ sortOrder: 1, name: 1 });
+      })(),
+      (async () => {
+        const userWithAffiliate = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          include: {
+            affiliate: true,
+            withdrawalRequests: {
+              orderBy: { createdAt: "desc" },
+            },
           },
-        },
-      });
-      if (!userWithAffiliate?.affiliate) return null;
-      return {
-        availableBalance: userWithAffiliate.affiliate.availableBalance,
-        totalEarned: userWithAffiliate.affiliate.totalEarned,
-        withdrawalHistory: userWithAffiliate.withdrawalRequests.map((req) => ({
-          withdrawalId: req.id,
-          amount: req.amount,
-          status: req.status,
-          requestedAt: req.createdAt,
-          processedAt: req.processedAt,
-          phoneNumber: req.phoneNumber,
-        })),
-      };
-    })(),
-  ]);
+        });
+        if (!userWithAffiliate?.affiliate) return null;
+        return {
+          availableBalance: userWithAffiliate.affiliate.availableBalance,
+          totalEarned: userWithAffiliate.affiliate.totalEarned,
+          withdrawalHistory: userWithAffiliate.withdrawalRequests.map(
+            (req) => ({
+              withdrawalId: req.id,
+              amount: req.amount,
+              status: req.status,
+              requestedAt: req.createdAt,
+              processedAt: req.processedAt,
+              phoneNumber: req.phoneNumber,
+            })
+          ),
+        };
+      })(),
+    ]);
 
   // Format referrals
   const formattedReferrals = await Promise.all(

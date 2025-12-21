@@ -15,6 +15,8 @@ import {
   Copy,
   Check,
   Plus,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getAuthHeaders } from "@/lib/utils";
@@ -106,6 +108,10 @@ export default function NicheDashboardPage() {
   }
 
   const copyToClipboard = async () => {
+    if (!user?.has_paid) {
+      alert("You need to publish the site to view this page.");
+      return;
+    }
     const publicURL = site ? `${window.location.origin}/site/${site.slug}` : "";
     await navigator.clipboard.writeText(publicURL);
     setCopied(true);
@@ -138,6 +144,34 @@ export default function NicheDashboardPage() {
 
   return (
     <>
+      {/* Help Section - Only for real-estate dashboard, not for affiliates */}
+      {user?.role !== 'affiliate' && (
+        <div className="sticky top-16 z-40 bg-white border-b shadow-sm p-4">
+          <div className="max-w-7xl mx-auto">
+            <p className="text-sm text-gray-600 mb-2">Need help? Contact us</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => window.location.href = `tel:+254768524480`}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Phone className="w-4 h-4" />
+                Phone
+              </button>
+              <button
+                onClick={() => {
+                  const message = "Hello, I need help with ClintonStack!";
+                  const whatsappUrl = `https://wa.me/254768524480?text=${encodeURIComponent(message)}`;
+                  window.open(whatsappUrl, '_blank');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {(user?.role === "admin" ||
         user?.email === "clintonochieng072@gmail.com") && <AdminMiniPanel />}
       <motion.div
@@ -172,11 +206,25 @@ export default function NicheDashboardPage() {
                   <Plus className="w-4 h-4 mr-2" />
                   Add Property
                 </Button>
-              </div>
+                <Button
+                  onClick={() => {
+                    if (user?.has_paid) {
+                      window.open(`${window.location.origin}/site/${site.slug}`, "_blank");
+                    } else {
+                      alert("You need to publish the site to view this page.");
+                    }
+                  }}
+                  variant="outline"
+                  disabled={!site?.published}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View Public Site
+                </Button>
+                </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-2">Live Site Link</p>
-                <div className="flex items-center gap-3 max-w-lg">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 max-w-lg">
                   <Input
                     readOnly
                     value={
@@ -189,6 +237,7 @@ export default function NicheDashboardPage() {
                     onClick={copyToClipboard}
                     variant="outline"
                     className="flex items-center gap-2 rounded-xl"
+                    disabled={!user?.has_paid}
                   >
                     {copied ? <Check size={18} /> : <Copy size={18} />}
                     {copied ? "Copied" : "Copy"}
@@ -213,7 +262,7 @@ export default function NicheDashboardPage() {
                     <p className="text-sm font-medium text-gray-600">
                       Visitors this month
                     </p>
-                    <p className="text-3xl font-bold text-gray-900">1,234</p>
+                    <p className="text-3xl font-bold text-gray-900">0</p>
                   </div>
                   <Users className="w-8 h-8 text-blue-500" />
                 </div>
@@ -233,7 +282,7 @@ export default function NicheDashboardPage() {
                     <p className="text-sm font-medium text-gray-600">
                       Leads received
                     </p>
-                    <p className="text-3xl font-bold text-gray-900">56</p>
+                    <p className="text-3xl font-bold text-gray-900">0</p>
                   </div>
                   <Mail className="w-8 h-8 text-green-500" />
                 </div>
