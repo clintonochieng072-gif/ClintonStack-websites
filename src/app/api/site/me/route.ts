@@ -8,7 +8,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 60 seconds
 
 // Add no-cache headers to all responses
 function addNoCacheHeaders(response: NextResponse) {

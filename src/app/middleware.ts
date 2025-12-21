@@ -11,6 +11,21 @@ export async function middleware(req: NextRequest) {
   // 🚨 NEVER TOUCH AUTH.JS ROUTES
   if (
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/upload") ||
+    pathname.startsWith("/api/site") ||
+    pathname.startsWith("/api/affiliate") ||
+    pathname.startsWith("/api/notifications") ||
+    pathname.startsWith("/api/user") ||
+    pathname.startsWith("/api/team") ||
+    pathname.startsWith("/api/leads") ||
+    pathname.startsWith("/api/properties") ||
+    pathname.startsWith("/api/payments") ||
+    pathname.startsWith("/api/billing") ||
+    pathname.startsWith("/api/subscription") ||
+    pathname.startsWith("/api/analytics") ||
+    pathname.startsWith("/api/contact") ||
+    pathname.startsWith("/api/category") ||
+    pathname.startsWith("/api/property-types") ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico"
   ) {

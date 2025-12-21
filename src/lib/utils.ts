@@ -46,6 +46,7 @@ export async function apiPut(path: string, body: any) {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
+    credentials: "include",
   });
   if (!res.ok) {
     const text = await res.text();
@@ -59,6 +60,7 @@ export async function apiPost(path: string, body: any) {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
+    credentials: "include",
   });
   if (!res.ok) {
     const text = await res.text();

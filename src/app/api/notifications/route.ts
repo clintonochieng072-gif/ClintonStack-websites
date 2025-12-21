@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongodb";
 import { Notification } from "@/lib/models/Notification";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 30; // Cache for 30 seconds
 
 export async function GET(request: NextRequest) {
   try {

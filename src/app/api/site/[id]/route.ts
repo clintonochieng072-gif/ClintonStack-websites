@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDb } from "@/lib/db";
 import { Site } from "@/lib/models/Site";
-import { getUserFromToken } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
 
 export const dynamic = "force-dynamic";
@@ -135,9 +136,10 @@ export async function GET(
 ) {
   await connectDb();
   const { id } = await params;
-  const user = await getUserFromToken();
-  if (!user)
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = { id: session.user.id };
   const site = await Site.findById(id);
   if (!site) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (String(site.ownerId) !== String(user.id))
@@ -152,9 +154,10 @@ export async function PUT(
 ) {
   await connectDb();
   const { id } = await params;
-  const user = await getUserFromToken();
-  if (!user)
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = { id: session.user.id };
   const site = await Site.findById(id);
   if (!site) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (String(site.ownerId) !== String(user.id))

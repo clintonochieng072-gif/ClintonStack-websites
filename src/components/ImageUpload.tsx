@@ -85,6 +85,7 @@ export default function ImageUpload(props: ImageUploadPropsCombined) {
             headers: authHeaders,
             body: formData,
             signal: controller.signal,
+            credentials: "include",
           });
 
           clearTimeout(timeoutId);

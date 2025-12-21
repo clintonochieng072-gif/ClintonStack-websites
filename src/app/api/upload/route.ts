@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromToken } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary
@@ -13,10 +14,15 @@ export const maxDuration = 60; // 60 seconds to handle large uploads
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getUserFromToken();
-    if (!user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const user = {
+      id: session.user.id,
+      email: session.user.email,
+    };
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
