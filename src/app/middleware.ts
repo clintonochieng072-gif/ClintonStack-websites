@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/prisma";
+import dbConnect from "@/lib/mongodb";
+import { Site } from "@/lib/models/Site";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -110,13 +112,28 @@ export async function middleware(req: NextRequest) {
           }
         }
 
-        // For onboarded clients, redirect to /dashboard if not already there
+        // For onboarded clients, get the site niche and redirect to niche dashboard
         if (user.onboarded) {
-          if (
-            !pathname.startsWith("/dashboard") ||
-            pathname.startsWith("/dashboard/affiliate")
-          ) {
-            return NextResponse.redirect(new URL("/dashboard", req.url));
+          try {
+            await dbConnect();
+            const site = await Site.findOne({ ownerId: userId }, { niche: 1 }).lean();
+            if (site?.niche) {
+              const nicheDashboard = `/dashboard/${site.niche}`;
+              if (!pathname.startsWith(nicheDashboard) && !pathname.startsWith("/dashboard/niches")) {
+                return NextResponse.redirect(new URL(nicheDashboard, req.url));
+              }
+            } else {
+              // No site, redirect to niches page
+              if (!pathname.startsWith("/dashboard/niches")) {
+                return NextResponse.redirect(new URL("/dashboard/niches", req.url));
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching site for redirect:", error);
+            // Fallback to /dashboard
+            if (!pathname.startsWith("/dashboard")) {
+              return NextResponse.redirect(new URL("/dashboard", req.url));
+            }
           }
         }
       }

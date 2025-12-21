@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    await usersRepo.update(user.id, { role });
+    // For affiliates, also set onboarded to true
+    const updateData = role === "affiliate" ? { role, onboarded: true } : { role };
+
+    await usersRepo.update(user.id, updateData);
 
     return NextResponse.json({ success: true });
   } catch (error) {
