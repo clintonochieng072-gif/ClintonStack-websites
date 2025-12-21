@@ -287,22 +287,6 @@ export default function AffiliateWithdrawPage() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-900">
-                      Processing Time
-                    </h4>
-                    <p className="text-sm text-blue-700 mt-1">
-                      Withdrawals are typically processed within 1-2 business
-                      days. You can only make one withdrawal per day.
-                    </p>
-                  </div>
-                </div>
-              </div>
 
               <div className="flex justify-center">
                 {(balance?.availableBalance || 0) >= 300 ? (

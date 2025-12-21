@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, User, LogOut, Menu, Settings, UserCircle, MoreVertical } from "lucide-react";
+import {
+  Bell,
+  User,
+  LogOut,
+  Menu,
+  Settings,
+  UserCircle,
+  MoreVertical,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -137,28 +145,26 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         {/* Right side */}
         <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Mobile HeaderActions Dropdown */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  title="More actions"
-                  className="hover:bg-gray-100"
-                >
-                  <MoreVertical className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handlePreview} disabled={!site}>
-                  Preview
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handlePublish} disabled={publishing || !site}>
-                  {publishing ? "Publishing..." : "Publish"}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Mobile HeaderActions - Show buttons directly for better visibility */}
+          <div className="md:hidden flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreview}
+              disabled={!site}
+              className="text-xs px-3 py-2"
+            >
+              Preview
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishing || !site}
+              className="text-xs px-3 py-2 bg-blue-600 hover:bg-blue-700"
+            >
+              {publishing ? "Publishing..." : "Publish"}
+            </Button>
           </div>
 
           {/* Desktop HeaderActions */}

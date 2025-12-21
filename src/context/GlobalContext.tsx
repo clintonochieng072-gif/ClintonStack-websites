@@ -95,7 +95,7 @@ export default function GlobalProvider({
     localStorage.removeItem("onboarding_niche");
     localStorage.removeItem("onboarding_template");
     // Sign out from NextAuth
-    await signOut({ callbackUrl: "/" });
+    await signOut({ callbackUrl: "/auth/login" });
   };
 
   const refreshUser = async () => {

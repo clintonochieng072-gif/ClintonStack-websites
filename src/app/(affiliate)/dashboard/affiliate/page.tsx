@@ -86,6 +86,7 @@ export default function AffiliateDashboard() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [productLoading, setProductLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [mpesaName, setMpesaName] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Removed countdown - commissions are immediately available
 
@@ -233,6 +234,10 @@ ClintonStack handles the technical side while you focus on selling properties.`;
       alert("Please enter your M-Pesa phone number");
       return;
     }
+    if (!mpesaName.trim()) {
+      alert("Please enter your MPESA name");
+      return;
+    }
 
     // Validate phone number format
     const phoneRegex = /^(\+254|0)7[0-9]{8}$/;
@@ -253,12 +258,14 @@ ClintonStack handles the technical side while you focus on selling properties.`;
         body: JSON.stringify({
           amount: balance.availableBalance,
           phoneNumber: phoneNumber.trim(),
+          mpesaName: mpesaName.trim(),
         }),
       });
 
       if (response.ok) {
         alert("Withdrawal request submitted successfully!");
-        setPhoneNumber(""); // Clear phone number
+        setPhoneNumber(""); // Clear fields
+        setMpesaName("");
         // Refresh data
         fetchAffiliateData();
       } else {
@@ -275,12 +282,104 @@ ClintonStack handles the technical side while you focus on selling properties.`;
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            Loading your affiliate dashboard...
-          </p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Sidebar Skeleton */}
+        <div className="hidden lg:block fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200">
+          <div className="p-6">
+            <div className="h-8 bg-gray-200 rounded w-32 mb-8 animate-pulse"></div>
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Header Skeleton */}
+        <header className="bg-white shadow-sm border-b lg:ml-64">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-200 rounded mr-4 animate-pulse lg:hidden"></div>
+                <div>
+                  <div className="h-6 bg-gray-200 rounded w-48 mb-1 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+                </div>
+              </div>
+              <div className="h-10 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+          </div>
+        </header>
+
+        <div className="lg:ml-64 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Welcome Section Skeleton */}
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
+          </div>
+
+          {/* Affiliate Link Section Skeleton */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+            <div className="flex">
+              <div className="flex-1 h-10 bg-gray-200 rounded-l-md animate-pulse"></div>
+              <div className="w-10 h-10 bg-gray-200 rounded-r-md animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl p-6 border border-gray-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-1 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32 mt-1 animate-pulse"></div>
+                  </div>
+                  <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Actions Skeleton */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 bg-gray-200 rounded-lg animate-pulse"
+                ></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Activity Skeleton */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-32 mb-1 animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded w-48 animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -482,6 +581,61 @@ ClintonStack handles the technical side while you focus on selling properties.`;
           </div>
         </div>
 
+        {/* Withdrawal Section */}
+        {(balance?.availableBalance || 0) >= 300 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Withdraw Funds
+            </h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="0712345678"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    MPESA Name
+                  </label>
+                  <input
+                    type="text"
+                    value={mpesaName}
+                    onChange={(e) => setMpesaName(e.target.value)}
+                    placeholder="John Doe"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={handleWithdrawal}
+                    disabled={
+                      withdrawLoading ||
+                      !phoneNumber.trim() ||
+                      !mpesaName.trim()
+                    }
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
+                  >
+                    {withdrawLoading
+                      ? "Processing..."
+                      : "Withdraw KES " + (balance?.availableBalance || 0)}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Withdrawal requests are submitted to admin for processing
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -504,7 +658,7 @@ ClintonStack handles the technical side while you focus on selling properties.`;
             >
               <Wallet className="w-5 h-5 text-purple-600" />
               <span className="text-sm font-medium text-purple-900">
-                Withdraw Funds
+                Withdrawal History
               </span>
             </Link>
 

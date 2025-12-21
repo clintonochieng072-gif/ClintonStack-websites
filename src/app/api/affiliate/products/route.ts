@@ -16,8 +16,12 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
-    // Get all active products that affiliates can promote
-    const products = await Product.find({ isActive: true, status: "active" })
+    // Get only the ClintonStack Real Estate product
+    const products = await Product.find({
+      isActive: true,
+      status: "active",
+      name: "ClintonStack Real Estate",
+    })
       .select("name description slug commissionRate features pricing sortOrder")
       .sort({ sortOrder: 1, name: 1 });
 
