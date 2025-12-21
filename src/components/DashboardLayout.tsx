@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <main className="lg:ml-64 mt-4 md:mt-6 p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="lg:ml-64 mt-2 md:mt-4 p-4 sm:p-6 lg:p-8">{children}</main>
 
       {/* Floating support buttons - Admin only on real-estate dashboard */}
       {pathname === "/dashboard/real-estate" && (

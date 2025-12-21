@@ -69,7 +69,7 @@ export default function AffiliateWithdrawPage() {
       return;
     }
     if (amount > (balance?.availableBalance || 0)) {
-      alert("Withdrawal amount cannot exceed available balance");
+      alert("Insufficient balance");
       return;
     }
     if (!phoneNumber.trim()) {
@@ -287,27 +287,25 @@ export default function AffiliateWithdrawPage() {
                 </div>
               </div>
 
-
               <div className="flex justify-center">
-                {(balance?.availableBalance || 0) >= 300 ? (
-                  <button
-                    onClick={handleWithdrawal}
-                    disabled={withdrawLoading}
-                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200 font-medium"
-                  >
-                    {withdrawLoading ? "Processing..." : "Withdraw"}
-                  </button>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-gray-500 mb-2">
-                      Minimum withdrawal: KES 300
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Earn more commissions to unlock withdrawals
-                    </p>
-                  </div>
-                )}
+                <button
+                  onClick={handleWithdrawal}
+                  disabled={withdrawLoading}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200 font-medium"
+                >
+                  {withdrawLoading ? "Processing..." : "Withdraw"}
+                </button>
               </div>
+              {(balance?.availableBalance || 0) < 300 && (
+                <div className="text-center mt-4">
+                  <p className="text-gray-500 mb-2">
+                    Minimum withdrawal: KES 300
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    Earn more commissions to unlock withdrawals
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

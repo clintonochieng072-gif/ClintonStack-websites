@@ -89,6 +89,32 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Notify all admin users
+    const adminUsers = await prisma.user.findMany({
+      where: { role: "admin" },
+    });
+
+    const notifications = adminUsers.map((admin) => ({
+      userId: admin.id,
+      type: "withdrawal_request",
+      message: `New withdrawal request from ${user.name} (${user.email}) for KES ${withdrawalAmount}`,
+      data: {
+        withdrawalId: withdrawalRequest.id,
+        affiliateId: user.id,
+        affiliateName: user.name,
+        affiliateEmail: user.email,
+        amount: withdrawalAmount,
+        phoneNumber,
+        mpesaName,
+      },
+    }));
+
+    if (notifications.length > 0) {
+      await prisma.notification.createMany({
+        data: notifications,
+      });
+    }
+
     return NextResponse.json({
       message:
         "Withdrawal request submitted successfully. It will be processed manually.",
