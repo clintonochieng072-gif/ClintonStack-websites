@@ -6,7 +6,7 @@ import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { referralsRepo } from "@/repositories/referralsRepo";
 import { getBaseUrl } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // cache for 1 minute
 
 export async function GET(request: NextRequest) {
   try {

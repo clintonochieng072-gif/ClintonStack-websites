@@ -6,7 +6,7 @@ import { affiliatesRepo } from "@/repositories/affiliatesRepo";
 import { referralsRepo } from "@/repositories/referralsRepo";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function GET(request: NextRequest) {
   try {

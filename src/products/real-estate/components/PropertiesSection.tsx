@@ -42,7 +42,7 @@ function PropertyCard({ property }: { property: Property }) {
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-200"
       whileHover={{ translateY: -6 }}
     >
-      <div className="relative h-96 w-full">
+      <div className="relative h-[26rem] w-full">
         <img
           src={property.images?.[0] || "/placeholder-property.jpg"}
           alt={property.title}

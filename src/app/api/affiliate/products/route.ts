@@ -4,7 +4,7 @@ import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongodb";
 import Product from "@/lib/models/Product";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // cache for 5 minutes
 
 export async function GET(request: NextRequest) {
   try {
