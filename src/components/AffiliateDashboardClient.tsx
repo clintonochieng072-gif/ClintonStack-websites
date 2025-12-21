@@ -24,7 +24,7 @@ interface Referral {
   _id: string;
   clientId: string;
   productId: string;
-  signupDate: string;
+  signupDate: Date;
   paymentStatus: "pending" | "paid";
   clientName?: string;
   clientEmail?: string;
@@ -66,8 +66,8 @@ interface AffiliateBalance {
     amount: number;
     status: "pending" | "completed" | "failed";
     requestedAt: Date;
-    processedAt?: Date;
-    phoneNumber?: string;
+    processedAt?: Date | null;
+    phoneNumber?: string | null;
   }[];
 }
 
@@ -88,7 +88,9 @@ export default function AffiliateDashboardClient({
 }: AffiliateDashboardClientProps) {
   const router = useRouter();
   const [stats, setStats] = useState<AffiliateStats | null>(initialStats);
-  const [balance, setBalance] = useState<AffiliateBalance | null>(initialBalance);
+  const [balance, setBalance] = useState<AffiliateBalance | null>(
+    initialBalance
+  );
   const [referrals, setReferrals] = useState<Referral[]>(initialReferrals);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);

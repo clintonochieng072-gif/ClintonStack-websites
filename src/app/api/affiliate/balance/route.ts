@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
       amount: req.amount,
       status: req.status,
       requestedAt: req.createdAt,
-      processedAt: req.processedAt || undefined,
-      phoneNumber: req.phoneNumber || undefined,
+      processedAt: req.processedAt as Date | undefined,
+      phoneNumber: req.phoneNumber as string | undefined,
     }));
 
     return NextResponse.json({

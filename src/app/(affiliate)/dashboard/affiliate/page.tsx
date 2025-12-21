@@ -95,11 +95,13 @@ export default async function AffiliateDashboard() {
       return {
         _id: referral.id,
         clientId: referral.referredUser.id,
+        productId: "real-estate",
         clientName: referral.referredUser.name,
         clientEmail: referral.referredUser.email,
         signupDate: referral.createdAt,
-        paymentStatus: commission ? "paid" : "pending",
+        paymentStatus: (commission ? "paid" : "pending") as "pending" | "paid",
         commissionEarned: commission?.commissionAmount || 0,
+        productName: "ClintonStack Real Estate",
       };
     })
   );
