@@ -48,52 +48,8 @@ export default function ImageUpload(props: ImageUploadPropsCombined) {
   }, [value]);
 
   const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = new window.Image();
-
-      img.onload = () => {
-        // Calculate new dimensions (max 1920px width/height)
-        let { width, height } = img;
-        const maxSize = 1920;
-
-        if (width > height) {
-          if (width > maxSize) {
-            height = (height * maxSize) / width;
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width = (width * maxSize) / height;
-            height = maxSize;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            } else {
-              resolve(file); // Fallback to original
-            }
-          },
-          "image/jpeg",
-          0.8 // 80% quality
-        );
-      };
-
-      img.src = URL.createObjectURL(file);
-    });
+    // Keep original image without compression or resizing
+    return Promise.resolve(file);
   };
 
   const handleFileSelect = async (files: FileList | File) => {
