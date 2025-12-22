@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
         return {
           _id: referral.id,
-          clientId: referral.referredUser.id,
+          clientId: referral.referredUserId,
           clientName: referral.referredUser.name,
           clientEmail: referral.referredUser.email,
           signupDate: referral.createdAt,
