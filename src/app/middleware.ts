@@ -1,3 +1,4 @@
+import "@/lib/logger";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -78,38 +79,25 @@ export async function middleware(req: NextRequest) {
       }
 
       if (user.role === "affiliate") {
-        // Affiliates can only access affiliate routes and public pages
-        const allowedAffiliatePaths = [
-          "/dashboard/affiliate",
-          "/auth",
-          "/api",
-          "/_next",
-          "/favicon.ico",
-          "/", // landing page
-          "/affiliate-program",
-          "/affiliate-signup",
-        ];
-
-        const isAllowed = allowedAffiliatePaths.some((path) =>
-          pathname.startsWith(path)
-        );
-
-        if (!isAllowed) {
-          return NextResponse.redirect(
-            new URL("/dashboard/affiliate", req.url)
-          );
+        // Allow all affiliate subroutes
+        if (pathname.startsWith("/dashboard/affiliate")) {
+          return NextResponse.next();
         }
 
-        // Force redirect to affiliate dashboard if not already there
+        // Allow public + auth + api routes
         if (
-          !pathname.startsWith("/dashboard/affiliate") &&
-          !pathname.startsWith("/auth") &&
-          !pathname.startsWith("/api")
+          pathname.startsWith("/auth") ||
+          pathname.startsWith("/api") ||
+          pathname.startsWith("/_next") ||
+          pathname === "/" ||
+          pathname.startsWith("/affiliate-program") ||
+          pathname.startsWith("/affiliate-signup")
         ) {
-          return NextResponse.redirect(
-            new URL("/dashboard/affiliate", req.url)
-          );
+          return NextResponse.next();
         }
+
+        // Redirect ONLY if not already on affiliate dashboard
+        return NextResponse.redirect(new URL("/dashboard/affiliate", req.url));
       } else {
         // Clients cannot access affiliate routes
         if (
@@ -131,16 +119,24 @@ export async function middleware(req: NextRequest) {
         if (user.onboarded) {
           try {
             await dbConnect();
-            const site = await Site.findOne({ ownerId: userId }, { niche: 1 }).lean() as { niche?: string } | null;
+            const site = (await Site.findOne(
+              { ownerId: userId },
+              { niche: 1 }
+            ).lean()) as { niche?: string } | null;
             if (site?.niche) {
               const nicheDashboard = `/dashboard/${site.niche}`;
-              if (!pathname.startsWith(nicheDashboard) && !pathname.startsWith("/dashboard/niches")) {
+              if (
+                !pathname.startsWith(nicheDashboard) &&
+                !pathname.startsWith("/dashboard/niches")
+              ) {
                 return NextResponse.redirect(new URL(nicheDashboard, req.url));
               }
             } else {
               // No site, redirect to niches page
               if (!pathname.startsWith("/dashboard/niches")) {
-                return NextResponse.redirect(new URL("/dashboard/niches", req.url));
+                return NextResponse.redirect(
+                  new URL("/dashboard/niches", req.url)
+                );
               }
             }
           } catch (error) {

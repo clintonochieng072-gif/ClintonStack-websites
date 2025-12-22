@@ -4,6 +4,7 @@ import { connectDb } from "@/lib/db";
 import { getUserFromToken } from "@/lib/auth";
 import { Site } from "@/lib/models/Site";
 import Contact from "@/lib/models/Contact";
+import { escapeCSV } from "@/lib/csv";
 
 export async function GET(req: Request) {
   await connectDb();
@@ -49,16 +50,16 @@ export async function GET(req: Request) {
       ];
 
       const csvRows = leads.map((lead: any) => [
-        lead.name,
-        lead.email,
-        lead.phone || "",
-        `"${lead.message.replace(/"/g, '""')}"`, // Escape quotes in message
-        lead.status,
-        lead.source,
-        new Date(lead.createdAt).toISOString().split("T")[0],
-        lead.metadata?.ipAddress || "",
-        lead.metadata?.referrer || "",
-        lead.notes || "",
+        escapeCSV(lead.name),
+        escapeCSV(lead.email),
+        escapeCSV(lead.phone || ""),
+        escapeCSV(lead.message),
+        escapeCSV(lead.status),
+        escapeCSV(lead.source),
+        escapeCSV(new Date(lead.createdAt).toISOString().split("T")[0]),
+        escapeCSV(lead.metadata?.ipAddress || ""),
+        escapeCSV(lead.metadata?.referrer || ""),
+        escapeCSV(lead.notes || ""),
       ]);
 
       const csvContent = [

@@ -2,9 +2,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { usersRepo } from "@/repositories/usersRepo";
 import { redirect } from "next/navigation";
-import NichesPageClient from "./NichesPageClient";
+import OnboardingNichesClient from "./OnboardingNichesClient";
 
-export default async function NichesPage() {
+export default async function OnboardingPage() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.id) {
     redirect("/auth/login");
@@ -15,9 +15,9 @@ export default async function NichesPage() {
     redirect("/auth/login");
   }
 
-  if (user.role !== "client" || !user.onboarded) {
+  if (user.role !== "client" || user.onboarded) {
     redirect("/dashboard");
   }
 
-  return <NichesPageClient />;
+  return <OnboardingNichesClient />;
 }

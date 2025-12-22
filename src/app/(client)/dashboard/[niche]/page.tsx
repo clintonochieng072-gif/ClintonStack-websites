@@ -144,34 +144,6 @@ export default function NicheDashboardPage() {
 
   return (
     <>
-      {/* Help Section - Only for real-estate dashboard, not for affiliates */}
-      {user?.role !== 'affiliate' && (
-        <div className="sticky top-16 z-40 bg-white border-b shadow-sm p-4">
-          <div className="max-w-7xl mx-auto">
-            <p className="text-sm text-gray-600 mb-2">Need help? Contact us</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => window.location.href = `tel:+254768524480`}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <Phone className="w-4 h-4" />
-                Phone
-              </button>
-              <button
-                onClick={() => {
-                  const message = "Hello, I need help with ClintonStack!";
-                  const whatsappUrl = `https://wa.me/254768524480?text=${encodeURIComponent(message)}`;
-                  window.open(whatsappUrl, '_blank');
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {(user?.role === "admin" ||
         user?.email === "clintonochieng072@gmail.com") && <AdminMiniPanel />}
       <motion.div
@@ -182,7 +154,7 @@ export default function NicheDashboardPage() {
       >
         {/* Welcome Panel */}
         <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-lg">
-          <CardContent className="p-8">
+          <CardContent className="p-8 pt-0">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome to your {niche.charAt(0).toUpperCase() + niche.slice(1)}{" "}
               Dashboard
@@ -209,7 +181,10 @@ export default function NicheDashboardPage() {
                 <Button
                   onClick={() => {
                     if (user?.has_paid) {
-                      window.open(`${window.location.origin}/site/${site.slug}`, "_blank");
+                      window.open(
+                        `${window.location.origin}/site/${site.slug}`,
+                        "_blank"
+                      );
                     } else {
                       alert("You need to publish the site to view this page.");
                     }
@@ -220,30 +195,45 @@ export default function NicheDashboardPage() {
                   <ExternalLink className="w-4 h-4 mr-2" />
                   View Public Site
                 </Button>
-                </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Live Site Link</p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 max-w-lg">
-                  <Input
-                    readOnly
-                    value={
-                      site ? `${window.location.origin}/site/${site.slug}` : ""
-                    }
-                    className="bg-gray-50 border rounded-xl"
-                  />
-
-                  <Button
-                    onClick={copyToClipboard}
-                    variant="outline"
-                    className="flex items-center gap-2 rounded-xl"
-                    disabled={!user?.has_paid}
-                  >
-                    {copied ? <Check size={18} /> : <Copy size={18} />}
-                    {copied ? "Copied" : "Copy"}
-                  </Button>
-                </div>
               </div>
+
+              {user?.has_paid && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Live Site Link</p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 max-w-lg">
+                    <Input
+                      readOnly
+                      value={
+                        site
+                          ? `${window.location.origin}/site/${site.slug}`
+                          : ""
+                      }
+                      className="bg-gray-50 border rounded-xl"
+                    />
+
+                    <Button
+                      onClick={copyToClipboard}
+                      variant="outline"
+                      className="flex items-center gap-2 rounded-xl"
+                      disabled={!user?.has_paid}
+                    >
+                      {copied ? <Check size={18} /> : <Copy size={18} />}
+                      {copied ? "Copied" : "Copy"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {!user?.has_paid && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Live Site Link</p>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <p className="text-sm text-gray-800">
+                      Publish your site to get the live link
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

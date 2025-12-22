@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -117,11 +118,7 @@ export default function AffiliateSidebar({
                 return (
                   <button
                     key={item.name}
-                    onClick={() => {
-                      // Handle logout
-                      localStorage.removeItem("auth_token");
-                      window.location.href = "/auth/login";
-                    }}
+                    onClick={() => signOut({ callbackUrl: "/auth/login" })}
                     className="w-full px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-center rounded-lg text-left"
                   >
                     <Icon className="w-5 h-5 mr-3 text-gray-600" />

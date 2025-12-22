@@ -77,15 +77,15 @@ export default function GlobalProvider({
 
     const channel = pusherClient.subscribe(`user-${user.id}`);
     channel.bind("payment-approved", () => {
-      // Refresh session
-      update();
+      // Refresh user data if needed
+      // update(); // Commented out to prevent potential loops
     });
 
     return () => {
       channel.unbind_all();
       pusherClient.unsubscribe(`user-${user.id}`);
     };
-  }, [user?.id, update]);
+  }, [user?.id]);
 
   const login = (u: User) => setUser(u);
   const logout = async () => {

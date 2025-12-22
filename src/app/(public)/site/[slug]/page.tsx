@@ -8,7 +8,6 @@ import PublicSiteContent from "@/components/public/PublicSiteContent";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-
 function normalizeSite(blocks: any[]) {
   if (!Array.isArray(blocks)) return [];
 
@@ -72,22 +71,14 @@ function normalizeSite(blocks: any[]) {
           data: {
             ...block.data,
             list: Array.isArray(block.data?.list)
-              ? block.data.list.map((prop: any) =>
-                  JSON.parse(JSON.stringify(prop))
-                )
+              ? block.data.list.map((prop: any) => ({ ...prop }))
               : Array.isArray(block.data?.properties)
-              ? block.data.properties.map((prop: any) =>
-                  JSON.parse(JSON.stringify(prop))
-                )
+              ? block.data.properties.map((prop: any) => ({ ...prop }))
               : [],
             properties: Array.isArray(block.data?.properties)
-              ? block.data.properties.map((prop: any) =>
-                  JSON.parse(JSON.stringify(prop))
-                )
+              ? block.data.properties.map((prop: any) => ({ ...prop }))
               : Array.isArray(block.data?.list)
-              ? block.data.list.map((prop: any) =>
-                  JSON.parse(JSON.stringify(prop))
-                )
+              ? block.data.list.map((prop: any) => ({ ...prop }))
               : [],
           },
         };
@@ -106,7 +97,6 @@ async function getPublicSiteDirect(slug: string) {
 
     // Start with published data
     const publishedData = site.publishedWebsite?.data || {};
-    console.log("PUBLIC DATA:", publishedData);
 
     // Convert flat data structure to blocks array if needed
     if (!publishedData.blocks) {
@@ -128,10 +118,10 @@ async function getPublicSiteDirect(slug: string) {
         .map(([type, data]) => ({ type, data }));
     }
 
-    // Normalize blocks to ensure proper data structure
-    if (publishedData.blocks) {
-      publishedData.blocks = normalizeSite(publishedData.blocks);
-    }
+    // Use blocks as is to avoid data processing issues
+    // if (publishedData.blocks) {
+    //   publishedData.blocks = normalizeSite(publishedData.blocks);
+    // }
 
     // For public site, use the properties from publishedWebsite.data.blocks
     // (already copied from draft.blocks during publish)

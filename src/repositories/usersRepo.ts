@@ -50,7 +50,14 @@ export class UsersRepository {
         onboarded: data.onboarded || false,
       },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
     });
   }
@@ -60,10 +67,22 @@ export class UsersRepository {
     return await prisma.user.findUnique({
       where: { id },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
         referredUsers: {
           include: {
-            affiliate: true,
+            affiliate: {
+              select: {
+                id: true,
+                commissionRate: true,
+              },
+            },
           },
         },
         payments: true,
@@ -76,7 +95,14 @@ export class UsersRepository {
     return await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
     });
   }
@@ -86,7 +112,14 @@ export class UsersRepository {
     return await prisma.user.findUnique({
       where: { username: username.toLowerCase() },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
     });
   }
@@ -96,7 +129,14 @@ export class UsersRepository {
     return await prisma.user.findUnique({
       where: { referralCode },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
     });
   }
@@ -107,7 +147,14 @@ export class UsersRepository {
       where: { id },
       data,
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
     });
   }
@@ -132,7 +179,14 @@ export class UsersRepository {
     return await prisma.user.findMany({
       where: role ? { role } : undefined,
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            id: true,
+            availableBalance: true,
+            totalEarned: true,
+            commissionRate: true,
+          },
+        },
       },
       take: limit,
       skip: offset,

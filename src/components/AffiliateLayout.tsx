@@ -37,12 +37,6 @@ export default function AffiliateLayout({ children }: AffiliateLayoutProps) {
 
       {/* Main content */}
       <main className="lg:ml-64 p-4 sm:p-6 lg:p-8">{children}</main>
-
-      {/* Floating support buttons */}
-      <FloatingButtons
-        phoneNumber="+254768524480"
-        whatsappNumber="+254768524480"
-      />
     </div>
   );
 }

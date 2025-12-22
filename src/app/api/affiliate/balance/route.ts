@@ -17,7 +17,12 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
-        affiliate: true,
+        affiliate: {
+          select: {
+            availableBalance: true,
+            totalEarned: true,
+          },
+        },
         withdrawalRequests: {
           orderBy: { createdAt: "desc" },
         },

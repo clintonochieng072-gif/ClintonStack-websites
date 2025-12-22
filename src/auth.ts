@@ -22,17 +22,13 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("authorize called for", credentials?.email);
         if (!credentials?.email || !credentials?.password) {
-          console.log("Missing credentials");
           return null;
         }
 
         try {
           const user = await usersRepo.findByEmail(credentials.email);
-          console.log("User found:", !!user);
           if (!user || !user.passwordHash) {
-            console.log("User not found or no password hash");
             return null;
           }
 
@@ -40,13 +36,10 @@ export const authOptions = {
             credentials.password,
             user.passwordHash
           );
-          console.log("Password valid:", isValid);
           if (!isValid) {
-            console.log("Invalid password");
             return null;
           }
 
-          console.log("authorize success");
           return {
             id: user.id.toString(),
             email: user.email,
@@ -74,19 +67,12 @@ export const authOptions = {
   },
   callbacks: {
     async signIn({ user, account }: any) {
-      console.log("signIn callback called", {
-        provider: account?.provider,
-        email: user?.email,
-      });
       if (account?.provider === "google") {
         try {
-          console.log("Processing Google sign-in for", user.email);
           // Check if user exists
           let existingUser = await usersRepo.findByEmail(user.email!);
-          console.log("Existing user found:", !!existingUser);
 
           if (!existingUser) {
-            console.log("Creating new user for Google sign-in");
             // Create new user for Google sign-in
             const hashedGoogle = await bcrypt.hash("google", 12);
             const clientId = generateClientId();
@@ -100,7 +86,6 @@ export const authOptions = {
               onboarded: false,
               emailVerified: true, // Google accounts are pre-verified
             });
-            console.log("New user created:", existingUser.id);
           }
 
           // Update user object with full data for NextAuth
@@ -115,7 +100,6 @@ export const authOptions = {
           user.has_paid = existingUser.has_paid || false;
           user.subscriptionStatus = existingUser.subscriptionStatus || "trial";
           user.subscriptionType = existingUser.subscriptionType || null;
-          console.log("signIn success for Google");
 
           return true;
         } catch (error) {
@@ -123,11 +107,9 @@ export const authOptions = {
           return false;
         }
       }
-      console.log("signIn success (non-Google)");
       return true;
     },
     async jwt({ token, user }: any) {
-      console.log("jwt callback", { hasUser: !!user, tokenId: token?.id });
       if (user) {
         // For new logins, user is passed from authorize or signIn
         token.id = user.id;
@@ -142,19 +124,10 @@ export const authOptions = {
         token.has_paid = user.has_paid || false;
         token.subscriptionStatus = user.subscriptionStatus || "trial";
         token.subscriptionType = user.subscriptionType || null;
-        console.log("jwt updated with user data");
-      } else if (token.id) {
-        // For subsequent requests, ensure data persists
-        // Fetch fresh data if needed, but for now keep existing
-        console.log("jwt callback with existing token");
       }
       return token;
     },
     async session({ session, token }: any) {
-      console.log("session callback", {
-        hasToken: !!token,
-        tokenId: token?.id,
-      });
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
@@ -168,7 +141,6 @@ export const authOptions = {
         session.user.has_paid = token.has_paid as boolean;
         session.user.subscriptionStatus = token.subscriptionStatus as string;
         session.user.subscriptionType = token.subscriptionType as string;
-        console.log("session updated");
       }
       return session;
     },

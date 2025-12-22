@@ -1,44 +1,34 @@
-"use client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
+import { usersRepo } from "@/repositories/usersRepo";
+import { redirect } from "next/navigation";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useGlobalContext } from "@/context/GlobalContext";
+export default async function DashboardRedirect() {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    redirect("/auth/login");
+  }
 
-export default function DashboardRedirect() {
-  const router = useRouter();
-  const { user, authLoading } = useGlobalContext();
+  const user = await usersRepo.findById(session.user.id);
+  if (!user) {
+    redirect("/auth/login");
+  }
 
-  useEffect(() => {
-    if (authLoading) return;
+  if (user.role === "admin") {
+    redirect("/admin/dashboard");
+  }
 
-    if (user) {
-      if (user.role === "admin") {
-        router.replace("/admin/dashboard");
-        return;
-      }
+  if (user.role === "affiliate") {
+    redirect("/dashboard/affiliate");
+  }
 
-      if (user.role === "affiliate") {
-        router.replace("/dashboard/affiliate");
-        return;
-      }
-
-      // Check onboarding for clients
-      if (user.role === "client" && !user.onboarded) {
-        router.replace("/onboarding/niches");
-        return;
-      }
-
-      // Default to client dashboard
-      router.replace("/dashboard/real-estate");
+  if (user.role === "client") {
+    if (!user.onboarded) {
+      redirect("/onboarding");
     }
-  }, [authLoading, user, router]);
+    redirect("/dashboard/niches");
+  }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading your dashboard...</p>
-      </div>
-    </div>
-  );
+  // Fallback
+  redirect("/auth/login");
 }

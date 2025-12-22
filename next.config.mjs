@@ -1,3 +1,5 @@
+import "source-map-support/register.js";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {

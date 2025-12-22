@@ -30,3 +30,10 @@ class Logger {
 }
 
 export const logger = new Logger();
+
+// Monkey-patch console.error for global tracking
+const originalConsoleError = console.error;
+console.error = (...args: any[]) => {
+  const stack = new Error().stack?.split("\n")[2]; // the caller
+  originalConsoleError(`[LOGGING] ${stack}`, ...args);
+};

@@ -104,33 +104,28 @@ export default function AffiliateDashboardClient({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (user && user.role === "affiliate") {
-      // Subscribe to real-time updates
-      const channel = pusherClient.subscribe(`affiliate-${user.id}`);
-      channel.bind("commission-earned", (data: any) => {
-        console.log("Commission earned:", data);
-        // Update stats in real-time
-        setStats((prevStats) => {
-          if (!prevStats) return prevStats;
-          return {
-            ...prevStats,
-            totalEarnings: prevStats.totalEarnings + data.commissionAmount,
-            availableBalance:
-              prevStats.availableBalance + data.commissionAmount,
-            convertedReferrals: prevStats.convertedReferrals + 1,
-          };
-        });
-        // Refresh data to get accurate counts
-        fetchAffiliateData();
+    if (!user || user.role !== "affiliate") return; // early return
+
+    // Subscribe to real-time updates
+    const channel = pusherClient.subscribe(`affiliate-${user.id}`);
+    channel.bind("commission-earned", (data: any) => {
+      setStats((prevStats) => {
+        if (!prevStats) return prevStats;
+        return {
+          ...prevStats,
+          totalEarnings: prevStats.totalEarnings + data.commissionAmount,
+          availableBalance: prevStats.availableBalance + data.commissionAmount,
+          convertedReferrals: prevStats.convertedReferrals + 1,
+        };
       });
 
-      return () => {
-        pusherClient.unsubscribe(`affiliate-${user.id}`);
-      };
-    } else if (user && user.role !== "affiliate") {
-      window.location.href = "/dashboard";
-    }
-  }, [user]);
+      fetchAffiliateData();
+    });
+
+    return () => {
+      pusherClient.unsubscribe(`affiliate-${user.id}`);
+    };
+  }, [user?.id]);
 
   const fetchAffiliateData = async () => {
     try {
@@ -307,12 +302,6 @@ ClintonStack handles the technical side while you focus on selling properties.`;
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 mr-4"
-              >
-                <Menu size={20} />
-              </button>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                   Affiliate Dashboard

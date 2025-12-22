@@ -25,10 +25,24 @@ export class AffiliatesRepository {
         status: data.status || "active",
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
         referrals: {
           include: {
-            referredUser: true,
+            referredUser: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         commissions: true,
@@ -41,10 +55,24 @@ export class AffiliatesRepository {
     return await prisma.affiliate.findUnique({
       where: { id },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
         referrals: {
           include: {
-            referredUser: true,
+            referredUser: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         commissions: {
@@ -61,10 +89,24 @@ export class AffiliatesRepository {
     return await prisma.affiliate.findUnique({
       where: { userId },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
         referrals: {
           include: {
-            referredUser: true,
+            referredUser: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         commissions: {
@@ -82,7 +124,16 @@ export class AffiliatesRepository {
       where: { id },
       data,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
       },
     });
   }
@@ -107,7 +158,16 @@ export class AffiliatesRepository {
     return await prisma.affiliate.findMany({
       where: status ? { status } : undefined,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
         _count: {
           select: {
             referrals: true,
@@ -165,7 +225,16 @@ export class AffiliatesRepository {
   async getLeaderboard(limit: number = 10) {
     const affiliates = await prisma.affiliate.findMany({
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            role: true,
+            referralCode: true,
+          },
+        },
         _count: {
           select: {
             referrals: true,

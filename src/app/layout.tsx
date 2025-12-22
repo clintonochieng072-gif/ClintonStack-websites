@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import GlobalErrorHandler from "@/components/GlobalErrorHandler";
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -37,7 +39,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <GlobalErrorHandler />
+        <ErrorBoundary>
+          <Providers>{children}</Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

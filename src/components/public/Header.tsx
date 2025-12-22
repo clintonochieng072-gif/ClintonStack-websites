@@ -4,6 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 
 interface HeaderProps {
   site: any;
@@ -19,6 +20,7 @@ export default function Header({ site }: HeaderProps) {
   const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
   const [activeSection, setActiveSection] = useState("home");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
@@ -31,7 +33,13 @@ export default function Header({ site }: HeaderProps) {
   // Track active section on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["home", "properties", "about", "testimonials", "contact"];
+      const sections = [
+        "home",
+        "properties",
+        "about",
+        "testimonials",
+        "contact",
+      ];
       const scrollPosition = window.scrollY + 100;
 
       for (const section of sections) {
@@ -97,8 +105,8 @@ export default function Header({ site }: HeaderProps) {
               </div>
             </div>
 
-            {/* Navigation Tabs - Always visible horizontally */}
-            <nav className="flex items-center space-x-4 lg:space-x-8">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-4 lg:space-x-8">
               <button
                 onClick={() => scrollToSection("home")}
                 className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
@@ -151,8 +159,89 @@ export default function Header({ site }: HeaderProps) {
               </button>
             </nav>
 
+            {/* Mobile Hamburger */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200">
+            <nav className="flex flex-col space-y-2 px-6 py-4">
+              <button
+                onClick={() => {
+                  scrollToSection("home");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                  activeSection === "home"
+                    ? "text-blue-600"
+                    : ""
+                }`}
+              >
+                Home
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("properties");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                  activeSection === "properties"
+                    ? "text-blue-600"
+                    : ""
+                }`}
+              >
+                Properties
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("about");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                  activeSection === "about"
+                    ? "text-blue-600"
+                    : ""
+                }`}
+              >
+                About
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("testimonials");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                  activeSection === "testimonials"
+                    ? "text-blue-600"
+                    : ""
+                }`}
+              >
+                Testimonials
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("contact");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                  activeSection === "contact"
+                    ? "text-blue-600"
+                    : ""
+                }`}
+              >
+                Contact
+              </button>
+            </nav>
+          </div>
+        )}
 
       </header>
     </>

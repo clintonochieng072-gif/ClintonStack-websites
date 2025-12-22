@@ -47,7 +47,12 @@ export class ReferralsRepository {
             user: true,
           },
         },
-        referredUser: true,
+        referredUser: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -67,7 +72,12 @@ export class ReferralsRepository {
             user: true,
           },
         },
-        referredUser: true,
+        referredUser: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -83,7 +93,12 @@ export class ReferralsRepository {
             user: true,
           },
         },
-        referredUser: true,
+        referredUser: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -112,7 +127,12 @@ export class ReferralsRepository {
         ...(status && { status }),
       },
       include: {
-        referredUser: true,
+        referredUser: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
       take: limit,
       skip: offset,
@@ -122,9 +142,25 @@ export class ReferralsRepository {
 
   // Convert referral (mark as converted)
   async convertReferral(id: string) {
-    return await this.update(id, {
-      status: "converted",
-      conversionTimestamp: new Date(),
+    return await prisma.referral.update({
+      where: { id },
+      data: {
+        status: "converted",
+        conversionTimestamp: new Date(),
+      },
+      include: {
+        affiliate: {
+          include: {
+            user: true,
+          },
+        },
+        referredUser: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
   }
 

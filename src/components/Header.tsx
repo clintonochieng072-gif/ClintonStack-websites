@@ -151,7 +151,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
               variant="outline"
               size="sm"
               onClick={handlePreview}
-              disabled={!site}
               className="px-3 py-2 text-sm font-medium"
             >
               Preview
@@ -160,8 +159,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
               variant="default"
               size="sm"
               onClick={handlePublish}
-              disabled={publishing || !site}
               className="px-3 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700"
+              disabled={publishing}
             >
               {publishing ? "Publishing..." : "Publish"}
             </Button>
@@ -174,7 +173,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 variant="outline"
                 className="px-8 py-4 text-lg font-medium hover:bg-gray-50 border-2"
                 onClick={handlePreview}
-                disabled={!site}
               >
                 Preview
               </Button>
@@ -187,7 +185,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 variant="default"
                 className="px-8 py-4 text-lg font-medium bg-blue-600 hover:bg-blue-700"
                 onClick={handlePublish}
-                disabled={publishing || !site}
+                disabled={publishing}
               >
                 {publishing ? "Publishing..." : "Publish"}
               </Button>

@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Globe, Clock, Calendar } from "lucide-react";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function PublishSettingsPage() {
+  const { user } = useGlobalContext();
   const { data: siteData, mutate: mutateSite } = useSWR(
     "/api/site/me",
     fetcher
@@ -31,6 +33,7 @@ export default function PublishSettingsPage() {
   const site = siteData?.data;
   const isPublished = site?.published;
   const schedule = scheduleData?.data;
+  const userHasPaid = user?.has_paid || user?.role === "admin" || user?.email === "clintonochieng072@gmail.com";
 
   useEffect(() => {
     if (schedule) {
@@ -78,7 +81,7 @@ export default function PublishSettingsPage() {
         </p>
       </div>
 
-      {isPublished && site?.slug && (
+      {isPublished && site?.slug && userHasPaid && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -104,6 +107,24 @@ export default function PublishSettingsPage() {
               Use the View Public Site button in your dashboard to access your
               live website.
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {isPublished && site?.slug && !userHasPaid && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Globe className="w-5 h-5" />
+              <span>Live Website</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-md">
+              <p className="text-sm text-gray-800">
+                Publish your site to get the live link
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

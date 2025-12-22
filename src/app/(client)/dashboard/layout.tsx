@@ -31,18 +31,14 @@ export default function DashboardLayout({
         </div>
       )}
 
-      {/* Persistent Hamburger */}
-      <div className="fixed left-0 top-16 z-60 bg-white border-r border-gray-200">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 m-2 rounded-lg hover:bg-gray-100"
-        >
-          <Menu size={20} />
-        </button>
-      </div>
-
       {/* Main content */}
-      <main className="mt-16 p-4 sm:p-6 lg:p-8">{children}</main>
+      <main className="mt-16 p-4 sm:p-6 lg:p-8">
+        {(() => {
+          console.log("dashboard layout main rendered with mt-16");
+          return null;
+        })()}
+        {children}
+      </main>
 
       {/* Floating support buttons - Admin only on real-estate dashboard */}
       {pathname === "/dashboard/real-estate" && (

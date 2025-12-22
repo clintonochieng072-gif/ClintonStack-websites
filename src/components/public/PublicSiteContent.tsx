@@ -69,8 +69,7 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
   });
 
   // Debug logging
-  console.log("PublicSiteContent - Site data:", site);
-  console.log("PublicSiteContent - Blocks:", blocks);
+  console.log("PublicSiteContent - Site loaded");
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -257,7 +256,8 @@ function FeaturedProperties({ site }: { site: Site }) {
                     )}
                     {property.propertyType && (
                       <div className="text-sm text-gray-600 capitalize">
-                        Type: {property.propertyType.replace(/-/g, " ")}
+                        Type:{" "}
+                        {String(property.propertyType).split("-").join(" ")}
                       </div>
                     )}
                   </div>
@@ -272,13 +272,17 @@ function FeaturedProperties({ site }: { site: Site }) {
                   {/* Price and Status */}
                   <div className="flex items-center justify-between">
                     <span className="text-3xl font-bold text-blue-600">
-                      KES {property.price?.toLocaleString()}
+                      KES{" "}
+                      {property.price
+                        ? Number(property.price).toLocaleString()
+                        : "0"}
                     </span>
                     <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
-                      {property.status?.replace("-", " ")}
+                      {property.status
+                        ? String(property.status).split("-").join(" ")
+                        : "Unknown"}
                     </span>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -513,7 +517,9 @@ function PropertiesBlock({ data }: { data: any }) {
                     ${property.price}
                   </span>
                   <span className="text-sm text-gray-500 capitalize">
-                    {property.status?.replace("-", " ")}
+                    {property.status
+                      ? String(property.status).split("-").join(" ")
+                      : "Unknown"}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
