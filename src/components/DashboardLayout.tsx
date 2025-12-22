@@ -41,16 +41,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       )}
 
-      {/* Header - Only show on non-onboarding pages */}
-      {!isOnboardingPage && (
+      {/* Header - Only show on /dashboard/real-estate */}
+      {pathname === "/dashboard/real-estate" && (
         <>
           <Header />
           {console.log("Header rendered")}
         </>
       )}
 
-      {/* Persistent Hamburger - Only show on non-onboarding pages */}
-      {!isOnboardingPage &&
+      {/* Persistent Hamburger - Only show on /dashboard/real-estate */}
+      {pathname === "/dashboard/real-estate" &&
         pathname &&
         !pathname.includes("/edit/settings/publish") &&
         !pathname.includes("/preview") && (
@@ -70,7 +70,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <main
         className={`lg:ml-64 ${
-          pathname === "/dashboard/real-estate" ? "pt-0" : "pt-16"
+          pathname === "/dashboard/real-estate" ||
+          pathname?.includes("/preview")
+            ? "pt-0"
+            : "pt-16"
         } mt-0 p-4 sm:p-6 lg:p-8`}
       >
         {children}

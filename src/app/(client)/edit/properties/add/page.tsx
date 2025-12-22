@@ -21,13 +21,11 @@ function AddPropertyPageContent() {
   const { site } = useSite();
 
   // Fetch categories from the categories API
-  const { data: categories } = useSWR(
-    "/api/category",
-    (url: string) =>
-      fetch(url, {
-        cache: "no-store",
-        headers: getAuthHeaders(),
-      }).then((r) => r.json())
+  const { data: categories } = useSWR("/api/category", (url: string) =>
+    fetch(url, {
+      cache: "no-store",
+      headers: getAuthHeaders(),
+    }).then((r) => r.json())
   );
 
   // Helper function to convert property type value back to display name
@@ -51,7 +49,6 @@ function AddPropertyPageContent() {
     images: [] as string[],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   useEffect(() => {
     if (isEditing && site) {
@@ -111,6 +108,7 @@ function AddPropertyPageContent() {
 
       propertiesBlock.data.properties = propertiesBlock.data.properties || [];
 
+      let newProperty: any;
       if (isEditing) {
         // Update existing property
         const index = propertiesBlock.data.properties.findIndex(
@@ -121,16 +119,30 @@ function AddPropertyPageContent() {
             ...propertiesBlock.data.properties[index],
             ...formData,
           };
+          newProperty = propertiesBlock.data.properties[index];
         }
       } else {
         // Add new property with ID
-        const newProperty = {
+        newProperty = {
           ...formData,
           id: Date.now().toString(), // Simple ID generation
           createdAt: new Date().toISOString(),
         };
         propertiesBlock.data.properties.push(newProperty);
       }
+
+      // Optimistic update: update SWR cache immediately
+      mutate(
+        "/api/site/me",
+        (currentData: any) => {
+          if (!currentData?.data) return currentData;
+          const updatedSite = { ...currentData.data };
+          updatedSite.userWebsite = { ...updatedSite.userWebsite };
+          updatedSite.userWebsite.draft = draftData;
+          return { ...currentData, data: updatedSite };
+        },
+        false
+      ); // false = don't revalidate immediately
 
       // Update site draft
       const updateRes = await fetch(`/api/site/${siteId}`, {
@@ -143,15 +155,18 @@ function AddPropertyPageContent() {
 
       if (!updateRes.ok) {
         const error = await updateRes.json();
+        // Revert optimistic update on failure
+        mutate("/api/site/me");
         alert(`Failed to save property: ${error.error || "Unknown error"}`);
         return;
       }
 
-      // Success - update SWR cache and stay on page
-      mutate("/api/site/me");
+      // Success - property is already shown optimistically
       alert("Property saved successfully!");
     } catch (error) {
       console.error("Save error:", error);
+      // Revert optimistic update on error
+      mutate("/api/site/me");
       alert("Failed to save property. Please try again.");
     }
     setIsSubmitting(false);
@@ -389,7 +404,7 @@ function AddPropertyPageContent() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-blue-600 hover:bg-blue-700 transition-all px-8 py-3 ${
+              className={`bg-blue-600 hover:bg-blue-700 transition-all px-8 py-3 min-h-[44px] ${
                 isSubmitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >

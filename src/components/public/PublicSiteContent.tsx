@@ -1,11 +1,16 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import Header from "./Header";
 import Footer from "./Footer";
 import Hero from "./Hero";
 import FloatingButtons from "./FloatingButtons";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
+
+const FeaturedProperties = dynamic(() => import("./FeaturedProperties"), {
+  ssr: false,
+});
 
 interface Block {
   type: string;
@@ -72,7 +77,7 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
   console.log("PublicSiteContent - Site loaded");
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Website Header */}
       <Header site={site} />
 
@@ -175,124 +180,6 @@ function TrustBadges() {
   );
 }
 
-function FeaturedProperties({ site }: { site: Site }) {
-  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
-  const isPreview = !site.publishedWebsite?.data;
-  const siteData = isPreview
-    ? site.userWebsite?.data
-    : site.publishedWebsite?.data;
-
-  // Get featured properties from the site's properties block
-  const propertiesBlock = siteData?.blocks?.find(
-    (b: any) => b.type === "properties"
-  );
-  const allProperties = propertiesBlock?.data?.properties || [];
-  const featuredProperties = allProperties.slice(0, 3); // Show first 3 as featured
-
-  if (featuredProperties.length === 0) return null;
-
-  return (
-    <section id="properties" className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Featured Properties
-          </h2>
-          <p className="text-xl text-gray-600">
-            Handpicked premium listings just for you
-          </p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          {featuredProperties.map((property: any, index: number) => (
-            <div
-              key={property._id || property.id || index}
-              className="group cursor-pointer"
-              onClick={() => {
-                // Scroll to contact section for inquiries
-                const contactElement = document.getElementById("contact");
-                if (contactElement) {
-                  contactElement.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-            >
-              <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                {property.images && property.images.length > 0 && (
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={property.images[0]}
-                      alt={property.title}
-                      className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      Featured
-                    </div>
-                  </div>
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {property.title}
-                  </h3>
-                  <p className="text-gray-600 mb-3 flex items-center">
-                    <span className="text-lg mr-1">📍</span>
-                    {property.location}
-                  </p>
-
-                  {/* Features Section - Vertical List */}
-                  <div className="mb-4 space-y-1">
-                    {property.bedrooms && (
-                      <div className="text-sm text-gray-600">
-                        Beds: {property.bedrooms}
-                      </div>
-                    )}
-                    {property.bathrooms && (
-                      <div className="text-sm text-gray-600">
-                        Bathrooms: {property.bathrooms}
-                      </div>
-                    )}
-                    {property.sqft && (
-                      <div className="text-sm text-gray-600">
-                        Square feet: {property.sqft} sqft
-                      </div>
-                    )}
-                    {property.propertyType && (
-                      <div className="text-sm text-gray-600 capitalize">
-                        Type:{" "}
-                        {String(property.propertyType).split("-").join(" ")}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  {property.description && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {property.description}
-                    </p>
-                  )}
-
-                  {/* Price and Status */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold text-blue-600">
-                      KES{" "}
-                      {property.price
-                        ? Number(property.price).toLocaleString()
-                        : "0"}
-                    </span>
-                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
-                      {property.status
-                        ? String(property.status).split("-").join(" ")
-                        : "Unknown"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Neighborhoods() {
   const neighborhoods = [
     {
@@ -329,7 +216,7 @@ function Neighborhoods() {
 
   return (
     <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-full mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Explore Neighborhoods
@@ -338,7 +225,7 @@ function Neighborhoods() {
             Find your perfect location across Kenya
           </p>
         </div>
-        <div className="grid md:grid-cols-5 gap-6">
+        <div className="grid md:grid-cols-5 gap-6 overflow-x-auto">
           {neighborhoods.map((neighborhood, index) => (
             <div
               key={index}
@@ -380,9 +267,9 @@ function ServicesBlock({ data }: { data: any }) {
 
   return (
     <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-full mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto">
           {services.map((service: any, index: number) => (
             <div key={index} className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-3">{service.title}</h3>
@@ -403,9 +290,9 @@ function GalleryBlock({ data }: { data: any }) {
 
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-full mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Gallery</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 overflow-x-auto">
           {images.map((image: string, index: number) => (
             <img
               key={index}
@@ -425,9 +312,9 @@ function TestimonialsBlock({ data }: { data: any }) {
 
   return (
     <section id="testimonials" className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-full mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Testimonials</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto">
           {testimonials.map((testimonial: any, index: number) => (
             <div key={index} className="bg-white p-6 rounded-lg shadow-md">
               <p className="text-gray-600 mb-4">"{testimonial.text}"</p>
@@ -541,9 +428,9 @@ function PricingBlock({ data }: { data: any }) {
 
   return (
     <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-full mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Pricing Plans</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 overflow-x-auto">
           {plans.map((plan: any, index: number) => (
             <div
               key={index}

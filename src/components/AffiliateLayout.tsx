@@ -35,6 +35,16 @@ export default function AffiliateLayout({ children }: AffiliateLayoutProps) {
         </div>
       )}
 
+      {/* Persistent Hamburger */}
+      <div className="fixed left-0 top-8 z-60 bg-white border-r border-gray-200 lg:hidden">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 m-2 rounded-lg hover:bg-gray-100"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+
       {/* Main content */}
       <main className="lg:ml-64 p-4 sm:p-6 lg:p-8">{children}</main>
     </div>

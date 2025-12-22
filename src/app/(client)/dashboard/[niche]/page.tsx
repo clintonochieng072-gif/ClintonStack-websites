@@ -19,6 +19,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { getAuthHeaders } from "@/lib/utils";
 import { useGlobalContext } from "@/context/GlobalContext";
 import AdminMiniPanel from "@/components/AdminMiniPanel";
@@ -36,6 +37,7 @@ export default function NicheDashboardPage() {
   const [site, setSite] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [forceRender, setForceRender] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   // Only allow real-estate niche to have a dashboard
   const allowedNiches = ["real-estate"];
@@ -65,6 +67,27 @@ export default function NicheDashboardPage() {
       }
     }
   }, [siteData, niche, router]);
+
+  // Fetch recent activity
+  useEffect(() => {
+    const fetchActivity = async () => {
+      try {
+        const response = await fetch(`/api/recent-activity?niche=${niche}`, {
+          headers: getAuthHeaders(),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setRecentActivity(data);
+        }
+      } catch (error) {
+        console.error("Error fetching recent activity:", error);
+      }
+    };
+
+    fetchActivity();
+    const interval = setInterval(fetchActivity, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
+  }, [niche]);
 
   // Show "Coming Soon" for niches that don't have dashboards yet
   if (!allowedNiches.includes(niche)) {
@@ -163,7 +186,7 @@ export default function NicheDashboardPage() {
               Manage your {niche} website and track your success
             </p>
             <div className="flex flex-col gap-4">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={() => router.push("/edit")}
                   className="bg-blue-600 hover:bg-blue-700"
@@ -305,6 +328,92 @@ export default function NicheDashboardPage() {
           </motion.div>
         </div>
 
+        {/* Properties Section */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Your Properties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {site ? (
+              (() => {
+                const propertiesBlock = site.userWebsite?.draft?.blocks?.find(
+                  (b: any) => b.type === "properties"
+                );
+                const properties = propertiesBlock?.data?.properties || [];
+
+                return properties.length > 0 ? (
+                  <div className="space-y-4">
+                    {properties
+                      .slice(0, 5)
+                      .map((property: any, index: number) => (
+                        <div
+                          key={property._id || property.id || index}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            {property.images && property.images.length > 0 && (
+                              <Image
+                                src={property.images[0]}
+                                alt={property.title}
+                                width={48}
+                                height={48}
+                                className="w-12 h-12 object-cover rounded-md"
+                                loading="lazy"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{property.title}</p>
+                              <p className="text-sm text-gray-600">
+                                {property.location}
+                              </p>
+                              <p className="text-sm font-semibold text-blue-600">
+                                KES {property.price?.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => router.push("/edit/properties")}
+                            variant="outline"
+                            size="sm"
+                          >
+                            View All
+                          </Button>
+                        </div>
+                      ))}
+                    {properties.length > 5 && (
+                      <div className="text-center pt-4">
+                        <Button
+                          onClick={() => router.push("/edit/properties")}
+                          variant="outline"
+                        >
+                          View All Properties ({properties.length})
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 mb-4">
+                      No properties added yet
+                    </p>
+                    <Button
+                      onClick={() => router.push("/edit/properties/add")}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Your First Property
+                    </Button>
+                  </div>
+                );
+              })()
+            ) : (
+              <p className="text-gray-500 text-center py-4">
+                Loading properties...
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Recent Activity */}
         <Card className="shadow-lg">
           <CardHeader>
@@ -312,27 +421,29 @@ export default function NicheDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Mock data - replace with real leads */}
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">John Doe</p>
-                  <p className="text-sm text-gray-600">john@example.com</p>
-                  <p className="text-sm text-gray-500">
-                    Interested in your services
-                  </p>
-                </div>
-                <span className="text-sm text-gray-500">2 hours ago</span>
-              </div>
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">Jane Smith</p>
-                  <p className="text-sm text-gray-600">jane@example.com</p>
-                  <p className="text-sm text-gray-500">
-                    Great work on the website!
-                  </p>
-                </div>
-                <span className="text-sm text-gray-500">1 day ago</span>
-              </div>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity: any, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">{activity.name}</p>
+                      <p className="text-sm text-gray-600">{activity.email}</p>
+                      <p className="text-sm text-gray-500">
+                        {activity.message}
+                      </p>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {activity.time}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">
+                  No recent activity
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

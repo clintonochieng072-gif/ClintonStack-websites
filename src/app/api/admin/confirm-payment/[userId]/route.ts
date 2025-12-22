@@ -4,6 +4,8 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { Notification } from "@/lib/models/Notification";
 import { getUserFromToken } from "@/lib/auth";
+import { usersRepo } from "@/repositories/usersRepo";
+import { pusherServer } from "@/lib/pusher";
 
 const isAdmin = (user: any) => user.email === "clintonochieng072@gmail.com";
 
@@ -40,6 +42,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         },
       }
     );
+
+    // Also update PostgreSQL user
+    const pgUser = await usersRepo.findByEmail(targetUser.email);
+    if (pgUser) {
+      await usersRepo.update(pgUser.id, { has_paid: true });
+
+      // Trigger real-time update for the user
+      await pusherServer.trigger(`user-${pgUser.id}`, "payment-approved", {});
+    }
 
     // Create notification for the user
     await Notification.create({

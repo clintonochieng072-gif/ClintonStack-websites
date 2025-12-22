@@ -50,6 +50,60 @@ async function removeUsers() {
     });
     console.log(`Users to delete: ${usersToDelete}`);
 
+    // Delete referrals for users to be deleted
+    await prisma.referral.deleteMany({
+      where: {
+        referredUserId: {
+          not: admin.id,
+        },
+      },
+    });
+
+    // Delete payments for users to be deleted
+    await prisma.payment.deleteMany({
+      where: {
+        userId: {
+          not: admin.id,
+        },
+      },
+    });
+
+    // Delete subscriptions for users to be deleted
+    await prisma.subscription.deleteMany({
+      where: {
+        userId: {
+          not: admin.id,
+        },
+      },
+    });
+
+    // Delete withdrawal requests for users to be deleted
+    await prisma.withdrawalRequest.deleteMany({
+      where: {
+        userId: {
+          not: admin.id,
+        },
+      },
+    });
+
+    // Delete notifications for users to be deleted
+    await prisma.notification.deleteMany({
+      where: {
+        userId: {
+          not: admin.id,
+        },
+      },
+    });
+
+    // Delete audit logs for users to be deleted
+    await prisma.auditLog.deleteMany({
+      where: {
+        userId: {
+          not: admin.id,
+        },
+      },
+    });
+
     // Delete all users except admin
     // Due to cascade deletes, related records will be deleted automatically
     const result = await prisma.user.deleteMany({

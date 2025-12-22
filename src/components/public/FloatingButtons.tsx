@@ -8,7 +8,10 @@ interface FloatingButtonsProps {
   whatsappNumber?: string;
 }
 
-export default function FloatingButtons({ phoneNumber, whatsappNumber }: FloatingButtonsProps) {
+export default function FloatingButtons({
+  phoneNumber,
+  whatsappNumber,
+}: FloatingButtonsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handlePhoneClick = () => {
@@ -20,16 +23,16 @@ export default function FloatingButtons({ phoneNumber, whatsappNumber }: Floatin
 
   const handleWhatsAppClick = () => {
     if (whatsappNumber) {
-      const cleanNumber = whatsappNumber.replace(/\D/g, '');
+      const cleanNumber = whatsappNumber.replace(/\D/g, "");
       const whatsappUrl = `https://wa.me/${cleanNumber}`;
-      window.open(whatsappUrl, '_blank');
+      window.open(whatsappUrl, "_blank");
     }
     setIsOpen(false);
   };
 
   const handleHelpClick = () => {
     // Assume help center link
-    window.open('/help', '_blank');
+    window.open("/help", "_blank");
     setIsOpen(false);
   };
 
@@ -72,7 +75,11 @@ export default function FloatingButtons({ phoneNumber, whatsappNumber }: Floatin
         className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
         aria-label="Support options"
       >
-        {isOpen ? <ChevronUp className="w-6 h-6" /> : <HelpCircle className="w-6 h-6" />}
+        {isOpen ? (
+          <ChevronUp className="w-6 h-6" />
+        ) : (
+          <Phone className="w-6 h-6" />
+        )}
       </button>
     </div>
   );
