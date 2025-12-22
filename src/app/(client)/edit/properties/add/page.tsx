@@ -18,7 +18,7 @@ function AddPropertyPageContent() {
   const searchParams = useSearchParams();
   const editId = searchParams?.get("id") || null;
   const isEditing = !!editId;
-  const { site } = useSite();
+  const { site, loading: siteLoading, error: siteError } = useSite();
 
   // Fetch categories from the categories API
   const { data: categories } = useSWR("/api/category", (url: string) =>
@@ -82,7 +82,7 @@ function AddPropertyPageContent() {
     e.preventDefault();
 
     if (!site) {
-      alert("Site data not available");
+      alert("Site data not loaded yet. Please wait.");
       return;
     }
 
@@ -193,6 +193,32 @@ function AddPropertyPageContent() {
       images: prev.images.filter((_, i) => i !== index),
     }));
   };
+
+  if (siteLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading site data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (siteError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading Site
+          </h1>
+          <p className="text-gray-600">
+            Please check your connection and try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -403,9 +429,11 @@ function AddPropertyPageContent() {
           <motion.div whileTap={{ scale: 0.96 }}>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || siteLoading}
               className={`bg-blue-600 hover:bg-blue-700 transition-all px-8 py-3 min-h-[44px] ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                isSubmitting || siteLoading
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
             >
               {isSubmitting ? (
