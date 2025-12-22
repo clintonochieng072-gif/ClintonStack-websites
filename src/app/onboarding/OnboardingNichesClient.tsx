@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getAuthHeaders } from "@/lib/utils";
+import Spinner from "@/components/Spinner";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -100,6 +101,7 @@ export default function OnboardingNichesClient() {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedNiche, setSelectedNiche] = useState<string>("");
+  const [creatingNiche, setCreatingNiche] = useState<string | null>(null);
 
   useEffect(() => {
     if (sitesData) {
@@ -122,6 +124,7 @@ export default function OnboardingNichesClient() {
       router.push(`/dashboard/${nicheId}`);
     } else {
       // Create new site
+      setCreatingNiche(nicheId);
       try {
         const response = await fetch("/api/site", {
           method: "POST",
@@ -149,6 +152,8 @@ export default function OnboardingNichesClient() {
         }
       } catch (error) {
         console.error("Error creating site:", error);
+      } finally {
+        setCreatingNiche(null);
       }
     }
   };
@@ -209,8 +214,18 @@ export default function OnboardingNichesClient() {
                 transition={{ duration: 0.5, delay: 0.1 * index }}
               >
                 <Card
-                  className={`${niche.color} border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group`}
-                  onClick={() => handleNicheSelect(niche.id)}
+                  className={`${
+                    niche.color
+                  } border-0 shadow-lg hover:shadow-xl transition-all ${
+                    creatingNiche === niche.id
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  } group`}
+                  onClick={() =>
+                    creatingNiche === niche.id
+                      ? null
+                      : handleNicheSelect(niche.id)
+                  }
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -233,8 +248,14 @@ export default function OnboardingNichesClient() {
                     <Button
                       className="w-full group-hover:bg-opacity-90 transition-colors"
                       variant={hasSite ? "outline" : "default"}
+                      disabled={creatingNiche === niche.id}
                     >
-                      {hasSite ? (
+                      {creatingNiche === niche.id ? (
+                        <>
+                          <Spinner size="w-4 h-4" />
+                          Creating...
+                        </>
+                      ) : hasSite ? (
                         <>
                           Continue
                           <ArrowRight className="w-4 h-4 ml-2" />

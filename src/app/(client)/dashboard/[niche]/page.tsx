@@ -23,6 +23,7 @@ import Image from "next/image";
 import { getAuthHeaders } from "@/lib/utils";
 import { useGlobalContext } from "@/context/GlobalContext";
 import AdminMiniPanel from "@/components/AdminMiniPanel";
+import Spinner from "@/components/Spinner";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -36,6 +37,7 @@ export default function NicheDashboardPage() {
   const { data: siteData, error } = useSWR("/api/site/me", fetcher);
   const [site, setSite] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [copyLoading, setCopyLoading] = useState(false);
   const [forceRender, setForceRender] = useState(false);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
@@ -135,9 +137,11 @@ export default function NicheDashboardPage() {
       alert("You need to publish the site to view this page.");
       return;
     }
+    setCopyLoading(true);
     const publicURL = site ? `${window.location.origin}/site/${site.slug}` : "";
     await navigator.clipboard.writeText(publicURL);
     setCopied(true);
+    setCopyLoading(false);
     setTimeout(() => setCopied(false), 1500);
   };
 
@@ -238,10 +242,10 @@ export default function NicheDashboardPage() {
                       onClick={copyToClipboard}
                       variant="outline"
                       className="flex items-center gap-2 rounded-xl"
-                      disabled={!user?.has_paid}
+                      disabled={!user?.has_paid || copyLoading}
                     >
-                      {copied ? <Check size={18} /> : <Copy size={18} />}
-                      {copied ? "Copied" : "Copy"}
+                      {copyLoading ? <Spinner size="w-4 h-4" /> : copied ? <Check size={18} /> : <Copy size={18} />}
+                      {copyLoading ? "Copying..." : copied ? "Copied" : "Copy"}
                     </Button>
                   </div>
                 </div>
