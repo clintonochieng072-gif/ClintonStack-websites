@@ -14,6 +14,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  console.log("DashboardLayout rendered for pathname:", pathname);
+
+  const isOnboardingPage = pathname === "/dashboard/niches";
+  console.log("isOnboardingPage:", isOnboardingPage);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Desktop Sidebar */}
@@ -36,21 +41,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       )}
 
-      {/* Header */}
-      <Header />
+      {/* Header - Only show on non-onboarding pages */}
+      {!isOnboardingPage && (
+        <>
+          <Header />
+          {console.log("Header rendered")}
+        </>
+      )}
 
-      {/* Persistent Hamburger */}
-      {pathname &&
+      {/* Persistent Hamburger - Only show on non-onboarding pages */}
+      {!isOnboardingPage &&
+        pathname &&
         !pathname.includes("/edit/settings/publish") &&
         !pathname.includes("/preview") && (
-          <div className="fixed left-0 top-8 z-60 bg-white border-r border-gray-200">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 m-2 rounded-lg hover:bg-gray-100"
-            >
-              <Menu size={20} />
-            </button>
-          </div>
+          <>
+            <div className="fixed left-0 top-8 z-60 bg-white border-r border-gray-200">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 m-2 rounded-lg hover:bg-gray-100"
+              >
+                <Menu size={20} />
+              </button>
+            </div>
+            {console.log("Hamburger rendered")}
+          </>
         )}
 
       {/* Main content */}

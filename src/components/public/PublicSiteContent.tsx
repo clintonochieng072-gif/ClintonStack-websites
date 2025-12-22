@@ -135,7 +135,7 @@ function BlockRenderer({ block }: { block: Block }) {
 function TrustBadges() {
   return (
     <section className="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
-      <div className="max-w-6xl mx-auto px-6 text-center">
+      <div className="max-w-full mx-auto px-4 sm:px-6 text-center overflow-x-auto">
         <p className="text-gray-600 mb-8 text-lg">
           Trusted real estate platform used by more than 1,500 clients across
           Kenya
