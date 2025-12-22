@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getAuthHeaders, apiPost } from "@/lib/utils";
 import ManualPaymentModal from "@/components/ManualPaymentModal";
+import Spinner from "@/components/Spinner";
 
 const fetcher = (url: string) =>
   fetch(url, { headers: getAuthHeaders() }).then((r) => r.json());
@@ -57,6 +58,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
   const [site, setSite] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [localUserHasPaid, setLocalUserHasPaid] = useState<boolean | null>(
     null
@@ -83,7 +85,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   const handlePreview = () => {
     if (site?.slug) {
+      setPreviewLoading(true);
       window.open(`/preview/${site.slug}`, "_blank");
+      setTimeout(() => setPreviewLoading(false), 500);
     }
   };
 
@@ -152,8 +156,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
               size="sm"
               onClick={handlePreview}
               className="px-3 py-2 text-sm font-medium"
+              disabled={previewLoading}
             >
-              Preview
+              {previewLoading ? <Spinner size="w-3 h-3" /> : null}
+              {previewLoading ? "Opening..." : "Preview"}
             </Button>
             <Button
               variant="default"
@@ -173,8 +179,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 variant="outline"
                 className="px-8 py-4 text-lg font-medium hover:bg-gray-50 border-2"
                 onClick={handlePreview}
+                disabled={previewLoading}
               >
-                Preview
+                {previewLoading ? <Spinner size="w-4 h-4" /> : null}
+                {previewLoading ? "Opening..." : "Preview"}
               </Button>
               <span className="text-xs text-gray-500 mt-1 text-center max-w-24">
                 See how your website looks

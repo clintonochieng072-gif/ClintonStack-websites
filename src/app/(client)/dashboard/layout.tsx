@@ -41,7 +41,7 @@ export default function DashboardLayout({
       </main>
 
       {/* Floating support buttons - Admin only on real-estate dashboard */}
-      {pathname === "/dashboard/real-estate" && (
+      {pathname && pathname.startsWith("/dashboard/real-estate") && (
         <FloatingButtons
           phoneNumber="+254768524480"
           whatsappNumber="+254768524480"

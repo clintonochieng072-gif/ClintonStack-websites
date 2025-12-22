@@ -94,8 +94,8 @@ export const defaultHomeContent = {
   // Contact section
   contact: {
     email: "info@realestatekenya.com",
-    phone: "+254 700 123 456",
-    address: "123 Real Estate Avenue, Nairobi, Kenya",
+    phone: "",
+    address: "",
   },
 
   // Gallery section

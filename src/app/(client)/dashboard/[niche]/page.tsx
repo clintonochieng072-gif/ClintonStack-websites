@@ -40,6 +40,11 @@ export default function NicheDashboardPage() {
   const [copyLoading, setCopyLoading] = useState(false);
   const [forceRender, setForceRender] = useState(false);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [editLoading, setEditLoading] = useState(false);
+  const [addPropertyLoading, setAddPropertyLoading] = useState(false);
+  const [viewSiteLoading, setViewSiteLoading] = useState(false);
+  const [viewAllLoading, setViewAllLoading] = useState(false);
+  const [addFirstPropertyLoading, setAddFirstPropertyLoading] = useState(false);
 
   // Only allow real-estate niche to have a dashboard
   const allowedNiches = ["real-estate"];
@@ -192,35 +197,59 @@ export default function NicheDashboardPage() {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={() => router.push("/edit")}
+                  onClick={() => {
+                    setEditLoading(true);
+                    router.push("/edit");
+                    setTimeout(() => setEditLoading(false), 500);
+                  }}
                   className="bg-blue-600 hover:bg-blue-700"
+                  disabled={editLoading}
                 >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Website
+                  {editLoading ? (
+                    <Spinner size="w-4 h-4" />
+                  ) : (
+                    <Edit className="w-4 h-4 mr-2" />
+                  )}
+                  {editLoading ? "Loading..." : "Edit Website"}
                 </Button>
                 <Button
-                  onClick={() => router.push("/edit/properties/add")}
+                  onClick={() => {
+                    setAddPropertyLoading(true);
+                    router.push("/edit/properties/add");
+                    setTimeout(() => setAddPropertyLoading(false), 500);
+                  }}
                   variant="default"
+                  disabled={addPropertyLoading}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Property
+                  {addPropertyLoading ? (
+                    <Spinner size="w-4 h-4" />
+                  ) : (
+                    <Plus className="w-4 h-4 mr-2" />
+                  )}
+                  {addPropertyLoading ? "Loading..." : "Add Property"}
                 </Button>
                 <Button
                   onClick={() => {
                     if (user?.has_paid) {
+                      setViewSiteLoading(true);
                       window.open(
                         `${window.location.origin}/site/${site.slug}`,
                         "_blank"
                       );
+                      setTimeout(() => setViewSiteLoading(false), 500);
                     } else {
                       alert("You need to publish the site to view this page.");
                     }
                   }}
                   variant="outline"
-                  disabled={!site?.published}
+                  disabled={!site?.published || viewSiteLoading}
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Public Site
+                  {viewSiteLoading ? (
+                    <Spinner size="w-4 h-4" />
+                  ) : (
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                  )}
+                  {viewSiteLoading ? "Opening..." : "View Public Site"}
                 </Button>
               </div>
 
@@ -244,7 +273,13 @@ export default function NicheDashboardPage() {
                       className="flex items-center gap-2 rounded-xl"
                       disabled={!user?.has_paid || copyLoading}
                     >
-                      {copyLoading ? <Spinner size="w-4 h-4" /> : copied ? <Check size={18} /> : <Copy size={18} />}
+                      {copyLoading ? (
+                        <Spinner size="w-4 h-4" />
+                      ) : copied ? (
+                        <Check size={18} />
+                      ) : (
+                        <Copy size={18} />
+                      )}
                       {copyLoading ? "Copying..." : copied ? "Copied" : "Copy"}
                     </Button>
                   </div>
@@ -376,21 +411,38 @@ export default function NicheDashboardPage() {
                             </div>
                           </div>
                           <Button
-                            onClick={() => router.push("/edit/properties")}
+                            onClick={() => {
+                              setViewAllLoading(true);
+                              router.push("/edit/properties");
+                              setTimeout(() => setViewAllLoading(false), 500);
+                            }}
                             variant="outline"
                             size="sm"
+                            disabled={viewAllLoading}
                           >
-                            View All
+                            {viewAllLoading ? (
+                              <Spinner size="w-3 h-3" />
+                            ) : (
+                              "View All"
+                            )}
                           </Button>
                         </div>
                       ))}
                     {properties.length > 5 && (
                       <div className="text-center pt-4">
                         <Button
-                          onClick={() => router.push("/edit/properties")}
+                          onClick={() => {
+                            setViewAllLoading(true);
+                            router.push("/edit/properties");
+                            setTimeout(() => setViewAllLoading(false), 500);
+                          }}
                           variant="outline"
+                          disabled={viewAllLoading}
                         >
-                          View All Properties ({properties.length})
+                          {viewAllLoading ? <Spinner size="w-4 h-4" /> : null}
+                          {viewAllLoading
+                            ? "Loading..."
+                            : `View All Properties (${properties.length})`}
                         </Button>
                       </div>
                     )}
@@ -401,11 +453,25 @@ export default function NicheDashboardPage() {
                       No properties added yet
                     </p>
                     <Button
-                      onClick={() => router.push("/edit/properties/add")}
+                      onClick={() => {
+                        setAddFirstPropertyLoading(true);
+                        router.push("/edit/properties/add");
+                        setTimeout(
+                          () => setAddFirstPropertyLoading(false),
+                          500
+                        );
+                      }}
                       className="bg-blue-600 hover:bg-blue-700"
+                      disabled={addFirstPropertyLoading}
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Your First Property
+                      {addFirstPropertyLoading ? (
+                        <Spinner size="w-4 h-4" />
+                      ) : (
+                        <Plus className="w-4 h-4 mr-2" />
+                      )}
+                      {addFirstPropertyLoading
+                        ? "Loading..."
+                        : "Add Your First Property"}
                     </Button>
                   </div>
                 );
