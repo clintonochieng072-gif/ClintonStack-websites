@@ -15,8 +15,8 @@ export default function Footer({ site }: FooterProps) {
   const title = site.title || "ClintonStack";
 
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      <div className="max-w-6xl mx-auto px-6 py-16">
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
@@ -29,42 +29,42 @@ export default function Footer({ site }: FooterProps) {
                   className="rounded-lg"
                 />
               ) : (
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">👑</span>
+                <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">K</span>
                 </div>
               )}
               <div>
                 <span className="font-bold text-2xl">{title}</span>
-                <p className="text-blue-400 text-sm">Real Estate Excellence</p>
+                <p className="text-emerald-400 text-sm">Premium Real Estate</p>
               </div>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Professional real estate services to help you find your perfect
-              home. Trusted by clients worldwide with verified listings and
-              expert guidance.
+              Your trusted partner in finding exceptional properties across Kenya.
+              We combine local expertise with premium service to help you discover
+              your perfect home.
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                href="https://facebook.com/kenyaproperties"
+                className="text-gray-400 hover:text-emerald-400 transition-colors"
               >
                 <Facebook className="w-6 h-6" />
               </a>
               <a
-                href="#"
-                className="text-gray-400 hover:text-pink-400 transition-colors"
+                href="https://instagram.com/kenyaproperties"
+                className="text-gray-400 hover:text-emerald-400 transition-colors"
               >
                 <Instagram className="w-6 h-6" />
               </a>
               <a
-                href="#"
-                className="text-gray-400 hover:text-blue-300 transition-colors"
+                href="https://twitter.com/kenyaproperties"
+                className="text-gray-400 hover:text-emerald-400 transition-colors"
               >
                 <Twitter className="w-6 h-6" />
               </a>
               <a
-                href="#"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
+                href="https://linkedin.com/company/kenyaproperties"
+                className="text-gray-400 hover:text-emerald-400 transition-colors"
               >
                 <Linkedin className="w-6 h-6" />
               </a>
@@ -76,7 +76,7 @@ export default function Footer({ site }: FooterProps) {
               <li>
                 <Link
                   href="#home"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   Home
                 </Link>
@@ -84,7 +84,7 @@ export default function Footer({ site }: FooterProps) {
               <li>
                 <Link
                   href="#properties"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   Properties
                 </Link>
@@ -92,23 +92,15 @@ export default function Footer({ site }: FooterProps) {
               <li>
                 <Link
                   href="#about"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   About
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#services"
-                  className="hover:text-white transition-colors"
-                >
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="#contact"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-emerald-400 transition-colors"
                 >
                   Contact
                 </Link>
@@ -118,28 +110,33 @@ export default function Footer({ site }: FooterProps) {
           <div>
             <h3 className="font-semibold mb-6 text-lg">Contact Info</h3>
             <ul className="space-y-3 text-gray-300">
-              {site.integrations?.phoneNumber && (
-                <li className="flex items-center">
-                  <span className="mr-2">📞</span>
-                  <Link
-                    href={`tel:${site.integrations.phoneNumber}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {site.integrations.phoneNumber}
-                  </Link>
-                </li>
-              )}
-              {!site.integrations?.phoneNumber && (
-                <li className="flex items-center">
-                  <span className="mr-2">📧</span>
-                  <Link
-                    href="mailto:contact@clintonstack.com"
-                    className="hover:text-white transition-colors"
-                  >
-                    contact@clintonstack.com
-                  </Link>
-                </li>
-              )}
+              <li className="flex items-center">
+                <span className="mr-3 text-emerald-400">📞</span>
+                <Link
+                  href="tel:+254700123456"
+                  className="hover:text-emerald-400 transition-colors"
+                >
+                  +254 700 123 456
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-3 text-emerald-400">💬</span>
+                <Link
+                  href="https://wa.me/254700123456"
+                  className="hover:text-emerald-400 transition-colors"
+                >
+                  WhatsApp
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-3 text-emerald-400">📧</span>
+                <Link
+                  href="mailto:hello@kenyaproperties.com"
+                  className="hover:text-emerald-400 transition-colors"
+                >
+                  hello@kenyaproperties.com
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -147,24 +144,23 @@ export default function Footer({ site }: FooterProps) {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-center md:text-left">
               &copy; {new Date().getFullYear()} {title}. All rights reserved.
-              <span className="hidden md:inline"> • </span>
-              <span className="block md:inline mt-2 md:mt-0">
-                Powered by ClintonStack
-              </span>
             </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
+            <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <Link
                 href="#"
-                className="text-gray-400 hover:text-white transition-colors text-sm"
+                className="text-gray-400 hover:text-emerald-400 transition-colors text-sm"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="#"
-                className="text-gray-400 hover:text-white transition-colors text-sm"
+                className="text-gray-400 hover:text-emerald-400 transition-colors text-sm"
               >
                 Terms & Conditions
               </Link>
+              <span className="text-gray-500 text-xs">
+                Powered by <span className="text-emerald-400">ClintonStack</span>
+              </span>
             </div>
           </div>
         </div>

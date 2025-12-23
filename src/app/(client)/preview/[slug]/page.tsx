@@ -2,11 +2,40 @@
 "use client";
 import React, { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Head from "next/head";
-import PublicSiteContent from "@/components/public/PublicSiteContent";
-import FloatingButtons from "@/components/public/FloatingButtons";
+import dynamicImport from "next/dynamic";
+
+// Dynamically import components to avoid SSR issues
+const PublicSiteContent = dynamicImport(
+  () => import("@/components/public/PublicSiteContent"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading preview...</p>
+        </div>
+      </div>
+    ),
+  }
+);
+
+const FloatingButtons = dynamicImport(
+  () => import("@/components/public/FloatingButtons"),
+  {
+    ssr: false,
+  }
+);
+
+const Head = dynamicImport(() => import("next/head"), {
+  ssr: false,
+});
+
 import { pusherClient } from "@/lib/pusher-client";
 import { getBaseUrl, getAuthHeaders } from "@/lib/utils";
+
+// Force dynamic rendering for preview pages
+export const dynamic = 'force-dynamic';
 
 export default function PreviewSite() {
   const router = useRouter();

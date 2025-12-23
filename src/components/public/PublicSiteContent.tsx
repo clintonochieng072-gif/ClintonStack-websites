@@ -139,39 +139,90 @@ function BlockRenderer({ block }: { block: Block }) {
 
 function TrustBadges() {
   return (
-    <section className="py-12 bg-gradient-to-r from-blue-50 to-indigo-50">
-      <div className="max-w-full mx-auto px-4 sm:px-6 text-center overflow-x-auto">
-        <p className="text-gray-600 mb-8 text-lg">
-          Trusted real estate platform used by more than 1,500 clients across
-          Kenya
-        </p>
-        <div className="flex flex-wrap justify-center items-center gap-8">
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">🏠</span>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">150+</div>
-              <div className="text-sm text-gray-600">Properties</div>
+    <section className="py-16 bg-gradient-to-r from-emerald-50 to-teal-50">
+      <div className="max-w-7xl mx-auto px-6 text-center">
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Why Choose Kenya Properties?
+          </h3>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Your trusted partner in finding the perfect home across Kenya's most
+            desirable locations
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🏠</span>
             </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">500+</div>
+            <div className="text-sm text-gray-600">Verified Properties</div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">⭐</span>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">4.8/5</div>
-              <div className="text-sm text-gray-600">Rating</div>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">⭐</span>
             </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">4.9/5</div>
+            <div className="text-sm text-gray-600">Client Rating</div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">🏆</span>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">2020</div>
-              <div className="text-sm text-gray-600">Trusted Since</div>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🏆</span>
             </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">10+</div>
+            <div className="text-sm text-gray-600">Years Experience</div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">🛡️</span>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">Verified</div>
-              <div className="text-sm text-gray-600">Listings</div>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🛡️</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
+            <div className="text-sm text-gray-600">Secure Transactions</div>
+          </div>
+        </div>
+
+        {/* Agent Showcase */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
+          <h4 className="text-xl font-bold text-gray-900 mb-6">
+            Meet Our Expert Agents
+          </h4>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
+                alt="Agent"
+                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+              />
+              <div className="font-semibold text-gray-900">David Kiprop</div>
+              <div className="text-sm text-gray-600">Senior Agent</div>
+              <div className="text-xs text-emerald-600 mt-1">
+                15+ years experience
+              </div>
+            </div>
+            <div className="text-center">
+              <img
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
+                alt="Agent"
+                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+              />
+              <div className="font-semibold text-gray-900">Sarah Wanjiku</div>
+              <div className="text-sm text-gray-600">Luxury Specialist</div>
+              <div className="text-xs text-emerald-600 mt-1">
+                12+ years experience
+              </div>
+            </div>
+            <div className="text-center">
+              <img
+                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
+                alt="Agent"
+                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+              />
+              <div className="font-semibold text-gray-900">Grace Achieng</div>
+              <div className="text-sm text-gray-600">Investment Advisor</div>
+              <div className="text-xs text-emerald-600 mt-1">
+                10+ years experience
+              </div>
             </div>
           </div>
         </div>
@@ -311,14 +362,50 @@ function TestimonialsBlock({ data }: { data: any }) {
   const testimonials = data.testimonials || [];
 
   return (
-    <section id="testimonials" className="py-16 bg-gray-50">
-      <div className="max-w-full mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">Testimonials</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto">
+    <section id="testimonials" className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            What Our Clients Say
+          </h2>
+          <p className="text-xl text-gray-600">
+            Real stories from real people who found their perfect homes
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial: any, index: number) => (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-              <p className="text-gray-600 mb-4">"{testimonial.text}"</p>
-              <p className="font-semibold">{testimonial.name}</p>
+            <div
+              key={index}
+              className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="flex items-center mb-6">
+                <img
+                  src={
+                    testimonial.image ||
+                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+                  }
+                  alt={testimonial.name}
+                  className="w-12 h-12 rounded-full object-cover mr-4"
+                />
+                <div>
+                  <div className="font-bold text-gray-900">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {testimonial.location || "Kenya"}
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-yellow-400 text-lg">
+                    ★
+                  </span>
+                ))}
+              </div>
+              <p className="text-gray-600 leading-relaxed italic">
+                "{testimonial.text}"
+              </p>
             </div>
           ))}
         </div>
@@ -329,25 +416,118 @@ function TestimonialsBlock({ data }: { data: any }) {
 
 function ContactBlock({ data }: { data: any }) {
   return (
-    <section id="contact" className="py-16 bg-white">
-      <div className="max-w-4xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-8">Contact Us</h2>
-        <div className="space-y-4">
-          {data.email && (
-            <p className="text-lg">
-              <strong>Email:</strong> {data.email}
-            </p>
-          )}
-          {data.phone && (
-            <p className="text-lg">
-              <strong>Phone:</strong> {data.phone}
-            </p>
-          )}
-          {data.address && (
-            <p className="text-lg">
-              <strong>Address:</strong> {data.address}
-            </p>
-          )}
+    <section id="contact" className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Ready to Find Your Dream Home?
+          </h2>
+          <p className="text-xl text-gray-600">
+            Get in touch with our expert team today
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="space-y-8">
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📞</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Call Us
+                </h3>
+                <p className="text-gray-600 mb-1">
+                  {data.phone || "+254 700 123 456"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {data.officeHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">💬</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  WhatsApp
+                </h3>
+                <p className="text-gray-600 mb-1">
+                  {data.whatsapp || "+254 700 123 456"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Quick responses, 24/7 availability
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📧</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Email</h3>
+                <p className="text-gray-600 mb-1">
+                  {data.email || "hello@kenyaproperties.com"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  We'll respond within 2 hours
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📍</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Visit Us
+                </h3>
+                <p className="text-gray-600">
+                  {data.address || "Westlands, Nairobi, Kenya"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              Send us a Message
+            </h3>
+            <form className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
+              />
+              <textarea
+                rows={4}
+                placeholder="Tell us about your property needs..."
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none resize-none"
+              ></textarea>
+              <button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors"
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -356,21 +536,81 @@ function ContactBlock({ data }: { data: any }) {
 
 function AboutBlock({ data }: { data: any }) {
   return (
-    <section id="about" className="py-16 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-8">About Us</h2>
-        {data.profilePhoto && (
-          <div className="mb-8">
-            <img
-              src={data.profilePhoto}
-              alt="Profile"
-              className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg"
-            />
+    <section id="about" className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            {data.profilePhoto && (
+              <div className="mb-8">
+                <img
+                  src={data.profilePhoto}
+                  alt="Our Team"
+                  className="w-48 h-48 rounded-2xl mx-auto md:mx-0 object-cover shadow-2xl"
+                />
+              </div>
+            )}
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              Your Local Real Estate Experts
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed mb-6">
+              {data.content || data.description}
+            </p>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-emerald-600 mb-2">
+                  1500+
+                </div>
+                <div className="text-sm text-gray-600">Happy Families</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-emerald-600 mb-2">
+                  98%
+                </div>
+                <div className="text-sm text-gray-600">Client Satisfaction</div>
+              </div>
+            </div>
           </div>
-        )}
-        <p className="text-lg text-gray-600">
-          {data.content || data.description}
-        </p>
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Why We're Different
+              </h3>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-start">
+                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
+                  <span>
+                    Deep local market knowledge across all Kenyan cities
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
+                  <span>Personalized service tailored to your needs</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
+                  <span>Transparent pricing with no hidden fees</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
+                  <span>End-to-end support from search to settlement</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-emerald-50 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Our Promise
+              </h3>
+              <p className="text-gray-600">
+                "We don't just sell properties – we help you find your home.
+                Every client relationship is built on trust, transparency, and
+                genuine care for your real estate goals."
+              </p>
+              <div className="mt-4 text-sm text-emerald-700 font-medium">
+                - Kenya Properties Team
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

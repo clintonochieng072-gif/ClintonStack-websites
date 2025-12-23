@@ -1,39 +1,41 @@
 export const defaultHomeContent = {
   // Hero section
   hero: {
-    title: "Find Your Dream Home Today",
+    title: "Find Your Perfect Home in Kenya",
     subtitle:
-      "Professional real estate services tailored to your needs. Discover premium properties across Kenya with expert guidance.",
-    ctaText: "Browse Properties",
+      "Discover exceptional properties that match your lifestyle. From luxury villas in Nairobi to coastal retreats in Mombasa, we connect you with verified homes that feel like home.",
+    ctaText: "View Properties",
+    secondaryCtaText: "List Your Property",
     heroImage:
-      "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?ixlib=rb-4.0.3&auto=format&fit=crop&w=1632&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
   },
 
   // About section
   about: {
     content:
-      "We are a leading real estate company in Kenya, committed to helping you find the perfect property. With years of experience and a dedicated team of professionals, we provide exceptional service in buying, selling, and renting properties across Nairobi, Kisumu, Mombasa, and beyond.",
+      "With over a decade of experience in Kenya's real estate market, we've helped thousands of families and investors find their perfect property. Our local expertise, combined with global standards, ensures you get the best value and peace of mind in every transaction. We're not just agents – we're your trusted partners in building your future.",
+    profilePhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80",
   },
 
   // Services section
   services: {
     services: [
       {
-        title: "Property Sales",
+        title: "Property Sales & Purchases",
         description:
-          "Expert assistance in buying and selling residential and commercial properties.",
+          "Expert guidance through buying or selling your property with market insights and negotiation support.",
         price: "Commission-based",
       },
       {
         title: "Property Rentals",
-        description: "Comprehensive rental services for landlords and tenants.",
+        description: "Comprehensive rental services for landlords and tenants with full property management.",
         price: "From KSh 5,000/month",
       },
       {
-        title: "Property Management",
+        title: "Investment Consulting",
         description:
-          "Full property management services including maintenance and tenant screening.",
-        price: "5% of monthly rent",
+          "Strategic property investment advice for local and international investors seeking growth opportunities.",
+        price: "Consultation fee",
       },
     ],
   },
@@ -45,7 +47,7 @@ export const defaultHomeContent = {
         name: "Basic Listing",
         price: "KSh 25,000",
         features: [
-          "Property listing on our website",
+          "Property listing on our platform",
           "Basic marketing materials",
           "Email support",
         ],
@@ -78,29 +80,44 @@ export const defaultHomeContent = {
     testimonials: [
       {
         name: "Sarah Johnson",
-        text: "Excellent service! They helped me find my dream home in Nairobi within weeks. Highly professional and responsive.",
+        text: "They found us our dream home in Karen within two weeks. The process was seamless and professional. Highly recommend!",
+        image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80",
+        location: "Nairobi",
       },
       {
         name: "Michael Oduya",
-        text: "Outstanding property management services. My rental property has never been better maintained.",
+        text: "Outstanding property management. My investment properties have never performed better. Trustworthy and reliable.",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80",
+        location: "Kisumu",
       },
       {
         name: "Grace Wanjiku",
-        text: "Great team to work with. They made the selling process smooth and stress-free.",
+        text: "The team made selling our family home stress-free. Got top market value and excellent service throughout.",
+        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80",
+        location: "Mombasa",
       },
     ],
   },
 
   // Contact section
   contact: {
-    email: "info@realestatekenya.com",
-    phone: "",
-    address: "",
+    email: "hello@kenyaproperties.com",
+    phone: "+254 700 123 456",
+    whatsapp: "+254 700 123 456",
+    address: "Westlands, Nairobi, Kenya",
+    officeHours: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
   },
 
   // Gallery section
   gallery: {
-    images: [],
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2053&q=80",
+      "https://images.unsplash.com/photo-1600566752355-35792bedcfea?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+    ],
   },
 
   // Properties section
@@ -110,28 +127,30 @@ export const defaultHomeContent = {
 
   // Footer section
   footer: {
-    companyName: "Real Estate Kenya",
-    description: "Your trusted partner in real estate",
+    companyName: "Kenya Properties",
+    description: "Your trusted real estate partner across Kenya",
     socialLinks: {
-      facebook: "https://facebook.com/realestatekenya",
-      twitter: "https://twitter.com/realestatekenya",
-      instagram: "https://instagram.com/realestatekenya",
+      facebook: "https://facebook.com/kenyaproperties",
+      twitter: "https://twitter.com/kenyaproperties",
+      instagram: "https://instagram.com/kenyaproperties",
+      linkedin: "https://linkedin.com/company/kenyaproperties",
     },
     quickLinks: [
-      { label: "About Us", url: "/about" },
-      { label: "Services", url: "/services" },
+      { label: "Home", url: "/" },
       { label: "Properties", url: "/properties" },
+      { label: "List Property", url: "/list-property" },
+      { label: "About", url: "/about" },
       { label: "Contact", url: "/contact" },
     ],
   },
 
   // Header/Navigation
   header: {
-    logo: "Real Estate Kenya",
+    logo: "Kenya Properties",
     navigation: [
       { label: "Home", url: "/" },
       { label: "Properties", url: "/properties" },
-      { label: "Services", url: "/services" },
+      { label: "List Property", url: "/list-property" },
       { label: "About", url: "/about" },
       { label: "Contact", url: "/contact" },
     ],

@@ -63,26 +63,9 @@ export default function Header({ site }: HeaderProps) {
 
   return (
     <>
-      {/* Top Bar - NOT sticky */}
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-2">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center space-x-4">
-              <span>📞 Call us: (555) 123-4567</span>
-              <span>📧 info@clintonstack.com</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span>Mon-Fri: 9AM-6PM</span>
-              <span>Sat: 10AM-4PM</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sticky Header - Main navigation and filters */}
+      {/* Sticky Header - Clean and minimal */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        {/* Main Header */}
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo and Brand */}
             <div className="flex items-center space-x-3">
@@ -95,23 +78,23 @@ export default function Header({ site }: HeaderProps) {
                   className="rounded-lg"
                 />
               ) : (
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">C</span>
+                <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">K</span>
                 </div>
               )}
               <div>
-                <h1 className="font-bold text-2xl text-gray-900">{title}</h1>
-                <p className="text-sm text-gray-600">Real Estate Excellence</p>
+                <h1 className="font-bold text-xl text-gray-900">{title}</h1>
+                <p className="text-xs text-gray-600 hidden sm:block">Premium Real Estate</p>
               </div>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-8">
+            {/* Desktop Navigation - Minimal */}
+            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <button
                 onClick={() => scrollToSection("home")}
-                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
                   activeSection === "home"
-                    ? "text-blue-600 border-b-2 border-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -119,9 +102,9 @@ export default function Header({ site }: HeaderProps) {
               </button>
               <button
                 onClick={() => scrollToSection("properties")}
-                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
                   activeSection === "properties"
-                    ? "text-blue-600 border-b-2 border-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -129,29 +112,19 @@ export default function Header({ site }: HeaderProps) {
               </button>
               <button
                 onClick={() => scrollToSection("about")}
-                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
                   activeSection === "about"
-                    ? "text-blue-600 border-b-2 border-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
                 About
               </button>
               <button
-                onClick={() => scrollToSection("testimonials")}
-                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
-                  activeSection === "testimonials"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : ""
-                }`}
-              >
-                Testimonials
-              </button>
-              <button
                 onClick={() => scrollToSection("contact")}
-                className={`text-gray-700 hover:text-blue-600 transition-colors font-medium ${
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
                   activeSection === "contact"
-                    ? "text-blue-600 border-b-2 border-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -159,14 +132,39 @@ export default function Header({ site }: HeaderProps) {
               </button>
             </nav>
 
-            {/* Mobile Hamburger */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-            >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Contact Info & CTA */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <a
+                href="tel:+254700123456"
+                className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors"
+              >
+                <span className="text-lg">📞</span>
+                <span className="font-medium text-sm">+254 700 123 456</span>
+              </a>
+              <a
+                href="https://wa.me/254700123456"
+                className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+              >
+                <span>💬</span>
+                <span>WhatsApp</span>
+              </a>
+            </div>
 
+            {/* Mobile Contact & Menu */}
+            <div className="flex items-center space-x-2 md:hidden">
+              <a
+                href="tel:+254700123456"
+                className="p-2 text-gray-700 hover:text-emerald-600 transition-colors"
+              >
+                <span className="text-lg">📞</span>
+              </a>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100"
+              >
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -179,9 +177,9 @@ export default function Header({ site }: HeaderProps) {
                   scrollToSection("home");
                   setMenuOpen(false);
                 }}
-                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
                   activeSection === "home"
-                    ? "text-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -192,9 +190,9 @@ export default function Header({ site }: HeaderProps) {
                   scrollToSection("properties");
                   setMenuOpen(false);
                 }}
-                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
                   activeSection === "properties"
-                    ? "text-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -205,9 +203,9 @@ export default function Header({ site }: HeaderProps) {
                   scrollToSection("about");
                   setMenuOpen(false);
                 }}
-                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
                   activeSection === "about"
-                    ? "text-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
@@ -215,34 +213,29 @@ export default function Header({ site }: HeaderProps) {
               </button>
               <button
                 onClick={() => {
-                  scrollToSection("testimonials");
-                  setMenuOpen(false);
-                }}
-                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
-                  activeSection === "testimonials"
-                    ? "text-blue-600"
-                    : ""
-                }`}
-              >
-                Testimonials
-              </button>
-              <button
-                onClick={() => {
                   scrollToSection("contact");
                   setMenuOpen(false);
                 }}
-                className={`text-left text-gray-700 hover:text-blue-600 transition-colors font-medium py-2 ${
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
                   activeSection === "contact"
-                    ? "text-blue-600"
+                    ? "text-emerald-600"
                     : ""
                 }`}
               >
                 Contact
               </button>
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <a
+                  href="https://wa.me/254700123456"
+                  className="flex items-center justify-center space-x-2 bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                >
+                  <span>💬</span>
+                  <span>WhatsApp Us</span>
+                </a>
+              </div>
             </nav>
           </div>
         )}
-
       </header>
     </>
   );

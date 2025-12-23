@@ -43,6 +43,10 @@ export default function Hero({ site }: HeroProps) {
         customHeroBlock.data.ctaText !== undefined
           ? customHeroBlock.data.ctaText
           : defaultHomeContent.hero.ctaText,
+      secondaryCtaText:
+        customHeroBlock.data.secondaryCtaText !== undefined
+          ? customHeroBlock.data.secondaryCtaText
+          : defaultHomeContent.hero.secondaryCtaText,
       heroImage:
         customHeroBlock.data.heroImage !== undefined
           ? customHeroBlock.data.heroImage
@@ -77,25 +81,28 @@ export default function Hero({ site }: HeroProps) {
   };
 
   return (
-    <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+    >
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
           src={heroImage}
-          alt="Hero Background"
+          alt="Luxury Kenyan Property"
           fill
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-6">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+      <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-6 py-20">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
           {title}
         </h1>
-        <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl lg:text-2xl mb-8 opacity-90 max-w-3xl mx-auto leading-relaxed">
           {subtitle}
         </p>
 
@@ -103,7 +110,7 @@ export default function Hero({ site }: HeroProps) {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
           <button
             onClick={() => scrollToSection("properties")}
-            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
+            className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
           >
             {ctaText}
             <ArrowRight className="w-5 h-5" />
@@ -114,30 +121,46 @@ export default function Hero({ site }: HeroProps) {
               console.log("List property clicked");
               // You could redirect to a listing page or open a modal
             }}
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-blue-50 active:bg-blue-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
+            className="bg-white text-emerald-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-emerald-50 active:bg-emerald-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
           >
             List Your Property
           </button>
         </div>
 
-        {/* Quick Search */}
-        <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl p-2 flex items-center">
-            <div className="flex-1 flex items-center px-4">
+        {/* Advanced Search */}
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl p-2 flex flex-col md:flex-row items-center gap-2">
+            <div className="flex-1 flex items-center px-4 w-full md:w-auto">
               <Search className="w-5 h-5 text-gray-400 mr-2" />
               <input
                 type="text"
-                placeholder="Search locations, property types..."
+                placeholder="Search by location, property type, or price..."
                 className="w-full outline-none text-gray-700 placeholder-gray-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
+            <div className="flex gap-2 px-4 w-full md:w-auto justify-center">
+              <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none">
+                <option>All Types</option>
+                <option>Apartments</option>
+                <option>Houses</option>
+                <option>Villas</option>
+                <option>Commercial</option>
+              </select>
+              <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none">
+                <option>Any Price</option>
+                <option>Under KSh 5M</option>
+                <option>KSh 5M - 15M</option>
+                <option>KSh 15M - 50M</option>
+                <option>Over KSh 50M</option>
+              </select>
+            </div>
             <button
               onClick={handleSearch}
               disabled={isSearching || !searchQuery.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2"
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2 w-full md:w-auto justify-center"
             >
               {isSearching ? (
                 <>

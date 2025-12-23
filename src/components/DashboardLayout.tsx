@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Header - Only show on /dashboard/real-estate */}
-      {pathname.startsWith("/dashboard/real-estate") && (
+      {pathname && pathname.startsWith("/dashboard/real-estate") && (
         <>
           <Header />
           {console.log("Header rendered")}
@@ -50,8 +50,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Persistent Hamburger - Only show on /dashboard/real-estate */}
-      {pathname.startsWith("/dashboard/real-estate") &&
-        pathname &&
+      {pathname &&
+        pathname.startsWith("/dashboard/real-estate") &&
         !pathname.includes("/edit/settings/publish") &&
         !pathname.includes("/preview") && (
           <>
