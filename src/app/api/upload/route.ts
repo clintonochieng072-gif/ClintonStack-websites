@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
           {
             folder: `clintonstack/${user.id}`,
             resource_type: "auto",
+            access_mode: "public",
           },
           (error, result) => {
             if (error) reject(error);

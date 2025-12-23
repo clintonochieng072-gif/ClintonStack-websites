@@ -26,12 +26,12 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
     ? site.userWebsite?.data
     : site.publishedWebsite?.data;
 
-  // Get featured properties from the site's properties block
+  // Get properties from the site's properties block
   const propertiesBlock = siteData?.blocks?.find(
     (b: any) => b.type === "properties"
   );
   const allProperties = propertiesBlock?.data?.properties || [];
-  const featuredProperties = allProperties.slice(0, 3); // Show first 3 as featured
+  const featuredProperties = allProperties; // Show all properties
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
@@ -48,7 +48,7 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Featured Properties
+            Our Properties
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Discover exceptional homes that match your lifestyle and dreams
@@ -74,12 +74,12 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
                       src={property.images[0]}
                       alt={property.title}
                       className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300/cccccc/000000?text=Image+Not+Found';
+                      }}
                     />
                     <div className="absolute top-4 left-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
                       Verified
-                    </div>
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                      Featured
                     </div>
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
                   </div>
@@ -160,15 +160,6 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
           ))}
         </div>
 
-        {/* View All Properties CTA */}
-        <div className="text-center mt-12">
-          <button
-            onClick={() => scrollToSection("properties")}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            View All Properties
-          </button>
-        </div>
       </div>
     </section>
   );
