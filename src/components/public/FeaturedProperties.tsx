@@ -128,7 +128,6 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-3xl font-bold text-emerald-600">
-                        KES{" "}
                         {property.price
                           ? Number(property.price).toLocaleString()
                           : "0"}

@@ -89,7 +89,7 @@ export default function Hero({ site }: HeroProps) {
       <div className="absolute inset-0">
         <Image
           src={heroImage}
-          alt="Luxury Kenyan Property"
+          alt="Luxury Property"
           fill
           className="object-cover"
           priority

@@ -84,17 +84,11 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
       {/* Hero Section */}
       <Hero site={site} />
 
-      {/* Trust Badges */}
-      <TrustBadges />
-
       {/* Main Content */}
       <main className="flex-1">
         <>
           {/* Featured Properties Section */}
           <FeaturedProperties site={site} />
-
-          {/* Neighborhoods Section */}
-          <Neighborhoods />
 
           {/* Regular Blocks */}
           {blocks.map((block, index) => (
@@ -116,6 +110,24 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
 }
 
 function BlockRenderer({ block }: { block: Block }) {
+  // Check if block has content before rendering
+  const hasContent = (data: any) => {
+    if (!data) return false;
+    if (Array.isArray(data)) return data.length > 0;
+    if (typeof data === "object") {
+      return Object.values(data).some(
+        (value) =>
+          value &&
+          (Array.isArray(value)
+            ? value.length > 0
+            : String(value).trim().length > 0)
+      );
+    }
+    return String(data).trim().length > 0;
+  };
+
+  if (!hasContent(block.data)) return null;
+
   switch (block.type) {
     case "services":
       return <ServicesBlock data={block.data} />;
@@ -135,182 +147,6 @@ function BlockRenderer({ block }: { block: Block }) {
     default:
       return null;
   }
-}
-
-function TrustBadges() {
-  return (
-    <section className="py-16 bg-gradient-to-r from-emerald-50 to-teal-50">
-      <div className="max-w-7xl mx-auto px-6 text-center">
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Why Choose Kenya Properties?
-          </h3>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Your trusted partner in finding the perfect home across Kenya's most
-            desirable locations
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl">🏠</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">500+</div>
-            <div className="text-sm text-gray-600">Verified Properties</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl">⭐</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">4.9/5</div>
-            <div className="text-sm text-gray-600">Client Rating</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl">🏆</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">10+</div>
-            <div className="text-sm text-gray-600">Years Experience</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl">🛡️</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
-            <div className="text-sm text-gray-600">Secure Transactions</div>
-          </div>
-        </div>
-
-        {/* Agent Showcase */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
-          <h4 className="text-xl font-bold text-gray-900 mb-6">
-            Meet Our Expert Agents
-          </h4>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
-                alt="Agent"
-                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
-              />
-              <div className="font-semibold text-gray-900">David Kiprop</div>
-              <div className="text-sm text-gray-600">Senior Agent</div>
-              <div className="text-xs text-emerald-600 mt-1">
-                15+ years experience
-              </div>
-            </div>
-            <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
-                alt="Agent"
-                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
-              />
-              <div className="font-semibold text-gray-900">Sarah Wanjiku</div>
-              <div className="text-sm text-gray-600">Luxury Specialist</div>
-              <div className="text-xs text-emerald-600 mt-1">
-                12+ years experience
-              </div>
-            </div>
-            <div className="text-center">
-              <img
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80"
-                alt="Agent"
-                className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
-              />
-              <div className="font-semibold text-gray-900">Grace Achieng</div>
-              <div className="text-sm text-gray-600">Investment Advisor</div>
-              <div className="text-xs text-emerald-600 mt-1">
-                10+ years experience
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Neighborhoods() {
-  const neighborhoods = [
-    {
-      name: "Nairobi",
-      image:
-        "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?ixlib=rb-4.0.3&auto=format&fit=crop&w=1632&q=80",
-      properties: 45,
-    },
-    {
-      name: "Kisumu",
-      image:
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-      properties: 23,
-    },
-    {
-      name: "Mombasa",
-      image:
-        "https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-      properties: 31,
-    },
-    {
-      name: "Eldoret",
-      image:
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1471&q=80",
-      properties: 18,
-    },
-    {
-      name: "Nakuru",
-      image:
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-      properties: 27,
-    },
-  ];
-
-  return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-full mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Explore Neighborhoods
-          </h2>
-          <p className="text-xl text-gray-600">
-            Find your perfect location across Kenya
-          </p>
-        </div>
-        <div className="grid md:grid-cols-5 gap-6 overflow-x-auto">
-          {neighborhoods.map((neighborhood, index) => (
-            <div
-              key={index}
-              className="group cursor-pointer"
-              onClick={() => {
-                // Scroll to properties section
-                const propertiesElement = document.getElementById("properties");
-                if (propertiesElement) {
-                  propertiesElement.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-            >
-              <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-                <img
-                  src={neighborhood.image}
-                  alt={neighborhood.name}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-bold mb-1">
-                    {neighborhood.name}
-                  </h3>
-                  <p className="text-sm opacity-90">
-                    {neighborhood.properties} Properties
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
 }
 
 function ServicesBlock({ data }: { data: any }) {
@@ -392,7 +228,7 @@ function TestimonialsBlock({ data }: { data: any }) {
                     {testimonial.name}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {testimonial.location || "Kenya"}
+                    {testimonial.location || ""}
                   </div>
                 </div>
               </div>
@@ -438,10 +274,10 @@ function ContactBlock({ data }: { data: any }) {
                   Call Us
                 </h3>
                 <p className="text-gray-600 mb-1">
-                  {data.phone || "+254 700 123 456"}
+                  {data.phone || "Contact number not provided"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {data.officeHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM"}
+                  {data.officeHours || "Business hours not specified"}
                 </p>
               </div>
             </div>
@@ -455,7 +291,7 @@ function ContactBlock({ data }: { data: any }) {
                   WhatsApp
                 </h3>
                 <p className="text-gray-600 mb-1">
-                  {data.whatsapp || "+254 700 123 456"}
+                  {data.whatsapp || "WhatsApp number not provided"}
                 </p>
                 <p className="text-sm text-gray-500">
                   Quick responses, 24/7 availability
@@ -470,7 +306,7 @@ function ContactBlock({ data }: { data: any }) {
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Email</h3>
                 <p className="text-gray-600 mb-1">
-                  {data.email || "hello@kenyaproperties.com"}
+                  {data.email || "Email address not provided"}
                 </p>
                 <p className="text-sm text-gray-500">
                   We'll respond within 2 hours
@@ -487,7 +323,7 @@ function ContactBlock({ data }: { data: any }) {
                   Visit Us
                 </h3>
                 <p className="text-gray-600">
-                  {data.address || "Westlands, Nairobi, Kenya"}
+                  {data.address || "Address not provided"}
                 </p>
               </div>
             </div>
@@ -549,66 +385,53 @@ function AboutBlock({ data }: { data: any }) {
                 />
               </div>
             )}
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Your Local Real Estate Experts
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">About Us</h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
               {data.content || data.description}
             </p>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-emerald-600 mb-2">
-                  1500+
-                </div>
-                <div className="text-sm text-gray-600">Happy Families</div>
+            {/* Only show stats if provided by admin */}
+            {data.stats && data.stats.length > 0 && (
+              <div className="grid grid-cols-2 gap-6">
+                {data.stats.map((stat: any, index: number) => (
+                  <div key={index} className="text-center">
+                    <div className="text-3xl font-bold text-emerald-600 mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-emerald-600 mb-2">
-                  98%
-                </div>
-                <div className="text-sm text-gray-600">Client Satisfaction</div>
-              </div>
-            </div>
+            )}
           </div>
           <div className="space-y-6">
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Why We're Different
-              </h3>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-start">
-                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
-                  <span>
-                    Deep local market knowledge across all Kenyan cities
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
-                  <span>Personalized service tailored to your needs</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
-                  <span>Transparent pricing with no hidden fees</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-emerald-600 mr-3 mt-1">✓</span>
-                  <span>End-to-end support from search to settlement</span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-emerald-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Our Promise
-              </h3>
-              <p className="text-gray-600">
-                "We don't just sell properties – we help you find your home.
-                Every client relationship is built on trust, transparency, and
-                genuine care for your real estate goals."
-              </p>
-              <div className="mt-4 text-sm text-emerald-700 font-medium">
-                - Kenya Properties Team
+            {data.features && data.features.length > 0 && (
+              <div className="bg-gray-50 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Why Choose Us
+                </h3>
+                <ul className="space-y-3 text-gray-600">
+                  {data.features.map((feature: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-emerald-600 mr-3 mt-1">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
+            {data.promise && (
+              <div className="bg-emerald-50 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Our Promise
+                </h3>
+                <p className="text-gray-600">{data.promise}</p>
+                {data.signature && (
+                  <div className="mt-4 text-sm text-emerald-700 font-medium">
+                    - {data.signature}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
