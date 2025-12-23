@@ -161,6 +161,35 @@ export async function POST(request: NextRequest) {
       data: { has_paid: true },
     });
 
+    // Create or update subscription
+    const plan = await prisma.plan.findFirst({
+      where: { slug: planType === "lifetime" ? "lifetime" : "basic" },
+    });
+
+    if (plan) {
+      const subscriptionStatus = plan.type === "one_time" ? "lifetime" : "active";
+      const currentPeriodEnd = plan.type === "one_time"
+        ? new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000) // 100 years for lifetime
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days for monthly
+
+      await prisma.subscription.upsert({
+        where: { userId },
+        update: {
+          planId: plan.id,
+          status: subscriptionStatus,
+          currentPeriodEnd,
+        },
+        create: {
+          userId,
+          planId: plan.id,
+          status: subscriptionStatus,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd,
+          autoRenew: plan.type === "subscription",
+        },
+      });
+    }
+
     // Create audit log
     await prisma.auditLog.create({
       data: {
