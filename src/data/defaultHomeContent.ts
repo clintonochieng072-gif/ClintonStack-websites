@@ -6,8 +6,7 @@ export const defaultHomeContent = {
       "Discover exceptional properties that match your lifestyle. We connect you with verified homes that feel like home, wherever you are.",
     ctaText: "View Properties",
     secondaryCtaText: "List Your Property",
-    heroImage:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
+    heroImage: "/hero-bg.jpg",
   },
 
   // About section

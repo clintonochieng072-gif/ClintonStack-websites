@@ -83,18 +83,18 @@ export default function Hero({ site }: HeroProps) {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative h-screen w-full flex items-center justify-center overflow-hidden"
     >
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
           src={heroImage}
-          alt="Luxury Property"
+          alt="Real Estate Background"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       </div>
 
       {/* Content */}
