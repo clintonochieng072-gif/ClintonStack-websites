@@ -15,9 +15,13 @@ interface PropertyCardProps {
     images?: string[];
     excerpt?: string;
   };
+  onImageClick?: () => void;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({
+  property,
+  onImageClick,
+}: PropertyCardProps) {
   const {
     title,
     price,
@@ -36,7 +40,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden group">
-      <div className="relative h-64">
+      <div
+        className={`relative h-64 ${onImageClick ? "cursor-pointer" : ""}`}
+        onClick={onImageClick}
+      >
         {displayImages.length > 0 ? (
           <div className="w-full h-full overflow-x-auto flex snap-x snap-mandatory">
             {displayImages.map((img, index) => (

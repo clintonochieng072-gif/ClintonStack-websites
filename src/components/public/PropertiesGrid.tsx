@@ -1,5 +1,7 @@
 // src/components/public/PropertiesGrid.tsx
+import { useState } from "react";
 import PropertyCard from "./PropertyCard";
+import PropertyModal from "./PropertyModal";
 
 interface PropertiesGridProps {
   data: any;
@@ -7,6 +9,18 @@ interface PropertiesGridProps {
 
 export default function PropertiesGrid({ data }: PropertiesGridProps) {
   const properties = data?.items || [];
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handlePropertyClick = (property: any) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProperty(null);
+  };
 
   if (!properties || properties.length === 0) {
     return (
@@ -40,7 +54,11 @@ export default function PropertiesGrid({ data }: PropertiesGridProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {displayProperties.map((property: any, index: number) => (
-            <PropertyCard key={property._id || property.id || index} property={property} />
+            <PropertyCard
+              key={property._id || property.id || index}
+              property={property}
+              onImageClick={() => handlePropertyClick(property)}
+            />
           ))}
         </div>
         {properties.length > 6 && (
@@ -51,6 +69,13 @@ export default function PropertiesGrid({ data }: PropertiesGridProps) {
           </div>
         )}
       </div>
+
+      {/* Property Modal */}
+      <PropertyModal
+        property={selectedProperty}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </section>
   );
 }

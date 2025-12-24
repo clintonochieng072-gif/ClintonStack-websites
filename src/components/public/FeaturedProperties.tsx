@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import PropertyModal from "./PropertyModal";
 
 interface Site {
   title: string;
@@ -38,6 +39,19 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
   const allProperties = propertiesData.properties || propertiesData.list || [];
   const sectionTitle = propertiesData.title || "Our Properties";
 
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handlePropertyClick = (property: any) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProperty(null);
+  };
+
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -71,7 +85,10 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
               className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
             >
               {/* Property Image */}
-              <div className="relative h-64 w-full">
+              <div
+                className="relative h-64 w-full cursor-pointer"
+                onClick={() => handlePropertyClick(property)}
+              >
                 <Image
                   src={
                     property.images && property.images.length > 0
@@ -153,6 +170,13 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
             </motion.div>
           ))}
         </div>
+
+        {/* Property Modal */}
+        <PropertyModal
+          property={selectedProperty}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
       </div>
     </section>
   );
