@@ -4,9 +4,11 @@ export const defaultHomeContent = {
     title: "Find Your Perfect Home",
     subtitle:
       "Discover exceptional properties that match your lifestyle. We connect you with verified homes that feel like home, wherever you are.",
-    ctaText: "View Properties",
-    secondaryCtaText: "List Your Property",
-    heroImage: "/hero-bg.jpg",
+    primaryCtaText: "",
+    primaryCtaLink: "",
+    secondaryCtaText: "",
+    secondaryCtaLink: "",
+    carouselImages: ["/hero-bg.jpg", "/hero-bg2.jpg", "/hero-bg3.jpg"],
   },
 
   // About section

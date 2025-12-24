@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Header from "./Header";
 import Footer from "./Footer";
 import Hero from "./Hero";
+import SearchSection from "./SearchSection";
 import FloatingButtons from "./FloatingButtons";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
 
@@ -87,6 +88,9 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
       {/* Main Content */}
       <main className="flex-1">
         <>
+          {/* Search Section */}
+          <SearchSection site={site} />
+
           {/* Featured Properties Section */}
           <FeaturedProperties site={site} />
 
@@ -371,6 +375,18 @@ function ContactBlock({ data }: { data: any }) {
 }
 
 function AboutBlock({ data }: { data: any }) {
+  // Only render if admin has provided content
+  const hasContent = data && (
+    data.content ||
+    data.description ||
+    (data.stats && data.stats.length > 0) ||
+    (data.features && data.features.length > 0) ||
+    data.promise ||
+    data.profilePhoto
+  );
+
+  if (!hasContent) return null;
+
   return (
     <section id="about" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6">

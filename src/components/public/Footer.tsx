@@ -8,10 +8,21 @@ interface FooterProps {
 }
 
 export default function Footer({ site }: FooterProps) {
-  const logo =
-    site.publishedWebsite?.data?.theme?.logo ||
-    site.publishedWebsite?.data?.logo ||
-    site.logo;
+  // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
+  const isPreview = !site.publishedWebsite?.data;
+  const siteData = isPreview
+    ? site.userWebsite?.data
+    : site.publishedWebsite?.data;
+  const customBlocks = siteData?.blocks || [];
+  const customBlocksMap = new Map(
+    customBlocks.map((block: any) => [block.type, block])
+  );
+
+  // Get contact info from contact block
+  const contactBlock = customBlocksMap.get("contact") as any;
+  const contactData = contactBlock?.data || {};
+
+  const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
 
   return (
@@ -39,9 +50,9 @@ export default function Footer({ site }: FooterProps) {
               </div>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Your trusted partner in finding exceptional properties across Kenya.
-              We combine local expertise with premium service to help you discover
-              your perfect home.
+              Your trusted partner in finding exceptional properties across
+              Kenya. We combine local expertise with premium service to help you
+              discover your perfect home.
             </p>
             <div className="flex space-x-4">
               <a
@@ -107,38 +118,46 @@ export default function Footer({ site }: FooterProps) {
               </li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-semibold mb-6 text-lg">Contact Info</h3>
-            <ul className="space-y-3 text-gray-300">
-              <li className="flex items-center">
-                <span className="mr-3 text-emerald-400">📞</span>
-                <Link
-                  href="tel:+254700123456"
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  +254 700 123 456
-                </Link>
-              </li>
-              <li className="flex items-center">
-                <span className="mr-3 text-emerald-400">💬</span>
-                <Link
-                  href="https://wa.me/254700123456"
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  WhatsApp
-                </Link>
-              </li>
-              <li className="flex items-center">
-                <span className="mr-3 text-emerald-400">📧</span>
-                <Link
-                  href="mailto:hello@kenyaproperties.com"
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  hello@kenyaproperties.com
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {(contactData.phone || contactData.whatsapp || contactData.email) && (
+            <div>
+              <h3 className="font-semibold mb-6 text-lg">Contact Info</h3>
+              <ul className="space-y-3 text-gray-300">
+                {contactData.phone && (
+                  <li className="flex items-center">
+                    <span className="mr-3 text-emerald-400">📞</span>
+                    <Link
+                      href={`tel:${contactData.phone}`}
+                      className="hover:text-emerald-400 transition-colors"
+                    >
+                      {contactData.phone}
+                    </Link>
+                  </li>
+                )}
+                {contactData.whatsapp && (
+                  <li className="flex items-center">
+                    <span className="mr-3 text-emerald-400">💬</span>
+                    <Link
+                      href={`https://wa.me/${contactData.whatsapp.replace(/\D/g, '')}`}
+                      className="hover:text-emerald-400 transition-colors"
+                    >
+                      WhatsApp
+                    </Link>
+                  </li>
+                )}
+                {contactData.email && (
+                  <li className="flex items-center">
+                    <span className="mr-3 text-emerald-400">📧</span>
+                    <Link
+                      href={`mailto:${contactData.email}`}
+                      className="hover:text-emerald-400 transition-colors"
+                    >
+                      {contactData.email}
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="border-t border-gray-700 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -159,7 +178,8 @@ export default function Footer({ site }: FooterProps) {
                 Terms & Conditions
               </Link>
               <span className="text-gray-500 text-xs">
-                Powered by <span className="text-emerald-400">ClintonStack</span>
+                Powered by{" "}
+                <span className="text-emerald-400">ClintonStack</span>
               </span>
             </div>
           </div>

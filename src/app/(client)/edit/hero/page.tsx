@@ -40,22 +40,39 @@ export default function HeroPage() {
             heroBlock.data.subtitle !== undefined
               ? heroBlock.data.subtitle
               : defaultHomeContent.hero.subtitle,
-          ctaText:
-            heroBlock.data.ctaText !== undefined
-              ? heroBlock.data.ctaText
-              : defaultHomeContent.hero.ctaText,
-          heroImage:
-            heroBlock.data.heroImage !== undefined
-              ? heroBlock.data.heroImage
-              : defaultHomeContent.hero.heroImage,
+          primaryCtaText:
+            heroBlock.data.primaryCtaText !== undefined
+              ? heroBlock.data.primaryCtaText
+              : defaultHomeContent.hero.primaryCtaText,
+          primaryCtaLink:
+            heroBlock.data.primaryCtaLink !== undefined
+              ? heroBlock.data.primaryCtaLink
+              : defaultHomeContent.hero.primaryCtaLink,
+          secondaryCtaText:
+            heroBlock.data.secondaryCtaText !== undefined
+              ? heroBlock.data.secondaryCtaText
+              : defaultHomeContent.hero.secondaryCtaText,
+          secondaryCtaLink:
+            heroBlock.data.secondaryCtaLink !== undefined
+              ? heroBlock.data.secondaryCtaLink
+              : defaultHomeContent.hero.secondaryCtaLink,
+          carouselImages:
+            heroBlock.data.carouselImages !== undefined &&
+            Array.isArray(heroBlock.data.carouselImages) &&
+            heroBlock.data.carouselImages.length > 0
+              ? heroBlock.data.carouselImages
+              : defaultHomeContent.hero.carouselImages,
         });
       } else {
         // No saved data exists, use static defaults for brand new sites
         setFormData({
           title: defaultHomeContent.hero.title,
           subtitle: defaultHomeContent.hero.subtitle,
-          ctaText: defaultHomeContent.hero.ctaText,
-          heroImage: defaultHomeContent.hero.heroImage,
+          primaryCtaText: defaultHomeContent.hero.primaryCtaText,
+          primaryCtaLink: defaultHomeContent.hero.primaryCtaLink,
+          secondaryCtaText: defaultHomeContent.hero.secondaryCtaText,
+          secondaryCtaLink: defaultHomeContent.hero.secondaryCtaLink,
+          carouselImages: defaultHomeContent.hero.carouselImages,
         });
       }
     }
@@ -126,25 +143,83 @@ export default function HeroPage() {
             rows={3}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            CTA Text
-          </label>
-          <Input
-            value={formData.ctaText || ""}
-            onChange={(e) => updateFormData("ctaText", e.target.value)}
-            placeholder="Call to action button text"
-          />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Primary CTA Text
+            </label>
+            <Input
+              value={formData.primaryCtaText || ""}
+              onChange={(e) => updateFormData("primaryCtaText", e.target.value)}
+              placeholder="Primary button text (optional)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Primary CTA Link
+            </label>
+            <Input
+              value={formData.primaryCtaLink || ""}
+              onChange={(e) => updateFormData("primaryCtaLink", e.target.value)}
+              placeholder="#properties or external URL"
+            />
+          </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Secondary CTA Text
+            </label>
+            <Input
+              value={formData.secondaryCtaText || ""}
+              onChange={(e) => updateFormData("secondaryCtaText", e.target.value)}
+              placeholder="Secondary button text (optional)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Secondary CTA Link
+            </label>
+            <Input
+              value={formData.secondaryCtaLink || ""}
+              onChange={(e) => updateFormData("secondaryCtaLink", e.target.value)}
+              placeholder="Link for secondary button"
+            />
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hero Image
+            Hero Carousel Images
           </label>
-          <ImageUpload
-            value={formData.heroImage || ""}
-            onChange={(url: string) => updateFormData("heroImage", url)}
-            placeholder="Upload hero background image"
-          />
+          <p className="text-sm text-gray-500 mb-3">
+            Upload 3-5 images for the rotating hero carousel. Leave empty to use defaults.
+          </p>
+          {(formData.carouselImages || []).map((image: string, index: number) => (
+            <div key={index} className="mb-3">
+              <ImageUpload
+                value={image}
+                onChange={(url: string) => {
+                  const newImages = [...(formData.carouselImages || [])];
+                  newImages[index] = url;
+                  updateFormData("carouselImages", newImages);
+                }}
+                placeholder={`Upload hero image ${index + 1}`}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const newImages = [...(formData.carouselImages || []), ""];
+              updateFormData("carouselImages", newImages);
+            }}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            + Add another image
+          </button>
         </div>
       </div>
 

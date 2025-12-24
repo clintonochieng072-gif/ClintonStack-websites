@@ -16,6 +16,14 @@ export default function Header({ site }: HeaderProps) {
   const siteData = isPreview
     ? site.userWebsite?.data
     : site.publishedWebsite?.data;
+  const customBlocks = siteData?.blocks || [];
+  const customBlocksMap = new Map(
+    customBlocks.map((block: any) => [block.type, block])
+  );
+
+  // Get contact info from contact block
+  const contactBlock = customBlocksMap.get("contact") as any;
+  const contactData = contactBlock?.data || {};
 
   const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
@@ -84,7 +92,9 @@ export default function Header({ site }: HeaderProps) {
               )}
               <div>
                 <h1 className="font-bold text-xl text-gray-900">{title}</h1>
-                <p className="text-xs text-gray-600 hidden sm:block">Premium Real Estate</p>
+                <p className="text-xs text-gray-600 hidden sm:block">
+                  Premium Real Estate
+                </p>
               </div>
             </div>
 
@@ -93,9 +103,7 @@ export default function Header({ site }: HeaderProps) {
               <button
                 onClick={() => scrollToSection("home")}
                 className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
-                  activeSection === "home"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "home" ? "text-emerald-600" : ""
                 }`}
               >
                 Home
@@ -103,9 +111,7 @@ export default function Header({ site }: HeaderProps) {
               <button
                 onClick={() => scrollToSection("properties")}
                 className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
-                  activeSection === "properties"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "properties" ? "text-emerald-600" : ""
                 }`}
               >
                 Properties
@@ -113,9 +119,7 @@ export default function Header({ site }: HeaderProps) {
               <button
                 onClick={() => scrollToSection("about")}
                 className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
-                  activeSection === "about"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "about" ? "text-emerald-600" : ""
                 }`}
               >
                 About
@@ -123,9 +127,7 @@ export default function Header({ site }: HeaderProps) {
               <button
                 onClick={() => scrollToSection("contact")}
                 className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
-                  activeSection === "contact"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "contact" ? "text-emerald-600" : ""
                 }`}
               >
                 Contact
@@ -134,30 +136,41 @@ export default function Header({ site }: HeaderProps) {
 
             {/* Contact Info & CTA */}
             <div className="hidden lg:flex items-center space-x-4">
-              <a
-                href="tel:+254700123456"
-                className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors"
-              >
-                <span className="text-lg">📞</span>
-                <span className="font-medium text-sm">+254 700 123 456</span>
-              </a>
-              <a
-                href="https://wa.me/254700123456"
-                className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
-              >
-                <span>💬</span>
-                <span>WhatsApp</span>
-              </a>
+              {contactData.phone && (
+                <a
+                  href={`tel:${contactData.phone}`}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                >
+                  <span className="text-lg">📞</span>
+                  <span className="font-medium text-sm">
+                    {contactData.phone}
+                  </span>
+                </a>
+              )}
+              {contactData.whatsapp && (
+                <a
+                  href={`https://wa.me/${contactData.whatsapp.replace(
+                    /\D/g,
+                    ""
+                  )}`}
+                  className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+                >
+                  <span>💬</span>
+                  <span>WhatsApp</span>
+                </a>
+              )}
             </div>
 
             {/* Mobile Contact & Menu */}
             <div className="flex items-center space-x-2 md:hidden">
-              <a
-                href="tel:+254700123456"
-                className="p-2 text-gray-700 hover:text-emerald-600 transition-colors"
-              >
-                <span className="text-lg">📞</span>
-              </a>
+              {contactData.phone && (
+                <a
+                  href={`tel:${contactData.phone}`}
+                  className="p-2 text-gray-700 hover:text-emerald-600 transition-colors"
+                >
+                  <span className="text-lg">📞</span>
+                </a>
+              )}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 rounded-lg hover:bg-gray-100"
@@ -178,9 +191,7 @@ export default function Header({ site }: HeaderProps) {
                   setMenuOpen(false);
                 }}
                 className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
-                  activeSection === "home"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "home" ? "text-emerald-600" : ""
                 }`}
               >
                 Home
@@ -191,9 +202,7 @@ export default function Header({ site }: HeaderProps) {
                   setMenuOpen(false);
                 }}
                 className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
-                  activeSection === "properties"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "properties" ? "text-emerald-600" : ""
                 }`}
               >
                 Properties
@@ -204,9 +213,7 @@ export default function Header({ site }: HeaderProps) {
                   setMenuOpen(false);
                 }}
                 className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
-                  activeSection === "about"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "about" ? "text-emerald-600" : ""
                 }`}
               >
                 About
@@ -217,22 +224,25 @@ export default function Header({ site }: HeaderProps) {
                   setMenuOpen(false);
                 }}
                 className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
-                  activeSection === "contact"
-                    ? "text-emerald-600"
-                    : ""
+                  activeSection === "contact" ? "text-emerald-600" : ""
                 }`}
               >
                 Contact
               </button>
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <a
-                  href="https://wa.me/254700123456"
-                  className="flex items-center justify-center space-x-2 bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-                >
-                  <span>💬</span>
-                  <span>WhatsApp Us</span>
-                </a>
-              </div>
+              {contactData.whatsapp && (
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <a
+                    href={`https://wa.me/${contactData.whatsapp.replace(
+                      /\D/g,
+                      ""
+                    )}`}
+                    className="flex items-center justify-center space-x-2 bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                  >
+                    <span>💬</span>
+                    <span>WhatsApp Us</span>
+                  </a>
+                </div>
+              )}
             </nav>
           </div>
         )}
