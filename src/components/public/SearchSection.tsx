@@ -23,10 +23,51 @@ export default function SearchSection({ site }: SearchSectionProps) {
 
     setIsSearching(true);
     try {
-      // Simulate search API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Here you would typically call the search API
-      console.log("Searching for:", { searchQuery, filters });
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) {
+        params.append('keyword', searchQuery.trim());
+      }
+      if (filters.type) {
+        params.append('propertyType', filters.type);
+      }
+      if (filters.location) {
+        params.append('location', filters.location);
+      }
+      if (filters.bedrooms) {
+        params.append('bedrooms', filters.bedrooms);
+      }
+
+      // Map price ranges to min/max
+      if (filters.price) {
+        switch (filters.price) {
+          case 'under-5m':
+            params.append('maxPrice', '5000000');
+            break;
+          case '5m-15m':
+            params.append('minPrice', '5000000');
+            params.append('maxPrice', '15000000');
+            break;
+          case '15m-50m':
+            params.append('minPrice', '15000000');
+            params.append('maxPrice', '50000000');
+            break;
+          case 'over-50m':
+            params.append('minPrice', '50000000');
+            break;
+        }
+      }
+
+      const response = await fetch(`/api/properties/search?${params.toString()}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Search results:", data.properties);
+        // Here you could navigate to results page or update state
+        // For now, just log the results
+      } else {
+        console.error("Search failed:", data.error);
+      }
     } catch (error) {
       console.error("Search failed:", error);
     } finally {

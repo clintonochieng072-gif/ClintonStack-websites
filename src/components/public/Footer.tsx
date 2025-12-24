@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { defaultHomeContent } from "@/data/defaultHomeContent";
 
 interface FooterProps {
   site: any;
@@ -21,6 +22,28 @@ export default function Footer({ site }: FooterProps) {
   // Get contact info from contact block
   const contactBlock = customBlocksMap.get("contact") as any;
   const contactData = contactBlock?.data || {};
+
+  // Get footer info from footer block, with defaults
+  const footerBlock = customBlocksMap.get("footer") as any;
+  const footerData = footerBlock?.data || {};
+  const socialLinks = {
+    facebook:
+      footerData.socialLinks?.facebook !== undefined
+        ? footerData.socialLinks.facebook
+        : defaultHomeContent.footer.socialLinks.facebook,
+    instagram:
+      footerData.socialLinks?.instagram !== undefined
+        ? footerData.socialLinks.instagram
+        : defaultHomeContent.footer.socialLinks.instagram,
+    twitter:
+      footerData.socialLinks?.twitter !== undefined
+        ? footerData.socialLinks.twitter
+        : defaultHomeContent.footer.socialLinks.twitter,
+    linkedin:
+      footerData.socialLinks?.linkedin !== undefined
+        ? footerData.socialLinks.linkedin
+        : defaultHomeContent.footer.socialLinks.linkedin,
+  };
 
   const logo = siteData?.theme?.logo || siteData?.logo || site.logo;
   const title = site.title || "ClintonStack";
@@ -55,30 +78,38 @@ export default function Footer({ site }: FooterProps) {
               discover your perfect home.
             </p>
             <div className="flex space-x-4">
-              <a
-                href="https://facebook.com/kenyaproperties"
-                className="text-gray-400 hover:text-emerald-400 transition-colors"
-              >
-                <Facebook className="w-6 h-6" />
-              </a>
-              <a
-                href="https://instagram.com/kenyaproperties"
-                className="text-gray-400 hover:text-emerald-400 transition-colors"
-              >
-                <Instagram className="w-6 h-6" />
-              </a>
-              <a
-                href="https://twitter.com/kenyaproperties"
-                className="text-gray-400 hover:text-emerald-400 transition-colors"
-              >
-                <Twitter className="w-6 h-6" />
-              </a>
-              <a
-                href="https://linkedin.com/company/kenyaproperties"
-                className="text-gray-400 hover:text-emerald-400 transition-colors"
-              >
-                <Linkedin className="w-6 h-6" />
-              </a>
+              {socialLinks.facebook && (
+                <a
+                  href={socialLinks.facebook}
+                  className="text-gray-400 hover:text-emerald-400 transition-colors"
+                >
+                  <Facebook className="w-6 h-6" />
+                </a>
+              )}
+              {socialLinks.instagram && (
+                <a
+                  href={socialLinks.instagram}
+                  className="text-gray-400 hover:text-emerald-400 transition-colors"
+                >
+                  <Instagram className="w-6 h-6" />
+                </a>
+              )}
+              {socialLinks.twitter && (
+                <a
+                  href={socialLinks.twitter}
+                  className="text-gray-400 hover:text-emerald-400 transition-colors"
+                >
+                  <Twitter className="w-6 h-6" />
+                </a>
+              )}
+              {socialLinks.linkedin && (
+                <a
+                  href={socialLinks.linkedin}
+                  className="text-gray-400 hover:text-emerald-400 transition-colors"
+                >
+                  <Linkedin className="w-6 h-6" />
+                </a>
+              )}
             </div>
           </div>
           <div>
@@ -137,7 +168,10 @@ export default function Footer({ site }: FooterProps) {
                   <li className="flex items-center">
                     <span className="mr-3 text-emerald-400">💬</span>
                     <Link
-                      href={`https://wa.me/${contactData.whatsapp.replace(/\D/g, '')}`}
+                      href={`https://wa.me/${contactData.whatsapp.replace(
+                        /\D/g,
+                        ""
+                      )}`}
                       className="hover:text-emerald-400 transition-colors"
                     >
                       WhatsApp

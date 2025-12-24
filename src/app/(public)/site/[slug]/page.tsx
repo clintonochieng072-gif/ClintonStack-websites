@@ -91,12 +91,15 @@ function normalizeSite(blocks: any[]) {
 async function getPublicSiteDirect(slug: string) {
   try {
     await connectDb();
-    const site = await Site.findOne({ slug, published: true });
+    const siteDoc = (await Site.findOne({
+      slug,
+      published: true,
+    }).lean()) as any;
 
-    if (!site) return null;
+    if (!siteDoc) return null;
 
     // Start with published data
-    const publishedData = site.publishedWebsite?.data || {};
+    const publishedData = (siteDoc as any).publishedWebsite?.data || {};
 
     // Convert flat data structure to blocks array if needed
     if (!publishedData.blocks) {
@@ -129,46 +132,46 @@ async function getPublicSiteDirect(slug: string) {
 
     // Create a completely plain object manually
     const plainSite = {
-      _id: site._id.toString(),
+      _id: siteDoc._id.toString(),
       ownerId:
-        typeof site.ownerId === "string"
-          ? site.ownerId
-          : site.ownerId.toString(),
-      slug: site.slug,
-      niche: site.niche,
-      title: site.title,
-      published: site.published,
-      layout: site.layout,
-      propertyTypes: Array.isArray(site.propertyTypes)
-        ? site.propertyTypes.map((pt: any) =>
+        typeof siteDoc.ownerId === "string"
+          ? siteDoc.ownerId
+          : siteDoc.ownerId.toString(),
+      slug: siteDoc.slug,
+      niche: siteDoc.niche,
+      title: siteDoc.title,
+      published: siteDoc.published,
+      layout: siteDoc.layout,
+      propertyTypes: Array.isArray(siteDoc.propertyTypes)
+        ? siteDoc.propertyTypes.map((pt: any) =>
             typeof pt === "string" ? pt : pt.toString()
           )
         : [],
-      createdAt: site.createdAt?.toISOString(),
-      updatedAt: site.updatedAt?.toISOString(),
-      integrations: site.publishedWebsite?.integrations || {
-        phoneNumber: site.integrations?.phoneNumber || "",
-        whatsappNumber: site.integrations?.whatsappNumber || "",
-        tawkToId: site.integrations?.tawkToId || "",
-        crispId: site.integrations?.crispId || "",
-        googleAnalyticsId: site.integrations?.googleAnalyticsId || "",
-        googleTagManagerId: site.integrations?.googleTagManagerId || "",
-        metaPixelId: site.integrations?.metaPixelId || "",
-        mailchimpApiKey: site.integrations?.mailchimpApiKey || "",
-        mailchimpListId: site.integrations?.mailchimpListId || "",
-        brevoApiKey: site.integrations?.brevoApiKey || "",
-        googleMapsApiKey: site.integrations?.googleMapsApiKey || "",
-        customScript: site.integrations?.customScript || "",
+      createdAt: siteDoc.createdAt?.toISOString(),
+      updatedAt: siteDoc.updatedAt?.toISOString(),
+      integrations: siteDoc.publishedWebsite?.integrations || {
+        phoneNumber: siteDoc.integrations?.phoneNumber || "",
+        whatsappNumber: siteDoc.integrations?.whatsappNumber || "",
+        tawkToId: siteDoc.integrations?.tawkToId || "",
+        crispId: siteDoc.integrations?.crispId || "",
+        googleAnalyticsId: siteDoc.integrations?.googleAnalyticsId || "",
+        googleTagManagerId: siteDoc.integrations?.googleTagManagerId || "",
+        metaPixelId: siteDoc.integrations?.metaPixelId || "",
+        mailchimpApiKey: siteDoc.integrations?.mailchimpApiKey || "",
+        mailchimpListId: siteDoc.integrations?.mailchimpListId || "",
+        brevoApiKey: siteDoc.integrations?.brevoApiKey || "",
+        googleMapsApiKey: siteDoc.integrations?.googleMapsApiKey || "",
+        customScript: siteDoc.integrations?.customScript || "",
       },
-      publishSchedule: site.publishSchedule
+      publishSchedule: siteDoc.publishSchedule
         ? {
-            enabled: site.publishSchedule.enabled,
-            frequency: site.publishSchedule.frequency,
-            time: site.publishSchedule.time,
-            dayOfWeek: site.publishSchedule.dayOfWeek,
-            dayOfMonth: site.publishSchedule.dayOfMonth,
-            lastPublished: site.publishSchedule.lastPublished?.toISOString(),
-            nextPublish: site.publishSchedule.nextPublish?.toISOString(),
+            enabled: siteDoc.publishSchedule.enabled,
+            frequency: siteDoc.publishSchedule.frequency,
+            time: siteDoc.publishSchedule.time,
+            dayOfWeek: siteDoc.publishSchedule.dayOfWeek,
+            dayOfMonth: siteDoc.publishSchedule.dayOfMonth,
+            lastPublished: siteDoc.publishSchedule.lastPublished?.toISOString(),
+            nextPublish: siteDoc.publishSchedule.nextPublish?.toISOString(),
           }
         : { enabled: false, frequency: "daily", time: "09:00" },
       // ADD THIS:
@@ -271,5 +274,15 @@ export default async function PublicSite({
     );
   }
 
-  return <PublicSiteContent site={site} />;
+  return (
+    <PublicSiteContent
+      site={{
+        slug: site.slug,
+        title: site.title,
+        layout: site.layout,
+        integrations: site.integrations,
+        publishedWebsite: site.publishedWebsite,
+      }}
+    />
+  );
 }

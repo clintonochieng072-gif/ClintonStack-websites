@@ -20,6 +20,8 @@ interface Block {
 
 interface Site {
   title: string;
+  slug?: string;
+  layout?: string;
   integrations?: any;
   userWebsite?: {
     data?: {

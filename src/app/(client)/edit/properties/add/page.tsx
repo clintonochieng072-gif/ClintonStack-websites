@@ -242,7 +242,7 @@ function AddPropertyPageContent() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
+        {/ Basic Information /}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -250,19 +250,19 @@ function AddPropertyPageContent() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Property Title *
+                Property Title 
               </label>
               <Input
                 value={formData.title}
                 onChange={(e) => updateFormData("title", e.target.value)}
                 placeholder="e.g., Modern 3BR Apartment Downtown"
-                required
+               
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Property Type *
+                Property Type 
               </label>
               <select
                 value={selectedPropertyType}
@@ -271,7 +271,7 @@ function AddPropertyPageContent() {
                   updateFormData("propertyType", e.target.value);
                 }}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
+               
               >
                 <option value="">Select property type</option>
                 {categories?.map((category: any) => (
@@ -292,13 +292,13 @@ function AddPropertyPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status *
+                Status 
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => updateFormData("status", e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
+               
               >
                 <option value="for-sale">For Sale</option>
                 <option value="for-rent">For Rent</option>
@@ -309,45 +309,45 @@ function AddPropertyPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price *
+                Price 
               </label>
               <Input
                 type="number"
                 value={formData.price}
                 onChange={(e) => updateFormData("price", e.target.value)}
                 placeholder="250000"
-                required
+               
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location *
+                Location 
               </label>
               <Input
                 value={formData.location}
                 onChange={(e) => updateFormData("location", e.target.value)}
                 placeholder="City, State"
-                required
+               
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
+                Description 
               </label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => updateFormData("description", e.target.value)}
                 placeholder="Detailed description of the property"
                 rows={4}
-                required
+               
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Property Details */}
+        {/ Property Details /}
         <Card>
           <CardHeader>
             <CardTitle>Property Details</CardTitle>
@@ -391,7 +391,7 @@ function AddPropertyPageContent() {
           </CardContent>
         </Card>
 
-        {/* Property Images */}
+        {/ Property Images /}
         <Card>
           <CardHeader>
             <CardTitle>Property Images</CardTitle>

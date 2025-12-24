@@ -1,5 +1,6 @@
 // src/components/public/PropertiesSection.tsx
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface PropertiesSectionProps {
   data: any;
@@ -13,9 +14,10 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
       ? data.properties
       : []) ||
     [];
+
   return (
     <section id="properties" className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Properties</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -24,82 +26,81 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {properties.map((property: any, i: number) => (
-            <div
+            <motion.div
               key={i}
-              className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              whileHover={{ scale: 1.03 }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
             >
-              {/* Property Images - Full View */}
+              {/* Property Image */}
               {property.images && property.images.length > 0 && (
-                <div className="relative">
-                  {property.images.length === 1 ? (
-                    // Single image - full view
-                    <Image
-                      src={property.images[0]}
-                      alt={property.title}
-                      width={800}
-                      height={600}
-                      className="w-full h-auto object-cover"
-                      placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
-                    />
-                  ) : (
-                    // Multiple images - carousel
-                    <div className="w-full overflow-x-auto flex snap-x snap-mandatory">
-                      {property.images.map(
-                        (image: string, imgIndex: number) => (
-                          <Image
-                            key={imgIndex}
-                            src={image}
-                            alt={`${property.title} - Image ${imgIndex + 1}`}
-                            width={800}
-                            height={600}
-                            className="w-full h-auto object-cover flex-shrink-0 snap-center min-w-full"
-                            placeholder="blur"
-                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
-                          />
-                        )
-                      )}
-                    </div>
-                  )}
+                <div className="relative h-64 overflow-hidden">
+                  <Image
+                    src={property.images[0]}
+                    alt={property.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  {/* Status Badge */}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-white/90 text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
+                      {property.status}
+                    </span>
+                  </div>
                 </div>
               )}
 
               {/* Property Details */}
               <div className="p-6">
+                <div className="mb-4">
+                  <span className="text-2xl font-bold text-emerald-600">
+                    KSh {property.price?.toLocaleString()}
+                  </span>
+                </div>
+
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {property.title}
                 </h3>
-                <p className="text-gray-600 mb-3 flex items-center">
-                  <span className="text-lg mr-1">📍</span>
+
+                <p className="text-gray-600 mb-4 flex items-center">
+                  <span className="text-lg mr-2">📍</span>
                   {property.location}
                 </p>
 
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold text-blue-600">
-                    ${property.price?.toLocaleString()}
-                  </span>
-                  <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    {property.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
-                  {property.bedrooms && <div>Beds: {property.bedrooms}</div>}
-                  {property.bathrooms && (
-                    <div>Bathrooms: {property.bathrooms}</div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  {property.beds && (
+                    <div className="flex items-center">
+                      <span className="mr-1">🛏️</span>
+                      {property.beds} beds
+                    </div>
                   )}
-                  {property.sqft && <div>Square Feet: {property.sqft}</div>}
+                  {property.baths && (
+                    <div className="flex items-center">
+                      <span className="mr-1">🛁</span>
+                      {property.baths} baths
+                    </div>
+                  )}
+                  {property.size && (
+                    <div className="flex items-center">
+                      <span className="mr-1">📐</span>
+                      {property.size} sq ft
+                    </div>
+                  )}
                 </div>
 
                 {property.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-gray-600 text-sm leading-relaxed mt-4">
                     {property.description.length > 120
                       ? `${property.description.substring(0, 120)}...`
                       : property.description}
                   </p>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

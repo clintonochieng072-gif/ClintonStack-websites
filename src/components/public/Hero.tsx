@@ -1,7 +1,6 @@
 // src/components/public/Hero.tsx
 "use client";
 
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { defaultHomeContent } from "@/data/defaultHomeContent";
@@ -11,8 +10,6 @@ interface HeroProps {
 }
 
 export default function Hero({ site }: HeroProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
   // For preview mode, read from userWebsite.data, for live mode read from publishedWebsite.data
   const isPreview = !site.publishedWebsite?.data;
   const siteData = isPreview
@@ -73,16 +70,12 @@ export default function Hero({ site }: HeroProps) {
     carouselImages,
   } = heroData;
 
-  // Auto-rotate carousel images
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   useEffect(() => {
-    if (carouselImages.length <= 1) return;
-
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000); // Change image every 5 seconds
-
+      setCurrentIndex((prev) => (prev + 1) % carouselImages.length);
+    }, 3000);
     return () => clearInterval(interval);
   }, [carouselImages.length]);
 
@@ -111,38 +104,22 @@ export default function Hero({ site }: HeroProps) {
       id="home"
       className="relative h-screen w-full flex items-center justify-center overflow-hidden"
     >
-      {/* Background Carousel */}
-      <div className="absolute inset-0">
-        {carouselImages.map((image: string, index: number) => (
-          <Image
-            key={index}
-            src={image}
-            alt={`Hero Background ${index + 1}`}
-            fill
-            className={`object-cover object-center transition-opacity duration-1000 ${
-              index === currentImageIndex ? "opacity-100" : "opacity-0"
-            }`}
-            priority={index === 0}
-          />
-        ))}
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-      </div>
-
-      {/* Carousel Indicators */}
-      {carouselImages.length > 1 && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-          {carouselImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentImageIndex ? "bg-white" : "bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
+      {/* Background Images */}
+      {carouselImages.map((image, index) => (
+        <div
+          key={index}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{
+            backgroundImage: `url(${image})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            opacity: index === currentIndex ? 1 : 0,
+          }}
+        />
+      ))}
+      {/* Overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-6 py-20">
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -167,7 +144,7 @@ export default function Hero({ site }: HeroProps) {
             {secondaryCtaText && (
               <button
                 onClick={() => handleCtaClick(secondaryCtaLink)}
-                className="bg-white text-emerald-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-emerald-50 active:bg-emerald-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
+                className="bg-transparent text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 border-2 border-white hover:bg-white hover:text-emerald-600 active:bg-emerald-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-95"
               >
                 {secondaryCtaText}
               </button>
@@ -178,8 +155,8 @@ export default function Hero({ site }: HeroProps) {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
     </section>
