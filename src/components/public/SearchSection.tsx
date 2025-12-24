@@ -11,6 +11,8 @@ interface SearchSectionProps {
 export default function SearchSection({ site }: SearchSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchPerformed, setSearchPerformed] = useState(false);
   const [filters, setFilters] = useState({
     type: "",
     price: "",
@@ -19,64 +21,67 @@ export default function SearchSection({ site }: SearchSectionProps) {
   });
 
   const handleSearch = async () => {
-    if (!searchQuery.trim() && !Object.values(filters).some(v => v)) return;
+    if (!searchQuery.trim() && !Object.values(filters).some((v) => v)) return;
 
     setIsSearching(true);
+    setSearchPerformed(true);
     try {
       // Build query parameters
       const params = new URLSearchParams();
       if (searchQuery.trim()) {
-        params.append('keyword', searchQuery.trim());
+        params.append("keyword", searchQuery.trim());
       }
       if (filters.type) {
-        params.append('propertyType', filters.type);
+        params.append("propertyType", filters.type);
       }
       if (filters.location) {
-        params.append('location', filters.location);
+        params.append("location", filters.location);
       }
       if (filters.bedrooms) {
-        params.append('bedrooms', filters.bedrooms);
+        params.append("bedrooms", filters.bedrooms);
       }
 
       // Map price ranges to min/max
       if (filters.price) {
         switch (filters.price) {
-          case 'under-5m':
-            params.append('maxPrice', '5000000');
+          case "under-5m":
+            params.append("maxPrice", "5000000");
             break;
-          case '5m-15m':
-            params.append('minPrice', '5000000');
-            params.append('maxPrice', '15000000');
+          case "5m-15m":
+            params.append("minPrice", "5000000");
+            params.append("maxPrice", "15000000");
             break;
-          case '15m-50m':
-            params.append('minPrice', '15000000');
-            params.append('maxPrice', '50000000');
+          case "15m-50m":
+            params.append("minPrice", "15000000");
+            params.append("maxPrice", "50000000");
             break;
-          case 'over-50m':
-            params.append('minPrice', '50000000');
+          case "over-50m":
+            params.append("minPrice", "50000000");
             break;
         }
       }
 
-      const response = await fetch(`/api/properties/search?${params.toString()}`);
+      const response = await fetch(
+        `/api/properties/search?${params.toString()}`
+      );
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Search results:", data.properties);
-        // Here you could navigate to results page or update state
-        // For now, just log the results
+        setSearchResults(data.properties || []);
       } else {
         console.error("Search failed:", data.error);
+        setSearchResults([]);
       }
     } catch (error) {
       console.error("Search failed:", error);
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -172,7 +177,10 @@ export default function SearchSection({ site }: SearchSectionProps) {
           <div className="flex justify-center">
             <button
               onClick={handleSearch}
-              disabled={isSearching || (!searchQuery.trim() && !Object.values(filters).some(v => v))}
+              disabled={
+                isSearching ||
+                (!searchQuery.trim() && !Object.values(filters).some((v) => v))
+              }
               className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
             >
               {isSearching ? (
@@ -188,6 +196,67 @@ export default function SearchSection({ site }: SearchSectionProps) {
               )}
             </button>
           </div>
+
+          {/* Search Results */}
+          {searchPerformed && !isSearching && (
+            <div className="mt-6">
+              {searchResults.length > 0 ? (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Found {searchResults.length} propert
+                    {searchResults.length === 1 ? "y" : "ies"}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                    {searchResults
+                      .slice(0, 6)
+                      .map((property: any, index: number) => (
+                        <div
+                          key={index}
+                          className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                        >
+                          <h4 className="font-semibold text-gray-900 mb-2">
+                            {property.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {property.location}
+                          </p>
+                          <p className="text-lg font-bold text-emerald-600">
+                            KSh {property.price?.toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                  {searchResults.length > 6 && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      And {searchResults.length - 6} more properties...
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-4">
+                    <Search className="w-12 h-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No properties found
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    We couldn't find any properties matching your search
+                    criteria.
+                  </p>
+                  <div className="text-sm text-gray-500">
+                    <p className="mb-1">Try:</p>
+                    <ul className="list-disc list-inside text-left inline-block">
+                      <li>Using broader search terms</li>
+                      <li>Adjusting your price range</li>
+                      <li>Removing some filters</li>
+                      <li>Checking spelling</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

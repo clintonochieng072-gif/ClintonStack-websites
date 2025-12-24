@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface Site {
   title: string;
@@ -60,10 +61,16 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {allProperties.map((property: any, index: number) => (
-            <div
+            <motion.div
               key={property._id || property.id || index}
-              className="bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              whileHover={{ scale: 1.03 }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
             >
+              {/* Property Image */}
               <div className="relative h-64 w-full">
                 <Image
                   src={
@@ -74,50 +81,76 @@ export default function FeaturedProperties({ site }: FeaturedPropertiesProps) {
                   alt={property.title}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
+                {/* Status Badge */}
                 {property.status && (
-                  <div className="absolute top-4 left-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {String(property.status).split("-").join(" ").toUpperCase()}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-white/90 text-gray-900 px-3 py-1 rounded-full text-sm font-medium capitalize">
+                      {property.status.replace("-", " ")}
+                    </span>
                   </div>
                 )}
               </div>
+
+              {/* Property Details */}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                  {property.title}
-                </h3>
-                <div className="flex items-center text-emerald-600 mb-3">
-                  <span className="text-2xl font-bold">
-                    {property.price
-                      ? `KSh ${Number(property.price).toLocaleString()}`
-                      : "Price on request"}
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-2xl font-bold text-emerald-600">
+                    KSh {property.price?.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center text-gray-600 mb-4">
+
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {property.title}
+                </h3>
+
+                <p className="text-gray-600 mb-4 flex items-center">
                   <span className="text-lg mr-2">📍</span>
-                  <span className="text-sm">{property.location || "Location not specified"}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600 border-t border-gray-100 pt-4">
+                  {property.location || "Location not specified"}
+                </p>
+
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                   {property.bedrooms && (
-                    <span className="flex items-center">
+                    <div className="flex items-center">
                       <span className="mr-1">🛏️</span>
-                      {property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}
-                    </span>
+                      {property.bedrooms} beds
+                    </div>
                   )}
                   {property.bathrooms && (
-                    <span className="flex items-center">
+                    <div className="flex items-center">
                       <span className="mr-1">🛁</span>
-                      {property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}
-                    </span>
+                      {property.bathrooms} baths
+                    </div>
                   )}
                   {property.sqft && (
-                    <span className="flex items-center">
+                    <div className="flex items-center">
                       <span className="mr-1">📐</span>
-                      {property.sqft} sqft
-                    </span>
+                      {property.sqft} sq ft
+                    </div>
                   )}
                 </div>
+
+                {property.propertyType && (
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-gray-500">
+                      Property Type:{" "}
+                    </span>
+                    <span className="text-sm text-gray-700 capitalize">
+                      {property.propertyType}
+                    </span>
+                  </div>
+                )}
+
+                {property.description && (
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {property.description.length > 150
+                      ? `${property.description.substring(0, 150)}...`
+                      : property.description}
+                  </p>
+                )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -56,10 +56,15 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
 
               {/* Property Details */}
               <div className="p-6">
-                <div className="mb-4">
+                <div className="flex justify-between items-start mb-4">
                   <span className="text-2xl font-bold text-emerald-600">
                     KSh {property.price?.toLocaleString()}
                   </span>
+                  {property.status && (
+                    <span className="text-xs font-medium bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full capitalize">
+                      {property.status.replace("-", " ")}
+                    </span>
+                  )}
                 </div>
 
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -71,7 +76,7 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
                   {property.location}
                 </p>
 
-                <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                   {property.beds && (
                     <div className="flex items-center">
                       <span className="mr-1">🛏️</span>
@@ -92,10 +97,21 @@ export default function PropertiesSection({ data }: PropertiesSectionProps) {
                   )}
                 </div>
 
+                {property.propertyType && (
+                  <div className="mb-4">
+                    <span className="text-sm font-medium text-gray-500">
+                      Property Type:{" "}
+                    </span>
+                    <span className="text-sm text-gray-700 capitalize">
+                      {property.propertyType}
+                    </span>
+                  </div>
+                )}
+
                 {property.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed mt-4">
-                    {property.description.length > 120
-                      ? `${property.description.substring(0, 120)}...`
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {property.description.length > 150
+                      ? `${property.description.substring(0, 150)}...`
                       : property.description}
                   </p>
                 )}

@@ -96,10 +96,30 @@ export default function PublicSiteContent({ site }: PublicSiteContentProps) {
           {/* Featured Properties Section */}
           <FeaturedProperties site={site} />
 
-          {/* Regular Blocks */}
-          {blocks.map((block, index) => (
-            <BlockRenderer key={index} block={block} />
-          ))}
+          {/* Testimonials Section */}
+          <TestimonialsBlock
+            data={
+              siteData?.blocks?.find((b) => b.type === "testimonials")?.data ||
+              defaultHomeContent.testimonials
+            }
+          />
+
+          {/* Services Section */}
+          <ServicesBlock
+            data={
+              siteData?.blocks?.find((b) => b.type === "services")?.data ||
+              defaultHomeContent.services
+            }
+          />
+
+          {/* Regular Blocks (excluding testimonials and services since we show them above) */}
+          {blocks
+            .filter(
+              (block) => !["testimonials", "services"].includes(block.type)
+            )
+            .map((block, index) => (
+              <BlockRenderer key={index} block={block} />
+            ))}
         </>
       </main>
 
@@ -159,7 +179,7 @@ function ServicesBlock({ data }: { data: any }) {
   const services = data.services || [];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section id="services" className="py-16 bg-gray-50">
       <div className="max-w-full mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto">
@@ -223,8 +243,9 @@ function TestimonialsBlock({ data }: { data: any }) {
               <div className="flex items-center mb-6">
                 <img
                   src={
+                    testimonial.avatar ||
                     testimonial.image ||
-                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
                   }
                   alt={testimonial.name}
                   className="w-12 h-12 rounded-full object-cover mr-4"
@@ -234,19 +255,19 @@ function TestimonialsBlock({ data }: { data: any }) {
                     {testimonial.name}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {testimonial.location || ""}
+                    {testimonial.title || testimonial.location || ""}
                   </div>
                 </div>
               </div>
               <div className="mb-4">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(testimonial.rating || 5)].map((_, i) => (
                   <span key={i} className="text-yellow-400 text-lg">
                     ★
                   </span>
                 ))}
               </div>
               <p className="text-gray-600 leading-relaxed italic">
-                "{testimonial.text}"
+                "{testimonial.comment || testimonial.text}"
               </p>
             </div>
           ))}
@@ -257,6 +278,40 @@ function TestimonialsBlock({ data }: { data: any }) {
 }
 
 function ContactBlock({ data }: { data: any }) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const message = formData.get("message") as string;
+
+    if (!name || !message) {
+      alert("Please fill in at least your name and message");
+      return;
+    }
+
+    // Create WhatsApp message
+    const whatsappNumber = data.whatsapp?.replace(/\D/g, "") || "";
+    if (!whatsappNumber) {
+      alert("WhatsApp number not configured. Please contact us directly.");
+      return;
+    }
+
+    const whatsappMessage = `Hello! I'm ${name}.\n\n${message}\n\nContact: ${
+      phone || "Not provided"
+    }\nEmail: ${email || "Not provided"}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+      whatsappMessage
+    )}`;
+
+    // Open WhatsApp
+    window.open(whatsappUrl, "_blank");
+
+    // Reset form
+    e.currentTarget.reset();
+  };
+
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6">
@@ -280,10 +335,10 @@ function ContactBlock({ data }: { data: any }) {
                   Call Us
                 </h3>
                 <p className="text-gray-600 mb-1">
-                  {data.phone || "Contact number not provided"}
+                  {data.phone || "+254 700 123 456"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {data.officeHours || "Business hours not specified"}
+                  {data.officeHours || "Mon-Fri: 9:00 AM - 6:00 PM"}
                 </p>
               </div>
             </div>
@@ -297,7 +352,7 @@ function ContactBlock({ data }: { data: any }) {
                   WhatsApp
                 </h3>
                 <p className="text-gray-600 mb-1">
-                  {data.whatsapp || "WhatsApp number not provided"}
+                  {data.whatsapp || "+254 700 123 456"}
                 </p>
                 <p className="text-sm text-gray-500">
                   Quick responses, 24/7 availability
@@ -312,7 +367,7 @@ function ContactBlock({ data }: { data: any }) {
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Email</h3>
                 <p className="text-gray-600 mb-1">
-                  {data.email || "Email address not provided"}
+                  {data.email || "info@youragency.com"}
                 </p>
                 <p className="text-sm text-gray-500">
                   We'll respond within 2 hours
@@ -329,7 +384,8 @@ function ContactBlock({ data }: { data: any }) {
                   Visit Us
                 </h3>
                 <p className="text-gray-600">
-                  {data.address || "Address not provided"}
+                  {data.address ||
+                    "123 Real Estate Avenue, Nairobi Central Business District, Kenya"}
                 </p>
               </div>
             </div>
@@ -339,34 +395,40 @@ function ContactBlock({ data }: { data: any }) {
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Send us a Message
             </h3>
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <input
+                  name="name"
                   type="text"
-                  placeholder="Your Name"
+                  placeholder="Your Name *"
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
                 />
                 <input
+                  name="email"
                   type="email"
                   placeholder="Your Email"
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
               <input
+                name="phone"
                 type="tel"
                 placeholder="Phone Number"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none"
               />
               <textarea
+                name="message"
                 rows={4}
-                placeholder="Tell us about your property needs..."
+                placeholder="Tell us about your property needs... *"
+                required
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:outline-none resize-none"
               ></textarea>
               <button
                 type="submit"
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors"
               >
-                Send Message
+                Send via WhatsApp
               </button>
             </form>
           </div>
@@ -377,54 +439,59 @@ function ContactBlock({ data }: { data: any }) {
 }
 
 function AboutBlock({ data }: { data: any }) {
-  // Only render if admin has provided content
-  const hasContent = data && (
-    data.content ||
-    data.description ||
-    (data.stats && data.stats.length > 0) ||
-    (data.features && data.features.length > 0) ||
-    data.promise ||
-    data.profilePhoto
-  );
-
-  if (!hasContent) return null;
-
   return (
     <section id="about" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            {data.profilePhoto && (
-              <div className="mb-8">
-                <img
-                  src={data.profilePhoto}
-                  alt="Our Team"
-                  className="w-48 h-48 rounded-2xl mx-auto md:mx-0 object-cover shadow-2xl"
-                />
-              </div>
-            )}
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">About Us</h2>
-            <p className="text-lg text-gray-600 leading-relaxed mb-6">
-              {data.content || data.description}
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-gray-900 mb-8">About Us</h2>
+          <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed">
+            <p className="text-lg mb-6">
+              {data.content ||
+                data.description ||
+                "With extensive experience in the Kenyan real estate market, we've helped thousands of families and investors find their perfect property. Our deep understanding of local neighborhoods, market trends, and regulatory requirements ensures you get the best value and peace of mind in every transaction."}
             </p>
-            {/* Only show stats if provided by admin */}
-            {data.stats && data.stats.length > 0 && (
-              <div className="grid grid-cols-2 gap-6">
-                {data.stats.map((stat: any, index: number) => (
-                  <div key={index} className="text-center">
-                    <div className="text-3xl font-bold text-emerald-600 mb-2">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p className="text-lg mb-6">
+              We combine traditional real estate expertise with modern
+              technology to provide transparent, efficient service. Whether
+              you're buying your first home, investing in commercial property,
+              or relocating to Nairobi, our team of certified professionals is
+              committed to making your real estate journey successful.
+            </p>
+            <p className="text-lg">
+              From initial consultation through final handover, we maintain the
+              highest standards of professionalism and integrity. We're not just
+              agents – we're your trusted partners in building your future in
+              Kenya's dynamic property market.
+            </p>
           </div>
-          <div className="space-y-6">
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div className="text-3xl font-bold text-emerald-600 mb-2">500+</div>
+            <div className="text-sm text-gray-600">Properties Sold</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-emerald-600 mb-2">98%</div>
+            <div className="text-sm text-gray-600">Client Satisfaction</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-emerald-600 mb-2">5+</div>
+            <div className="text-sm text-gray-600">Years Experience</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-emerald-600 mb-2">24/7</div>
+            <div className="text-sm text-gray-600">Support Available</div>
+          </div>
+        </div>
+
+        {/* Additional content if provided */}
+        {(data.features || data.promise) && (
+          <div className="mt-16 grid md:grid-cols-2 gap-8">
             {data.features && data.features.length > 0 && (
               <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Why Choose Us
                 </h3>
                 <ul className="space-y-3 text-gray-600">
@@ -439,19 +506,19 @@ function AboutBlock({ data }: { data: any }) {
             )}
             {data.promise && (
               <div className="bg-emerald-50 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Our Promise
                 </h3>
-                <p className="text-gray-600">{data.promise}</p>
+                <p className="text-gray-600 mb-4">{data.promise}</p>
                 {data.signature && (
-                  <div className="mt-4 text-sm text-emerald-700 font-medium">
+                  <div className="text-sm text-emerald-700 font-medium">
                     - {data.signature}
                   </div>
                 )}
               </div>
             )}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

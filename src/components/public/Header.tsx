@@ -44,8 +44,9 @@ export default function Header({ site }: HeaderProps) {
       const sections = [
         "home",
         "properties",
-        "about",
+        "services",
         "testimonials",
+        "about",
         "contact",
       ];
       const scrollPosition = window.scrollY + 100;
@@ -115,6 +116,22 @@ export default function Header({ site }: HeaderProps) {
                 }`}
               >
                 Properties
+              </button>
+              <button
+                onClick={() => scrollToSection("services")}
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
+                  activeSection === "services" ? "text-emerald-600" : ""
+                }`}
+              >
+                Services
+              </button>
+              <button
+                onClick={() => scrollToSection("testimonials")}
+                className={`text-gray-700 hover:text-emerald-600 transition-colors font-medium text-sm ${
+                  activeSection === "testimonials" ? "text-emerald-600" : ""
+                }`}
+              >
+                Testimonials
               </button>
               <button
                 onClick={() => scrollToSection("about")}
@@ -206,6 +223,28 @@ export default function Header({ site }: HeaderProps) {
                 }`}
               >
                 Properties
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("services");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
+                  activeSection === "services" ? "text-emerald-600" : ""
+                }`}
+              >
+                Services
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("testimonials");
+                  setMenuOpen(false);
+                }}
+                className={`text-left text-gray-700 hover:text-emerald-600 transition-colors font-medium py-2 ${
+                  activeSection === "testimonials" ? "text-emerald-600" : ""
+                }`}
+              >
+                Testimonials
               </button>
               <button
                 onClick={() => {
